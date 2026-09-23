@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
   Box,
+  CheckCircle2,
   CircleDashed,
   Layers3,
   Maximize2,
@@ -15,7 +19,7 @@ import {
   X,
 } from "lucide-react";
 import type { Hotspot, Organ } from "../i18n/merge";
-import { format, type UiDictionary } from "../i18n/types";
+import { format, type GuidedLesson, type UiDictionary } from "../i18n/types";
 import type { AnatomyViewer } from "../lib/three/viewer";
 
 type Props = {
@@ -27,6 +31,8 @@ type Props = {
   onCompare: () => void;
   quizActive: boolean;
   onQuizExit: () => void;
+  lesson: GuidedLesson | null;
+  onLessonExit: () => void;
 };
 
 /** Fisher–Yates. The quiz asks for every structure once, in a fresh order. */
@@ -162,7 +168,167 @@ function useAuthoringFlag() {
   );
 }
 
-export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, quizActive, onQuizExit }: Props) {
+function GuidedLessonPanel({
+  lesson,
+  onFocus,
+  onExit,
+}: {
+  lesson: GuidedLesson;
+  onFocus: (hotspotId: string | null) => void;
+  onExit: () => void;
+}) {
+  const [phase, setPhase] = useState<"overview" | "steps" | "questions" | "complete">("overview");
+  const [stepIndex, setStepIndex] = useState(0);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const step = lesson.steps[stepIndex];
+  const question = lesson.questions[questionIndex];
+  const answer = question ? answers[question.id] : undefined;
+  const score = lesson.questions.filter((item) => answers[item.id] === item.answerId).length;
+
+  useEffect(() => {
+    headingRef.current?.focus({ preventScroll: true });
+  }, [phase, stepIndex, questionIndex]);
+
+  useEffect(() => {
+    if (phase === "steps") onFocus(step?.hotspotId ?? null);
+    else if (phase === "questions" && answer) onFocus(question?.hotspotId ?? null);
+    else onFocus(null);
+  }, [answer, onFocus, phase, question?.hotspotId, step?.hotspotId]);
+
+  const begin = () => {
+    setStepIndex(0);
+    setPhase("steps");
+  };
+
+  const nextStep = () => {
+    if (stepIndex < lesson.steps.length - 1) setStepIndex((value) => value + 1);
+    else {
+      setQuestionIndex(0);
+      setPhase("questions");
+    }
+  };
+
+  const continueQuestion = () => {
+    if (questionIndex < lesson.questions.length - 1) setQuestionIndex((value) => value + 1);
+    else setPhase("complete");
+  };
+
+  const restart = () => {
+    setAnswers({});
+    setQuestionIndex(0);
+    setStepIndex(0);
+    setPhase("overview");
+  };
+
+  return (
+    <section className="guided-lesson" aria-labelledby="guided-lesson-title">
+      <button className="guided-lesson-close" type="button" onClick={onExit} aria-label={lesson.labels.exit}>
+        <X size={17} />
+      </button>
+
+      {phase === "overview" && (
+        <div className="guided-lesson-page guided-lesson-overview">
+          <span className="guided-lesson-icon"><BookOpen size={19} /></span>
+          <em>{lesson.eyebrow}</em>
+          <h2 id="guided-lesson-title" ref={headingRef} tabIndex={-1}>{lesson.title}</h2>
+          <p>{lesson.summary}</p>
+          <span className="guided-duration">{lesson.duration}</span>
+          <div className="guided-objectives">
+            <strong>{lesson.labels.objectives}</strong>
+            <ul>{lesson.objectives.map((objective) => <li key={objective}>{objective}</li>)}</ul>
+          </div>
+          <button className="guided-primary" type="button" onClick={begin}>
+            {lesson.labels.begin} <ArrowRight size={15} />
+          </button>
+        </div>
+      )}
+
+      {phase === "steps" && step && (
+        <div className="guided-lesson-page">
+          <div className="guided-progress" aria-label={format(lesson.labels.questionProgress, { current: String(stepIndex + 1), total: String(lesson.steps.length) })}>
+            {lesson.steps.map((item, index) => <i key={item.id} className={index <= stepIndex ? "active" : ""} />)}
+          </div>
+          <em>{step.eyebrow}</em>
+          <h2 id="guided-lesson-title" ref={headingRef} tabIndex={-1}>{step.title}</h2>
+          <p>{step.body}</p>
+          <aside className="guided-insight"><Sparkles size={15} /><span>{step.insight}</span></aside>
+          <div className="guided-actions">
+            <button type="button" onClick={() => stepIndex === 0 ? setPhase("overview") : setStepIndex((value) => value - 1)}>
+              <ArrowLeft size={15} /> {lesson.labels.previous}
+            </button>
+            <button className="guided-primary" type="button" onClick={nextStep}>
+              {stepIndex === lesson.steps.length - 1 ? lesson.labels.checkpoint : lesson.labels.next} <ArrowRight size={15} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {phase === "questions" && question && (
+        <div className="guided-lesson-page guided-question">
+          <em>{lesson.labels.checkpoint}</em>
+          <span className="guided-question-progress">
+            {format(lesson.labels.questionProgress, { current: String(questionIndex + 1), total: String(lesson.questions.length) })}
+          </span>
+          <h2 id="guided-lesson-title" ref={headingRef} tabIndex={-1}>{question.prompt}</h2>
+          <div className="guided-options">
+            {question.options.map((option) => {
+              const chosen = answer === option.id;
+              const correct = answer && option.id === question.answerId;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  className={`${chosen ? "chosen" : ""} ${correct ? "correct" : ""}`}
+                  onClick={() => !answer && setAnswers((current) => ({ ...current, [question.id]: option.id }))}
+                  disabled={Boolean(answer)}
+                >
+                  <span>{option.label}</span>
+                  {correct && <CheckCircle2 size={17} />}
+                </button>
+              );
+            })}
+          </div>
+          {answer && (
+            <div className={`guided-feedback ${answer === question.answerId ? "correct" : "incorrect"}`} role="status">
+              <strong>{answer === question.answerId ? lesson.labels.correct : lesson.labels.incorrect}</strong>
+              <p>{question.explanation}</p>
+            </div>
+          )}
+          {answer && (
+            <button className="guided-primary guided-continue" type="button" onClick={continueQuestion}>
+              {lesson.labels.continue} <ArrowRight size={15} />
+            </button>
+          )}
+        </div>
+      )}
+
+      {phase === "complete" && (
+        <div className="guided-lesson-page guided-complete">
+          <span className="guided-lesson-icon complete"><CheckCircle2 size={22} /></span>
+          <em>{lesson.labels.complete}</em>
+          <h2 id="guided-lesson-title" ref={headingRef} tabIndex={-1}>{lesson.title}</h2>
+          <p>{format(lesson.labels.score, { score: String(score), total: String(lesson.questions.length) })}</p>
+          <div className="guided-source-list">
+            <strong>{lesson.labels.sources}</strong>
+            {lesson.sources.map((source) => (
+              <a key={source.url} href={source.url} target="_blank" rel="noreferrer">{source.label}</a>
+            ))}
+            <small>{format(lesson.labels.reviewed, { date: lesson.evidenceReviewedAt })}</small>
+            <small>{lesson.reviewNote}</small>
+          </div>
+          <div className="guided-actions stacked">
+            <button type="button" onClick={restart}>{lesson.labels.retry}</button>
+            <button className="guided-primary" type="button" onClick={onExit}>{lesson.labels.exit}</button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, quizActive, onQuizExit, lesson, onLessonExit }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<AnatomyViewer | null>(null);
   const organRef = useRef(organ);
@@ -183,6 +349,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   // The viewer captures its callbacks once, so live handlers go through refs.
   const pickRef = useRef<(hotspot: Hotspot) => void>(() => {});
   const authorRef = useRef<(point: { x: number; y: number; z: number }) => void>(() => {});
+  const focusLessonHotspot = useCallback((id: string | null) => viewerRef.current?.focusHotspot(id), []);
   useEffect(() => {
     authorRef.current = setAuthorPoint;
   }, []);
@@ -255,7 +422,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
 
   // A spinning specimen makes "click the mitral valve" a game of chance, so the
   // quiz holds the model still and restores the user's setting on exit.
-  useEffect(() => viewerRef.current?.setAutoRotate(autoRotate && !quizActive), [autoRotate, quizActive]);
+  useEffect(() => viewerRef.current?.setAutoRotate(autoRotate && !quizActive && !lesson), [autoRotate, lesson, quizActive]);
   useEffect(() => viewerRef.current?.setQuizMode(quizActive), [quizActive]);
   useEffect(() => viewerRef.current?.setAuthoring(authoring), [authoring]);
 
@@ -296,6 +463,19 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
       <div className="viewer-glow" style={{ "--organ-accent": organ.accent } as React.CSSProperties} />
       <div ref={mountRef} className="three-mount" />
 
+      {lesson && (
+        <GuidedLessonPanel
+          key={lesson.id}
+          lesson={lesson}
+          onFocus={focusLessonHotspot}
+          onExit={() => {
+            viewerRef.current?.focusHotspot(null);
+            onLessonExit();
+          }}
+        />
+      )}
+
+      {!lesson && (
       <div className="viewer-tools" aria-label={t.tools.label}>
         {tools.map(({ id, label, icon: Icon }) => (
           <button
@@ -311,15 +491,16 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
           </button>
         ))}
       </div>
+      )}
 
-      {!quizActive && (
+      {!quizActive && !lesson && (
       <aside className="tip-note" aria-label={t.viewer.tip}>
         <span><Sparkles size={15} /> {t.viewer.tip}</span>
         <p>{t.viewer.tipDrag}<br />{t.viewer.tipScroll}<br />{t.viewer.tipClick}</p>
       </aside>
       )}
 
-      {selected && !quizActive && (
+      {selected && !quizActive && !lesson && (
         <div className="hotspot-callout" ref={calloutRef} data-side="right">
           <div className="callout-body" style={{ "--hotspot-color": selected.color } as React.CSSProperties}>
             <button className="callout-close" type="button" onClick={() => viewerRef.current?.clearSelection()} aria-label={t.modal.close}>
@@ -338,7 +519,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         ))}
       </ul>
 
-      {quizActive && (
+      {quizActive && !lesson && (
         <LabelQuiz
           key={organ.id}
           hotspots={organ.hotspots}
@@ -350,7 +531,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         />
       )}
 
-      {authoring && (
+      {authoring && !lesson && (
         <div className="authoring-panel">
           <span><Crosshair size={13} /> authoring</span>
           {authorPoint ? (
@@ -381,7 +562,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         </div>
       )}
 
-      {!quizActive && (
+      {!quizActive && !lesson && (
       <button className="auto-rotate" type="button" onClick={() => onAutoRotate(!autoRotate)} aria-pressed={autoRotate}>
         <RotateCcw size={14} /> {t.viewer.autoRotate}
         <span className={`switch ${autoRotate ? "on" : ""}`}><i /></span>

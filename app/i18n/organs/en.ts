@@ -17,6 +17,150 @@ export const organs: OrganContentDictionary = {
     tissue: "Cardiac muscle tissue",
     comparison: "Heart vs. brain",
     conditions: ["Coronary artery disease", "Arrhythmia", "Heart valve disorders", "Heart failure", "Cardiomyopathy", "Myocarditis", "Atrial fibrillation", "Congenital heart defects"],
+    lesson: {
+      id: "heart-blood-flow",
+      eyebrow: "Guided discovery · Heart",
+      title: "One heartbeat, two circuits",
+      summary:
+        "Follow one drop of blood through the receiving chambers, pumping chambers, lungs, and aorta. The highlighted structures stay anchored to the 3D specimen as you learn.",
+      duration: "6 min",
+      objectives: [
+        "Trace blood through the four chambers in the correct order",
+        "Distinguish the pulmonary and systemic circuits",
+        "Explain how valves keep blood moving forward",
+      ],
+      steps: [
+        {
+          id: "overview",
+          eyebrow: "Orient yourself",
+          title: "The heart is two pumps working in series",
+          body:
+            "The right side sends oxygen-poor blood to the lungs. The left side receives oxygen-rich blood and sends it around the body. Both sides fill and contract in a coordinated cycle.",
+          insight: "Atria receive blood; ventricles generate the pressure that moves it onward.",
+        },
+        {
+          id: "right-atrium",
+          eyebrow: "Step 1 · Returning from the body",
+          title: "Right atrium",
+          body:
+            "Oxygen-poor blood returns from the body through the venae cavae and enters the right atrium. This thin-walled upper chamber acts as a receiving reservoir.",
+          insight: "Direction: body → right atrium.",
+          hotspotId: "right-atrium",
+        },
+        {
+          id: "right-ventricle",
+          eyebrow: "Step 2 · Toward the lungs",
+          title: "Right ventricle",
+          body:
+            "Blood passes through the tricuspid valve into the right ventricle. When this chamber contracts, the pulmonary valve opens and blood enters the pulmonary arteries on its way to the lungs.",
+          insight: "The pulmonary arteries are unusual: they carry oxygen-poor blood.",
+          hotspotId: "right-ventricle",
+        },
+        {
+          id: "left-atrium",
+          eyebrow: "Step 3 · Returning with oxygen",
+          title: "Left atrium",
+          body:
+            "In the lungs, blood releases carbon dioxide and takes up oxygen. Pulmonary veins return that oxygen-rich blood to the left atrium.",
+          insight: "The pulmonary veins are unusual: they carry oxygen-rich blood.",
+          hotspotId: "left-atrium",
+        },
+        {
+          id: "mitral",
+          eyebrow: "Step 4 · One-way passage",
+          title: "Mitral valve",
+          body:
+            "The mitral valve opens as the left atrium empties into the left ventricle. It closes when the ventricle contracts, preventing blood from being pushed backward.",
+          insight: "Valves respond to pressure differences; they do not actively pull themselves open.",
+          hotspotId: "mitral",
+        },
+        {
+          id: "left-ventricle",
+          eyebrow: "Step 5 · The strongest chamber",
+          title: "Left ventricle",
+          body:
+            "The left ventricle has a thick muscular wall because it must generate enough pressure to move blood through the entire systemic circulation.",
+          insight: "Structure matches function: a thicker myocardium supports a higher-pressure pump.",
+          hotspotId: "left-ventricle",
+        },
+        {
+          id: "aorta",
+          eyebrow: "Step 6 · Back to the body",
+          title: "Aorta",
+          body:
+            "The aortic valve opens and oxygen-rich blood enters the aorta. Its branches distribute blood to the heart muscle, brain, organs, and tissues before the cycle begins again.",
+          insight: "Complete path: body → right heart → lungs → left heart → body.",
+          hotspotId: "aorta",
+        },
+      ],
+      questions: [
+        {
+          id: "systemic-pump",
+          prompt: "Which chamber generates the pressure that sends oxygen-rich blood around the body?",
+          options: [
+            { id: "right-atrium", label: "Right atrium" },
+            { id: "right-ventricle", label: "Right ventricle" },
+            { id: "left-atrium", label: "Left atrium" },
+            { id: "left-ventricle", label: "Left ventricle" },
+          ],
+          answerId: "left-ventricle",
+          explanation:
+            "The left ventricle supplies the systemic circuit. Its thick myocardium creates the pressure needed to move blood throughout the body.",
+          hotspotId: "left-ventricle",
+        },
+        {
+          id: "returning-blood",
+          prompt: "Where does blood returning from the body enter the heart first?",
+          options: [
+            { id: "left-atrium", label: "Left atrium" },
+            { id: "right-atrium", label: "Right atrium" },
+            { id: "aorta", label: "Aorta" },
+            { id: "left-ventricle", label: "Left ventricle" },
+          ],
+          answerId: "right-atrium",
+          explanation:
+            "The superior and inferior venae cavae return oxygen-poor blood from the body to the right atrium.",
+          hotspotId: "right-atrium",
+        },
+        {
+          id: "mitral-role",
+          prompt: "What is the mitral valve's main job?",
+          options: [
+            { id: "add-oxygen", label: "Add oxygen to blood" },
+            { id: "set-rhythm", label: "Set the heart rhythm" },
+            { id: "prevent-backflow", label: "Prevent backward flow into the left atrium" },
+            { id: "feed-muscle", label: "Supply the heart muscle" },
+          ],
+          answerId: "prevent-backflow",
+          explanation:
+            "The mitral valve closes during left-ventricular contraction, helping keep blood moving forward toward the aorta.",
+          hotspotId: "mitral",
+        },
+      ],
+      sources: [
+        { label: "NHLBI · How blood flows through the heart", url: "https://www.nhlbi.nih.gov/health/heart/blood-flow" },
+        { label: "OpenStax Anatomy & Physiology 2e · Heart anatomy", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/19-1-heart-anatomy" },
+      ],
+      evidenceReviewedAt: "2026-09-23",
+      reviewNote: "Educational draft · source-checked; clinical review still required before use as medical guidance.",
+      labels: {
+        objectives: "In this lesson",
+        begin: "Begin the journey",
+        previous: "Previous",
+        next: "Next structure",
+        checkpoint: "Check your understanding",
+        questionProgress: "Question {current} of {total}",
+        correct: "Exactly right",
+        incorrect: "Take another look",
+        continue: "Continue",
+        complete: "Journey complete",
+        score: "You answered {score} of {total} correctly.",
+        retry: "Review again",
+        exit: "Return to free explore",
+        sources: "Sources",
+        reviewed: "Evidence reviewed {date}",
+      },
+    },
     hotspots: {
       "aorta": { label: "Aorta", detail: "Main artery" },
       "left-atrium": { label: "Left Atrium", detail: "Receives oxygenated blood" },

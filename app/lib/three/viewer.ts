@@ -561,6 +561,29 @@ export class AnatomyViewer {
     this.select(null);
   }
 
+  /**
+   * Brings a teaching hotspot to the front of the specimen and emphasizes it.
+   * Guided lessons use the same authored anchors as free exploration, so the
+   * instructional camera never drifts away from the anatomy it describes.
+   */
+  focusHotspot(id: string | null) {
+    if (!id || !this.organ) {
+      this.select(null);
+      return;
+    }
+    const marker = this.hotspots.list.find((item) => item.hotspot.id === id);
+    if (!marker) return;
+    const frontFacingY = Math.atan2(-marker.anchor.x, marker.anchor.z);
+    this.tween(this.organ.pivot.rotation, {
+      x: 0.05,
+      y: frontFacingY,
+      z: 0,
+      duration: 0.72,
+      ease: "power3.inOut",
+    });
+    this.select(id);
+  }
+
   /** The callout is positioned imperatively so tracking a spinning model never
    *  triggers a React render. */
   attachCallout(element: HTMLElement | null) {

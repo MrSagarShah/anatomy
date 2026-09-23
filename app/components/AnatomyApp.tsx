@@ -128,6 +128,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
   const [query, setQuery] = useState("");
   const [mobileLibrary, setMobileLibrary] = useState(false);
   const [quizActive, setQuizActive] = useState(false);
+  const [lessonActive, setLessonActive] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const prefetched = useRef(new Set<OrganId>());
   const organ = organById[organId];
@@ -159,6 +160,14 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
     setMobileLibrary(false);
     setCompare(false);
     setQuizActive(false);
+    setLessonActive(false);
+  };
+
+  const openLesson = () => {
+    setQuizActive(false);
+    setModal(null);
+    if (organ.lesson) setLessonActive(true);
+    else setModal("lesson");
   };
 
   // Warms the model in the HTTP cache while the pointer is still travelling,
@@ -179,7 +188,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
         <nav className="main-nav" aria-label="Primary navigation">
           <button className="active"><Compass size={17} /> {t.nav.explore}</button>
           <button><BrainCircuit size={17} /> {t.nav.systems}</button>
-          <button onClick={() => setModal("lesson")}><BookOpen size={17} /> {t.nav.lessons}</button>
+          <button onClick={openLesson}><BookOpen size={17} /> {t.nav.lessons}</button>
           <button><LibraryBig size={17} /> {t.nav.library}</button>
           <button><NotebookPen size={17} /> {t.nav.notes}</button>
         </nav>
@@ -235,6 +244,8 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
           onCompare={() => setCompare(!compare)}
           quizActive={quizActive}
           onQuizExit={() => setQuizActive(false)}
+          lesson={lessonActive ? organ.lesson ?? null : null}
+          onLessonExit={() => setLessonActive(false)}
         />
 
         <aside className="info-panel" ref={contentRef}>
@@ -258,10 +269,10 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
           </dl>
           <div className="medical-note" data-reveal><Stethoscope size={16} /><p><b>{t.info.medical}</b>{organ.medical}</p></div>
           <div className="fun-note" data-reveal><Sparkles size={15} /><p><b>{t.info.didYouKnow}</b>{organ.funFact}</p></div>
-          <button className="lesson-button" data-reveal onClick={() => setModal("lesson")}>{t.info.viewLesson} <ArrowRight size={16} /></button>
+          <button className="lesson-button" data-reveal onClick={openLesson}>{t.info.viewLesson} <ArrowRight size={16} /></button>
           <div className="action-grid" data-reveal>
             <button onClick={() => setModal("animation")}><Play size={15} /> {t.info.animate}</button>
-            <button onClick={() => { setQuizActive(true); setModal(null); }}><CircleHelp size={15} /> {t.info.quiz}</button>
+            <button onClick={() => { setLessonActive(false); setQuizActive(true); setModal(null); }}><CircleHelp size={15} /> {t.info.quiz}</button>
             <button onClick={() => setCompare(!compare)} className={compare ? "active" : ""}><Share2 size={15} /> {t.info.compare}</button>
           </div>
         </aside>
@@ -284,7 +295,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
         <article>
           <header><div><em>{t.cards.microscopic}</em><h3>{organ.tissue}</h3></div><Microscope size={17} /></header>
           <div className="microscope-visual organ-card-image"><OrganArt organ={organ} asset="microscopic" alt="" /></div>
-          <button onClick={() => setModal("lesson")}>{t.cards.exploreTissue} <ArrowRight size={14} /></button>
+          <button onClick={openLesson}>{t.cards.exploreTissue} <ArrowRight size={14} /></button>
         </article>
         <article>
           <header><div><em>{t.cards.compareOrgans}</em><h3>{organ.comparison}</h3></div><Share2 size={17} /></header>
@@ -310,7 +321,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
         <article>
           <header><div><em>{t.cards.clinicalNotes}</em><h3>{t.cards.commonConditions}</h3></div><FileText size={17} /></header>
           <ul>{organ.conditions.map((condition) => <li key={condition}>{condition}</li>)}</ul>
-          <button onClick={() => setModal("lesson")}>{t.cards.seeAll} <ArrowRight size={14} /></button>
+          <button onClick={openLesson}>{t.cards.seeAll} <ArrowRight size={14} /></button>
         </article>
         <article className="system-card">
           <header><div><em>{t.cards.whereItWorks}</em><h3>{organ.system}</h3></div><BrainCircuit size={17} /></header>

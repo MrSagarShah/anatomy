@@ -1,5 +1,56 @@
 import type { OrganId } from "../lib/anatomy-data";
 
+export type GuidedLessonStep = {
+  id: string;
+  eyebrow: string;
+  title: string;
+  body: string;
+  insight: string;
+  /** Optional structure to emphasize on the 3D model while this step is open. */
+  hotspotId?: string;
+};
+
+export type GuidedLessonQuestion = {
+  id: string;
+  prompt: string;
+  options: { id: string; label: string }[];
+  answerId: string;
+  explanation: string;
+  /** Structure revealed after the learner answers. */
+  hotspotId?: string;
+};
+
+export type GuidedLesson = {
+  id: string;
+  eyebrow: string;
+  title: string;
+  summary: string;
+  duration: string;
+  objectives: string[];
+  steps: GuidedLessonStep[];
+  questions: GuidedLessonQuestion[];
+  sources: { label: string; url: string }[];
+  evidenceReviewedAt: string;
+  reviewNote: string;
+  labels: {
+    objectives: string;
+    begin: string;
+    previous: string;
+    next: string;
+    checkpoint: string;
+    questionProgress: string;
+    correct: string;
+    incorrect: string;
+    continue: string;
+    complete: string;
+    score: string;
+    retry: string;
+    exit: string;
+    sources: string;
+    reviewed: string;
+  };
+};
+
 /** Prose for one organ. Structure (positions, colours, model) lives in
  *  `anatomy-data.ts`; only translatable text belongs here. */
 export type OrganContent = {
@@ -18,6 +69,8 @@ export type OrganContent = {
   tissue: string;
   comparison: string;
   conditions: string[];
+  /** Optional premium guided module. Added organ-by-organ after source review. */
+  lesson?: GuidedLesson;
   /** Keyed by hotspot id — the Terminologia Anatomica term is the anchor. */
   hotspots: Record<string, { label: string; detail: string }>;
 };
