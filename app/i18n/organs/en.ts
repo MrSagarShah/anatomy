@@ -4,12 +4,12 @@ export const organs: OrganContentDictionary = {
   heart: {
     name: "Heart",
     system: "Cardiovascular",
-    description: "A muscular organ that pumps blood throughout the body, delivering oxygen and nutrients to every cell.",
+    description: "A muscular organ that drives two linked circuits: sending oxygen-poor blood to the lungs and oxygen-rich blood to the body.",
     poetic: "The tireless pump",
     size: "About the size of your fist",
     weight: "250–350 g",
     location: "Behind the sternum, slightly left",
-    function: "Circulates oxygenated blood",
+    function: "Pumps blood through the pulmonary and systemic circuits",
     dailyFact: "Beats about 100,000 times",
     medical: "Its electrical rhythm coordinates every heartbeat.",
     bloodSupply: "Left and right coronary arteries",
@@ -37,59 +37,71 @@ export const organs: OrganContentDictionary = {
           body:
             "The right side sends oxygen-poor blood to the lungs. The left side receives oxygen-rich blood and sends it around the body. Both sides fill and contract in a coordinated cycle.",
           insight: "Atria receive blood; ventricles generate the pressure that moves it onward.",
+          route: "Body → right heart → lungs → left heart → body",
         },
         {
           id: "right-atrium",
-          eyebrow: "Step 1 · Returning from the body",
+          eyebrow: "Returning from the body",
           title: "Right atrium",
           body:
             "Oxygen-poor blood returns from the body through the venae cavae and enters the right atrium. This thin-walled upper chamber acts as a receiving reservoir.",
           insight: "Direction: body → right atrium.",
+          route: "Body → right atrium",
           hotspotId: "right-atrium",
+          crossSection: true,
         },
         {
           id: "right-ventricle",
-          eyebrow: "Step 2 · Toward the lungs",
+          eyebrow: "Toward the lungs",
           title: "Right ventricle",
           body:
             "Blood passes through the tricuspid valve into the right ventricle. When this chamber contracts, the pulmonary valve opens and blood enters the pulmonary arteries on its way to the lungs.",
           insight: "The pulmonary arteries are unusual: they carry oxygen-poor blood.",
+          route: "Right atrium → tricuspid valve → right ventricle → pulmonary artery",
           hotspotId: "right-ventricle",
+          crossSection: true,
         },
         {
           id: "left-atrium",
-          eyebrow: "Step 3 · Returning with oxygen",
+          eyebrow: "Returning with oxygen",
           title: "Left atrium",
           body:
             "In the lungs, blood releases carbon dioxide and takes up oxygen. Pulmonary veins return that oxygen-rich blood to the left atrium.",
           insight: "The pulmonary veins are unusual: they carry oxygen-rich blood.",
+          route: "Lungs → pulmonary veins → left atrium",
           hotspotId: "left-atrium",
+          crossSection: true,
         },
         {
           id: "mitral",
-          eyebrow: "Step 4 · One-way passage",
+          eyebrow: "One-way passage",
           title: "Mitral valve",
           body:
             "The mitral valve opens as the left atrium empties into the left ventricle. It closes when the ventricle contracts, preventing blood from being pushed backward.",
           insight: "Valves respond to pressure differences; they do not actively pull themselves open.",
+          route: "Left atrium → mitral valve → left ventricle",
           hotspotId: "mitral",
+          crossSection: true,
         },
         {
           id: "left-ventricle",
-          eyebrow: "Step 5 · The strongest chamber",
+          eyebrow: "The strongest chamber",
           title: "Left ventricle",
           body:
             "The left ventricle has a thick muscular wall because it must generate enough pressure to move blood through the entire systemic circulation.",
           insight: "Structure matches function: a thicker myocardium supports a higher-pressure pump.",
+          route: "Left atrium → left ventricle → aortic valve",
           hotspotId: "left-ventricle",
+          crossSection: true,
         },
         {
           id: "aorta",
-          eyebrow: "Step 6 · Back to the body",
+          eyebrow: "Back to the body",
           title: "Aorta",
           body:
             "The aortic valve opens and oxygen-rich blood enters the aorta. Its branches distribute blood to the heart muscle, brain, organs, and tissues before the cycle begins again.",
           insight: "Complete path: body → right heart → lungs → left heart → body.",
+          route: "Left ventricle → aortic valve → aorta → body",
           hotspotId: "aorta",
         },
       ],
@@ -107,6 +119,7 @@ export const organs: OrganContentDictionary = {
           explanation:
             "The left ventricle supplies the systemic circuit. Its thick myocardium creates the pressure needed to move blood throughout the body.",
           hotspotId: "left-ventricle",
+          crossSection: true,
         },
         {
           id: "returning-blood",
@@ -121,6 +134,7 @@ export const organs: OrganContentDictionary = {
           explanation:
             "The superior and inferior venae cavae return oxygen-poor blood from the body to the right atrium.",
           hotspotId: "right-atrium",
+          crossSection: true,
         },
         {
           id: "mitral-role",
@@ -135,6 +149,7 @@ export const organs: OrganContentDictionary = {
           explanation:
             "The mitral valve closes during left-ventricular contraction, helping keep blood moving forward toward the aorta.",
           hotspotId: "mitral",
+          crossSection: true,
         },
       ],
       sources: [
@@ -148,6 +163,11 @@ export const organs: OrganContentDictionary = {
         begin: "Begin the journey",
         previous: "Previous",
         next: "Next structure",
+        stepProgress: "Step {current} of {total}",
+        showing: "Now showing",
+        anteriorView: "Anterior view · anatomical right appears on your left",
+        interiorView: "Interior cutaway · anatomical right appears on your left",
+        flow: "Blood-flow path",
         checkpoint: "Check your understanding",
         questionProgress: "Question {current} of {total}",
         correct: "Exactly right",

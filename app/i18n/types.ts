@@ -6,8 +6,12 @@ export type GuidedLessonStep = {
   title: string;
   body: string;
   insight: string;
+  /** Compact path shown beside the model to reinforce direction of flow. */
+  route?: string;
   /** Optional structure to emphasize on the 3D model while this step is open. */
   hotspotId?: string;
+  /** Reveal internal anatomy with the viewer's clipping plane. */
+  crossSection?: boolean;
 };
 
 export type GuidedLessonQuestion = {
@@ -18,6 +22,7 @@ export type GuidedLessonQuestion = {
   explanation: string;
   /** Structure revealed after the learner answers. */
   hotspotId?: string;
+  crossSection?: boolean;
 };
 
 export type GuidedLesson = {
@@ -37,6 +42,11 @@ export type GuidedLesson = {
     begin: string;
     previous: string;
     next: string;
+    stepProgress: string;
+    showing: string;
+    anteriorView: string;
+    interiorView: string;
+    flow: string;
     checkpoint: string;
     questionProgress: string;
     correct: string;

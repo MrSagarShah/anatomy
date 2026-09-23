@@ -174,7 +174,7 @@ function GuidedLessonPanel({
   onExit,
 }: {
   lesson: GuidedLesson;
-  onFocus: (hotspotId: string | null) => void;
+  onFocus: (hotspotId: string | null, crossSection?: boolean) => void;
   onExit: () => void;
 }) {
   const [phase, setPhase] = useState<"overview" | "steps" | "questions" | "complete">("overview");
@@ -192,10 +192,10 @@ function GuidedLessonPanel({
   }, [phase, stepIndex, questionIndex]);
 
   useEffect(() => {
-    if (phase === "steps") onFocus(step?.hotspotId ?? null);
-    else if (phase === "questions" && answer) onFocus(question?.hotspotId ?? null);
+    if (phase === "steps") onFocus(step?.hotspotId ?? null, step?.crossSection);
+    else if (phase === "questions" && answer) onFocus(question?.hotspotId ?? null, question?.crossSection);
     else onFocus(null);
-  }, [answer, onFocus, phase, question?.hotspotId, step?.hotspotId]);
+  }, [answer, onFocus, phase, question?.crossSection, question?.hotspotId, step?.crossSection, step?.hotspotId]);
 
   const begin = () => {
     setStepIndex(0);
@@ -247,12 +247,16 @@ function GuidedLessonPanel({
 
       {phase === "steps" && step && (
         <div className="guided-lesson-page">
-          <div className="guided-progress" aria-label={format(lesson.labels.questionProgress, { current: String(stepIndex + 1), total: String(lesson.steps.length) })}>
+          <div className="guided-progress" aria-label={format(lesson.labels.stepProgress, { current: String(stepIndex + 1), total: String(lesson.steps.length) })}>
             {lesson.steps.map((item, index) => <i key={item.id} className={index <= stepIndex ? "active" : ""} />)}
           </div>
-          <em>{step.eyebrow}</em>
+          <div className="guided-step-meta">
+            <span>{format(lesson.labels.stepProgress, { current: String(stepIndex + 1), total: String(lesson.steps.length) })}</span>
+            <em>{step.eyebrow}</em>
+          </div>
           <h2 id="guided-lesson-title" ref={headingRef} tabIndex={-1}>{step.title}</h2>
           <p>{step.body}</p>
+          {step.route && <div className="guided-route"><span>{lesson.labels.flow}</span><strong>{step.route}</strong></div>}
           <aside className="guided-insight"><Sparkles size={15} /><span>{step.insight}</span></aside>
           <div className="guided-actions">
             <button type="button" onClick={() => stepIndex === 0 ? setPhase("overview") : setStepIndex((value) => value - 1)}>
@@ -339,6 +343,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   const [progress, setProgress] = useState(0);
   const [slowLoad, setSlowLoad] = useState(false);
   const [activeTool, setActiveTool] = useState<string | null>(null);
+  const [lessonCrossSection, setLessonCrossSection] = useState(false);
 
   // Opt-in coordinate probe for placing hotspots — not a user-facing feature.
   const authoring = useAuthoringFlag();
@@ -349,7 +354,10 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   // The viewer captures its callbacks once, so live handlers go through refs.
   const pickRef = useRef<(hotspot: Hotspot) => void>(() => {});
   const authorRef = useRef<(point: { x: number; y: number; z: number }) => void>(() => {});
-  const focusLessonHotspot = useCallback((id: string | null) => viewerRef.current?.focusHotspot(id), []);
+  const focusLessonHotspot = useCallback((id: string | null, crossSection = false) => {
+    setLessonCrossSection(Boolean(id) && crossSection);
+    viewerRef.current?.focusHotspot(id, crossSection);
+  }, []);
   useEffect(() => {
     authorRef.current = setAuthorPoint;
   }, []);
@@ -459,7 +467,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   ];
 
   return (
-    <section className="viewer-shell" aria-label={format(t.viewer.title, { organ: organ.name })}>
+    <section className={`viewer-shell ${lesson ? "lesson-active" : ""}`} aria-label={format(t.viewer.title, { organ: organ.name })}>
       <div className="viewer-glow" style={{ "--organ-accent": organ.accent } as React.CSSProperties} />
       <div ref={mountRef} className="three-mount" />
 
@@ -469,10 +477,19 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
           lesson={lesson}
           onFocus={focusLessonHotspot}
           onExit={() => {
-            viewerRef.current?.focusHotspot(null);
+            setLessonCrossSection(false);
+            viewerRef.current?.focusHotspot(null, false);
             onLessonExit();
           }}
         />
+      )}
+
+      {lesson && selected && (
+        <div className="lesson-target" role="status" aria-live="polite">
+          <Crosshair size={17} />
+          <span><small>{lesson.labels.showing}</small><strong>{selected.label}</strong></span>
+          <em>{lessonCrossSection ? lesson.labels.interiorView : lesson.labels.anteriorView}</em>
+        </div>
       )}
 
       {!lesson && (
@@ -500,12 +517,14 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
       </aside>
       )}
 
-      {selected && !quizActive && !lesson && (
-        <div className="hotspot-callout" ref={calloutRef} data-side="right">
+      {selected && !quizActive && (
+        <div className={`hotspot-callout ${lesson ? "lesson-callout" : ""}`} ref={calloutRef} data-side="right">
           <div className="callout-body" style={{ "--hotspot-color": selected.color } as React.CSSProperties}>
-            <button className="callout-close" type="button" onClick={() => viewerRef.current?.clearSelection()} aria-label={t.modal.close}>
-              <X size={13} />
-            </button>
+            {!lesson && (
+              <button className="callout-close" type="button" onClick={() => viewerRef.current?.clearSelection()} aria-label={t.modal.close}>
+                <X size={13} />
+              </button>
+            )}
             <b>{selected.label}</b>
             <small>{selected.detail}</small>
           </div>
@@ -569,10 +588,12 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
       </button>
       )}
 
-      <div className="view-caption">
-        <span>{t.viewer.caption}</span>
-        <strong>{organ.scientificName}</strong>
-      </div>
+      {!lesson && (
+        <div className="view-caption">
+          <span>{t.viewer.caption}</span>
+          <strong>{organ.scientificName}</strong>
+        </div>
+      )}
     </section>
   );
 }

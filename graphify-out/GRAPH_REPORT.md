@@ -1,11 +1,11 @@
 # Graph Report - .  (2026-09-23)
 
 ## Corpus Check
-- 105 files · ~144,800 words
+- 106 files · ~144,800 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 461 nodes · 604 edges · 57 communities detected
+- 462 nodes · 607 edges · 57 communities detected
 - Extraction: 86% EXTRACTED · 12% INFERRED · 1% AMBIGUOUS · INFERRED: 75 edges (avg confidence: 0.93)
 - Token cost: 0 input · 0 output
 
@@ -69,7 +69,7 @@
 - [[_COMMUNITY_Cloudflare Worker Entrypoint|Cloudflare Worker Entrypoint]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `AnatomyViewer` - 33 edges
+1. `AnatomyViewer` - 34 edges
 2. `getCache()` - 21 edges
 3. `x()` - 18 edges
 4. `ExceptionInfo` - 14 edges

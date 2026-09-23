@@ -144,6 +144,18 @@ button:focus-visible, input:focus-visible, canvas:focus-visible {
   gap: 18px;
 }
 
+/* Guided study gets the full stage. The library and reference card remain in
+   the DOM, but step back so the specimen and instruction are the only active
+   visual hierarchy. */
+.lesson-mode .workspace {
+  max-width: 1500px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.lesson-mode .organ-library,
+.lesson-mode .info-panel { display: none; }
+.lesson-mode .viewer-shell { min-height: min(760px, calc(100vh - 128px)); }
+
 .organ-library, .viewer-shell, .info-panel {
   border: 1px solid var(--line);
   border-radius: 26px;
@@ -226,6 +238,7 @@ button:focus-visible, input:focus-visible, canvas:focus-visible {
 .viewer-glow { position: absolute; width: 420px; height: 420px; left: 50%; top: 47%; transform: translate(-50%,-50%); border-radius: 50%; background: color-mix(in srgb, var(--organ-accent), transparent 94%); filter: blur(72px); opacity: .55; }
 .three-mount { position: absolute; inset: 0; }
 .three-mount canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.viewer-shell.lesson-active .three-mount { inset-inline-end: 430px; }
 
 .viewer-tools {
   position: absolute;
@@ -308,6 +321,11 @@ button:focus-visible, input:focus-visible, canvas:focus-visible {
 .callout-close { position: absolute; top: 6px; inset-inline-end: 6px; width: 20px; height: 20px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; }
 .callout-close:hover { background: rgba(116,89,67,.09); }
 @keyframes callout-in { from { opacity: 0; transform: translateX(-6px) scale(.96); } }
+.lesson-callout .callout-body {
+  border-color: color-mix(in srgb, var(--hotspot-color), transparent 58%);
+  background: rgba(255,252,247,.97);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--hotspot-color), transparent 88%), 0 14px 34px rgba(83,59,42,.14);
+}
 
 .hotspot-index { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
@@ -667,10 +685,12 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
 .guided-lesson {
   position: absolute;
   z-index: 9;
-  inset-block: 16px;
-  inset-inline-end: 16px;
-  width: min(390px, 48%);
-  min-width: 330px;
+  top: 50%;
+  inset-inline-end: 18px;
+  width: 394px;
+  max-width: calc(100% - 36px);
+  max-height: calc(100% - 36px);
+  transform: translateY(-50%);
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
@@ -683,15 +703,12 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
   backdrop-filter: blur(20px);
   animation: guided-panel-in .42s cubic-bezier(.2,.82,.3,1);
 }
-@keyframes guided-panel-in { from { opacity: 0; transform: translateX(16px) scale(.985); } }
+@keyframes guided-panel-in {
+  from { opacity: 0; transform: translate(16px, -50%) scale(.985); }
+  to { opacity: 1; transform: translate(0, -50%) scale(1); }
+}
 .guided-lesson:before {
-  content: "";
-  position: absolute;
-  inset-inline: 24px 58px;
-  top: 0;
-  height: 3px;
-  border-radius: 0 0 6px 6px;
-  background: linear-gradient(90deg, var(--coral), #dfa884, var(--lavender));
+  content: none;
 }
 .guided-lesson-close {
   position: sticky;
@@ -711,14 +728,14 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
   box-shadow: 0 5px 12px rgba(67,45,31,.08);
 }
 .guided-lesson-page {
-  min-height: 100%;
   padding: 38px 30px 28px;
   display: flex;
   flex-direction: column;
   animation: guided-page-in .3s cubic-bezier(.2,.82,.3,1);
 }
 @keyframes guided-page-in { from { opacity: 0; transform: translateY(7px); } }
-.guided-lesson-page > em {
+.guided-lesson-page > em,
+.guided-step-meta em {
   color: var(--lavender);
   font: italic 12px "Comic Sans MS", "Bradley Hand", cursive;
 }
@@ -794,12 +811,43 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
   background: linear-gradient(135deg, #df7464, #c96155);
   box-shadow: 0 8px 20px rgba(185,82,66,.2);
 }
-.guided-lesson-overview > .guided-primary { margin-top: auto; }
-.guided-progress { display: flex; gap: 5px; margin: 2px 44px 26px 0; }
+.guided-actions > .guided-primary {
+  color: #fff;
+  border-color: #bc6558;
+  background: linear-gradient(135deg, #df7464, #c96155);
+  box-shadow: 0 8px 20px rgba(185,82,66,.2);
+}
+.guided-lesson-overview > .guided-primary { margin-top: 2px; }
+.guided-progress { display: flex; gap: 5px; margin: 2px 44px 18px 0; }
 .guided-progress i { flex: 1; height: 4px; border-radius: 99px; background: rgba(117,91,70,.13); transition: background .25s ease; }
 .guided-progress i.active { background: var(--coral); }
+.guided-step-meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
+.guided-step-meta span {
+  color: #7f746b;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.guided-route {
+  margin-top: 16px;
+  padding: 11px 13px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(99,147,216,.2);
+  border-radius: 13px;
+  background: rgba(232,241,252,.58);
+}
+.guided-route span {
+  color: #6e82a3;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.guided-route strong { color: #4d5f7b; font: 600 11px/1.45 var(--font-serif), serif; }
 .guided-insight {
-  margin: 20px 0;
+  margin: 12px 0 0;
   padding: 14px;
   display: flex;
   align-items: flex-start;
@@ -810,7 +858,7 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
   font: 500 12px/1.45 var(--font-serif), serif;
 }
 .guided-insight svg { flex: none; color: var(--lavender); margin-top: 2px; }
-.guided-actions { display: grid; grid-template-columns: auto 1fr; gap: 8px; margin-top: auto; }
+.guided-actions { display: grid; grid-template-columns: auto 1fr; gap: 8px; margin-top: 22px; }
 .guided-actions.stacked { grid-template-columns: 1fr; margin-top: 20px; }
 .guided-question-progress { margin: 8px 0 2px; color: var(--muted); font-size: 10px; letter-spacing: .08em; }
 .guided-question h2 { font-size: clamp(23px, 1.8vw, 29px); line-height: 1.15; }
@@ -843,18 +891,54 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
 .guided-source-list a { color: #6955a0; font: 500 11px/1.35 var(--font-serif), serif; text-underline-offset: 3px; }
 .guided-source-list small { color: var(--muted); font-size: 9px; line-height: 1.4; }
 
+.lesson-target {
+  position: absolute;
+  z-index: 7;
+  inset-inline-start: 20px;
+  top: 20px;
+  max-width: min(410px, calc(100% - 470px));
+  min-height: 58px;
+  padding: 10px 14px;
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(117,91,70,.16);
+  border-radius: 16px;
+  background: rgba(255,252,247,.9);
+  box-shadow: 0 12px 30px rgba(75,54,40,.09);
+  backdrop-filter: blur(14px);
+}
+.lesson-target > svg { color: var(--coral); }
+.lesson-target span { display: grid; gap: 1px; }
+.lesson-target small { color: var(--muted); font-size: 8px; letter-spacing: .13em; text-transform: uppercase; }
+.lesson-target strong { font: 600 15px/1.1 var(--font-serif), serif; }
+.lesson-target em { justify-self: end; color: #756a62; font: 500 9px/1.35 var(--font-sans), sans-serif; text-align: end; }
+
 @media (max-width: 760px) {
+  .lesson-mode .viewer-shell { height: calc(100dvh - 86px); min-height: 620px; }
+  .viewer-shell.lesson-active .three-mount { inset: 0 0 46%; }
   .guided-lesson {
     inset: auto 8px 8px;
     width: auto;
-    min-width: 0;
-    max-height: 61%;
+    max-width: none;
+    max-height: 50%;
+    transform: none;
     border-radius: 22px;
+    animation-name: guided-panel-mobile-in;
   }
+  @keyframes guided-panel-mobile-in { from { opacity: 0; transform: translateY(16px); } }
   .guided-lesson-page { min-height: 0; padding: 28px 22px 22px; }
   .guided-lesson-page h2 { font-size: 26px; }
   .guided-objectives { margin: 13px 0 16px; }
   .guided-progress { margin-bottom: 16px; }
+  .lesson-target {
+    top: 10px;
+    inset-inline: 10px;
+    max-width: none;
+    grid-template-columns: auto 1fr;
+  }
+  .lesson-target em { grid-column: 2; justify-self: start; text-align: start; }
 }
 
 /* ------------------------------------------------------- labelling quiz --- */

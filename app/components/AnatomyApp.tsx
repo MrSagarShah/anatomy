@@ -179,7 +179,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
   };
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell ${lessonActive ? "lesson-mode" : ""}`}>
       <header className="topbar">
         <button className="brand" type="button" onClick={() => selectOrgan("heart")} aria-label={t.brand.home}>
           <strong>Anatomy Atelier<sup>✦</sup></strong>

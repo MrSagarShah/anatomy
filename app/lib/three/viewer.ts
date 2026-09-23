@@ -566,7 +566,8 @@ export class AnatomyViewer {
    * Guided lessons use the same authored anchors as free exploration, so the
    * instructional camera never drifts away from the anatomy it describes.
    */
-  focusHotspot(id: string | null) {
+  focusHotspot(id: string | null, crossSection = false) {
+    this.setCrossSection(Boolean(id) && crossSection);
     if (!id || !this.organ) {
       this.select(null);
       return;
@@ -647,21 +648,26 @@ export class AnatomyViewer {
     return this.isolated;
   }
 
-  toggleCrossSection() {
-    this.crossSection = !this.crossSection;
-    this.applyClipping(this.crossSection);
-    gsap.fromTo(
-      this.clipPlane,
-      { constant: -1.8 },
-      {
-        constant: this.crossSection ? 0 : -1.8,
-        duration: 0.85,
-        ease: "power2.inOut",
-        onUpdate: () => (this.dirty = true),
+  setCrossSection(enabled: boolean) {
+    if (this.crossSection === enabled) return enabled;
+    this.crossSection = enabled;
+    gsap.killTweensOf(this.clipPlane);
+    if (enabled) this.applyClipping(true);
+    gsap.to(this.clipPlane, {
+      constant: enabled ? 0 : -1.8,
+      duration: 0.85,
+      ease: "power2.inOut",
+      onUpdate: () => (this.dirty = true),
+      onComplete: () => {
+        if (!enabled) this.applyClipping(false);
       },
-    );
+    });
     this.busy(0.95);
-    return this.crossSection;
+    return enabled;
+  }
+
+  toggleCrossSection() {
+    return this.setCrossSection(!this.crossSection);
   }
 
   private applyClipping(enabled: boolean) {
