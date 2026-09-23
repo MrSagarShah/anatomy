@@ -21,6 +21,7 @@ import {
 import type { Hotspot, Organ } from "../i18n/merge";
 import { format, type GuidedLesson, type UiDictionary } from "../i18n/types";
 import type { AnatomyViewer } from "../lib/three/viewer";
+import type { ProgressEventInput } from "../lib/progress/types";
 
 type Props = {
   organ: Organ;
@@ -33,7 +34,12 @@ type Props = {
   onQuizExit: () => void;
   lesson: GuidedLesson | null;
   onLessonExit: () => void;
+  /** Records a learning event (best-effort, may be a no-op when tracking is off). */
+  onEvent?: (event: ProgressEventInput) => void;
 };
+
+/** Stable no-op so children can always call the recorder unconditionally. */
+const noEvent: (event: ProgressEventInput) => void = () => {};
 
 /** Fisher–Yates. The quiz asks for every structure once, in a fresh order. */
 function shuffle<T>(items: T[]): T[] {
@@ -52,7 +58,7 @@ type PickRef = { current: (hotspot: Hotspot) => void };
  * organ, so switching specimens restarts it without a resetting effect.
  */
 function LabelQuiz({
-  hotspots, t, pickRef, flash, screenY, onExit,
+  hotspots, t, pickRef, flash, screenY, onExit, onEvent, organId,
 }: {
   hotspots: Hotspot[];
   t: UiDictionary;
@@ -60,6 +66,8 @@ function LabelQuiz({
   flash: (id: string, correct: boolean) => void;
   screenY: (id: string) => number | null;
   onExit: () => void;
+  onEvent: (event: ProgressEventInput) => void;
+  organId: string;
 }) {
   const [seed, setSeed] = useState(0);
   const [step, setStep] = useState(0);
@@ -71,6 +79,16 @@ function LabelQuiz({
   const target = order[step];
   const finished = step >= order.length;
 
+  // Report the final score once the round completes (each round has a fresh
+  // `seed`, so a retry reports again). Depends only on the finished transition.
+  const reportedSeed = useRef(-1);
+  useEffect(() => {
+    if (finished && order.length > 0 && reportedSeed.current !== seed) {
+      reportedSeed.current = seed;
+      onEvent({ kind: "label_quiz_complete", organId, value: score, total: order.length });
+    }
+  }, [finished, onEvent, order.length, organId, score, seed]);
+
   // Refreshed after every render so the viewer's long-lived callback always
   // sees the current question. Writing a ref in an effect is safe; writing one
   // during render is not.
@@ -78,6 +96,7 @@ function LabelQuiz({
     pickRef.current = (hotspot) => {
       if (!target || answer) return;   // ignore extra clicks while feedback shows
       const correct = hotspot.id === target.id;
+      onEvent({ kind: "label_answer", organId, refId: target.id, correct });
       flash(hotspot.id, correct);
       // A miss also marks where the answer actually was — otherwise the learner
       // is told they were wrong but never shown the right structure.
@@ -172,10 +191,14 @@ function GuidedLessonPanel({
   lesson,
   onFocus,
   onExit,
+  onEvent,
+  organId,
 }: {
   lesson: GuidedLesson;
-  onFocus: (hotspotId: string | null, crossSection?: boolean) => void;
+  onFocus: (hotspotId: string | null) => void;
   onExit: () => void;
+  onEvent: (event: ProgressEventInput) => void;
+  organId: string;
 }) {
   const [phase, setPhase] = useState<"overview" | "steps" | "questions" | "complete">("overview");
   const [stepIndex, setStepIndex] = useState(0);
@@ -187,22 +210,49 @@ function GuidedLessonPanel({
   const answer = question ? answers[question.id] : undefined;
   const score = lesson.questions.filter((item) => answers[item.id] === item.answerId).length;
 
+  // Emit completion once when the learner reaches the summary. Meta carries the
+  // lesson id so the rollup can attribute steps/questions to this lesson.
+  const completeReported = useRef(false);
+  useEffect(() => {
+    if (phase === "complete" && !completeReported.current) {
+      completeReported.current = true;
+      onEvent({
+        kind: "lesson_complete",
+        organId,
+        refId: lesson.id,
+        value: score,
+        total: lesson.questions.length,
+        meta: { lessonId: lesson.id },
+      });
+    }
+    if (phase === "overview") completeReported.current = false;
+  }, [phase, onEvent, organId, lesson.id, lesson.questions.length, score]);
+
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true });
   }, [phase, stepIndex, questionIndex]);
 
   useEffect(() => {
-    if (phase === "steps") onFocus(step?.hotspotId ?? null, step?.crossSection);
-    else if (phase === "questions" && answer) onFocus(question?.hotspotId ?? null, question?.crossSection);
+    if (phase === "steps") onFocus(step?.hotspotId ?? null);
+    else if (phase === "questions" && answer) onFocus(question?.hotspotId ?? null);
     else onFocus(null);
-  }, [answer, onFocus, phase, question?.crossSection, question?.hotspotId, step?.crossSection, step?.hotspotId]);
+  }, [answer, onFocus, phase, question?.hotspotId, step?.hotspotId]);
 
   const begin = () => {
+    onEvent({ kind: "lesson_start", organId, refId: lesson.id, meta: { lessonId: lesson.id } });
     setStepIndex(0);
     setPhase("steps");
   };
 
   const nextStep = () => {
+    onEvent({
+      kind: "lesson_step",
+      organId,
+      refId: step?.id,
+      value: stepIndex,
+      total: lesson.steps.length,
+      meta: { lessonId: lesson.id },
+    });
     if (stepIndex < lesson.steps.length - 1) setStepIndex((value) => value + 1);
     else {
       setQuestionIndex(0);
@@ -285,7 +335,18 @@ function GuidedLessonPanel({
                   key={option.id}
                   type="button"
                   className={`${chosen ? "chosen" : ""} ${correct ? "correct" : ""}`}
-                  onClick={() => !answer && setAnswers((current) => ({ ...current, [question.id]: option.id }))}
+                  onClick={() => {
+                    if (answer) return;
+                    setAnswers((current) => ({ ...current, [question.id]: option.id }));
+                    onEvent({
+                      kind: "quiz_answer",
+                      organId,
+                      refId: question.id,
+                      correct: option.id === question.answerId,
+                      total: lesson.questions.length,
+                      meta: { lessonId: lesson.id },
+                    });
+                  }}
                   disabled={Boolean(answer)}
                 >
                   <span>{option.label}</span>
@@ -332,7 +393,7 @@ function GuidedLessonPanel({
   );
 }
 
-export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, quizActive, onQuizExit, lesson, onLessonExit }: Props) {
+export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, quizActive, onQuizExit, lesson, onLessonExit, onEvent }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<AnatomyViewer | null>(null);
   const organRef = useRef(organ);
@@ -343,7 +404,6 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   const [progress, setProgress] = useState(0);
   const [slowLoad, setSlowLoad] = useState(false);
   const [activeTool, setActiveTool] = useState<string | null>(null);
-  const [lessonCrossSection, setLessonCrossSection] = useState(false);
 
   // Opt-in coordinate probe for placing hotspots — not a user-facing feature.
   const authoring = useAuthoringFlag();
@@ -354,9 +414,9 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   // The viewer captures its callbacks once, so live handlers go through refs.
   const pickRef = useRef<(hotspot: Hotspot) => void>(() => {});
   const authorRef = useRef<(point: { x: number; y: number; z: number }) => void>(() => {});
-  const focusLessonHotspot = useCallback((id: string | null, crossSection = false) => {
-    setLessonCrossSection(Boolean(id) && crossSection);
-    viewerRef.current?.focusHotspot(id, crossSection);
+  const focusLessonHotspot = useCallback((id: string | null) => {
+    setActiveTool(null);
+    viewerRef.current?.focusHotspot(id);
   }, []);
   useEffect(() => {
     authorRef.current = setAuthorPoint;
@@ -467,7 +527,13 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   ];
 
   return (
-    <section className={`viewer-shell ${lesson ? "lesson-active" : ""}`} aria-label={format(t.viewer.title, { organ: organ.name })}>
+    <section
+      className={`viewer-shell ${lesson ? "lesson-active" : ""}`}
+      aria-label={format(t.viewer.title, { organ: organ.name })}
+      data-lesson-focus={lesson ? selected?.id ?? "" : undefined}
+      data-lesson-view={lesson ? "surface" : undefined}
+      data-lesson-hotspots={lesson ? "focused" : undefined}
+    >
       <div className="viewer-glow" style={{ "--organ-accent": organ.accent } as React.CSSProperties} />
       <div ref={mountRef} className="three-mount" />
 
@@ -475,10 +541,11 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         <GuidedLessonPanel
           key={lesson.id}
           lesson={lesson}
+          organId={organ.id}
+          onEvent={onEvent ?? noEvent}
           onFocus={focusLessonHotspot}
           onExit={() => {
-            setLessonCrossSection(false);
-            viewerRef.current?.focusHotspot(null, false);
+            viewerRef.current?.clearLessonFocus();
             onLessonExit();
           }}
         />
@@ -488,7 +555,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         <div className="lesson-target" role="status" aria-live="polite">
           <Crosshair size={17} />
           <span><small>{lesson.labels.showing}</small><strong>{selected.label}</strong></span>
-          <em>{lessonCrossSection ? lesson.labels.interiorView : lesson.labels.anteriorView}</em>
+          <em>{lesson.labels.anteriorView}</em>
         </div>
       )}
 
@@ -542,6 +609,8 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         <LabelQuiz
           key={organ.id}
           hotspots={organ.hotspots}
+          organId={organ.id}
+          onEvent={onEvent ?? noEvent}
           t={t}
           pickRef={pickRef}
           flash={(id, correct) => viewerRef.current?.flash(id, correct)}

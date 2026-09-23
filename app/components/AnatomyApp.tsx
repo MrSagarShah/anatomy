@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import {
   ArrowRight,
+  Award,
   BookOpen,
   Bookmark,
   BrainCircuit,
@@ -15,7 +16,6 @@ import {
   Heart,
   LibraryBig,
   Microscope,
-  NotebookPen,
   Play,
   Search,
   Share2,
@@ -24,13 +24,24 @@ import {
   X,
 } from "lucide-react";
 import { OrganViewer } from "./OrganViewer";
+import { OnboardingModal } from "./OnboardingModal";
+import { ProgressDashboard } from "./ProgressDashboard";
 import type { OrganId } from "../lib/anatomy-data";
 import type { LocaleConfig } from "../i18n/config";
 import { locales } from "../i18n/config";
 import { buildOrgans, indexOrgans, type Organ } from "../i18n/merge";
 import { format, type Dictionary, type UiDictionary } from "../i18n/types";
+import { useProgress } from "../lib/progress/client";
+import { progressCopy } from "../lib/progress/copy";
 
 type Modal = "lesson" | "quiz" | "animation" | "system" | null;
+
+/** Two-letter monogram for the profile pill, from a name or email. */
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const letters = parts.length >= 2 ? parts[0][0] + parts[1][0] : name.slice(0, 2);
+  return letters.toUpperCase();
+}
 
 /**
  * Renders an organ illustration, or its accent glyph for organs that ship as a
@@ -116,7 +127,15 @@ function LanguageSwitcher({ locale, t }: { locale: LocaleConfig; t: UiDictionary
   );
 }
 
-export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dictionary: Dictionary }) {
+export function AnatomyApp({
+  locale,
+  dictionary,
+  user,
+}: {
+  locale: LocaleConfig;
+  dictionary: Dictionary;
+  user: { displayName: string; email: string } | null;
+}) {
   const t = dictionary.ui;
   const organs = useMemo(() => buildOrgans(dictionary.organs), [dictionary.organs]);
   const organById = useMemo(() => indexOrgans(organs), [organs]);
@@ -129,10 +148,32 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
   const [mobileLibrary, setMobileLibrary] = useState(false);
   const [quizActive, setQuizActive] = useState(false);
   const [lessonActive, setLessonActive] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [reonboard, setReonboard] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const prefetched = useRef(new Set<OrganId>());
   const organ = organById[organId];
   const reference = organById[organId === "heart" ? "brain" : "heart"];
+
+  // --- Learner progress ---
+  const copy = progressCopy(locale.code);
+  const progress = useProgress(locale.code, Boolean(user));
+  const { record } = progress;
+  const profileInitials = user ? initialsOf(user.displayName || user.email) : "MA";
+  const focusOptions = useMemo(
+    () => [...new Set(organs.map((item) => item.system))],
+    [organs],
+  );
+  const organNameById = useMemo(
+    () => Object.fromEntries(organs.map((item) => [item.id, item.name])) as Record<string, string>,
+    [organs],
+  );
+
+  // Record an exposure event whenever the learner lands on an organ (including
+  // the initial heart). Best-effort; the recorder no-ops when tracking is off.
+  useEffect(() => {
+    record({ kind: "organ_view", organId });
+  }, [organId, record]);
   const filteredOrgans = useMemo(
     () =>
       organs.filter((item) =>
@@ -190,14 +231,14 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
           <button><BrainCircuit size={17} /> {t.nav.systems}</button>
           <button onClick={openLesson}><BookOpen size={17} /> {t.nav.lessons}</button>
           <button><LibraryBig size={17} /> {t.nav.library}</button>
-          <button><NotebookPen size={17} /> {t.nav.notes}</button>
+          <button onClick={() => setDashboardOpen(true)}><Award size={17} /> {copy.nav}</button>
         </nav>
         <label className="search-box">
           <Search size={17} />
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search.placeholder} />
         </label>
         <LanguageSwitcher locale={locale} t={t} />
-        <button className="profile" aria-label={t.profile.open}><span>MA</span><ChevronDown size={15} /></button>
+        <button className="profile" aria-label={t.profile.open} onClick={() => setDashboardOpen(true)}><span>{profileInitials}</span><ChevronDown size={15} /></button>
         <button className="mobile-library-trigger" onClick={() => setMobileLibrary(true)} aria-label={t.library.open}><LibraryBig size={20} /></button>
       </header>
 
@@ -246,6 +287,7 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
           onQuizExit={() => setQuizActive(false)}
           lesson={lessonActive ? organ.lesson ?? null : null}
           onLessonExit={() => setLessonActive(false)}
+          onEvent={record}
         />
 
         <aside className="info-panel" ref={contentRef}>
@@ -339,6 +381,41 @@ export function AnatomyApp({ locale, dictionary }: { locale: LocaleConfig; dicti
 
       {modal && <LearningModal type={modal} organ={organ} t={t} onClose={() => setModal(null)} />}
       {mobileLibrary && <button className="drawer-backdrop" aria-label={t.library.close} onClick={() => setMobileLibrary(false)} />}
+
+      {progress.state.needsOnboarding && !dashboardOpen && (
+        <OnboardingModal
+          copy={copy}
+          focusOptions={focusOptions}
+          onSubmit={progress.submitOnboarding}
+          onSkip={progress.dismissOnboarding}
+        />
+      )}
+      {dashboardOpen && (
+        <ProgressDashboard
+          copy={copy}
+          state={progress.state}
+          organLabel={(id) => organNameById[id] ?? id}
+          onClose={() => setDashboardOpen(false)}
+          onEditBackground={() => {
+            setDashboardOpen(false);
+            progress.dismissOnboarding();
+            // Re-open onboarding by asking the hook to treat this learner as
+            // needing it again; the form pre-fills nothing but overwrites cleanly.
+            window.setTimeout(() => setReonboard(true), 0);
+          }}
+        />
+      )}
+      {reonboard && (
+        <OnboardingModal
+          copy={copy}
+          focusOptions={focusOptions}
+          onSubmit={(input) => {
+            void progress.submitOnboarding(input);
+            setReonboard(false);
+          }}
+          onSkip={() => setReonboard(false)}
+        />
+      )}
     </main>
   );
 }

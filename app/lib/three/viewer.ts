@@ -566,8 +566,12 @@ export class AnatomyViewer {
    * Guided lessons use the same authored anchors as free exploration, so the
    * instructional camera never drifts away from the anatomy it describes.
    */
-  focusHotspot(id: string | null, crossSection = false) {
-    this.setCrossSection(Boolean(id) && crossSection);
+  focusHotspot(id: string | null) {
+    // The current GLB is a closed exterior mesh, not a sectional anatomy
+    // model. Clipping it removes half the specimen without revealing chambers.
+    this.setCrossSection(false);
+    this.hotspots.focusOnly(id);
+    this.busy(0.5);
     if (!id || !this.organ) {
       this.select(null);
       return;
@@ -583,6 +587,13 @@ export class AnatomyViewer {
       ease: "power3.inOut",
     });
     this.select(id);
+  }
+
+  clearLessonFocus() {
+    this.setCrossSection(false);
+    this.hotspots.showAll();
+    this.select(null);
+    this.busy(0.5);
   }
 
   /** The callout is positioned imperatively so tracking a spinning model never

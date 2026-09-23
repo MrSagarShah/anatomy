@@ -48,7 +48,6 @@ export const organs: OrganContentDictionary = {
           insight: "Direction: body → right atrium.",
           route: "Body → right atrium",
           hotspotId: "right-atrium",
-          crossSection: true,
         },
         {
           id: "right-ventricle",
@@ -59,7 +58,6 @@ export const organs: OrganContentDictionary = {
           insight: "The pulmonary arteries are unusual: they carry oxygen-poor blood.",
           route: "Right atrium → tricuspid valve → right ventricle → pulmonary artery",
           hotspotId: "right-ventricle",
-          crossSection: true,
         },
         {
           id: "left-atrium",
@@ -70,7 +68,6 @@ export const organs: OrganContentDictionary = {
           insight: "The pulmonary veins are unusual: they carry oxygen-rich blood.",
           route: "Lungs → pulmonary veins → left atrium",
           hotspotId: "left-atrium",
-          crossSection: true,
         },
         {
           id: "mitral",
@@ -81,7 +78,6 @@ export const organs: OrganContentDictionary = {
           insight: "Valves respond to pressure differences; they do not actively pull themselves open.",
           route: "Left atrium → mitral valve → left ventricle",
           hotspotId: "mitral",
-          crossSection: true,
         },
         {
           id: "left-ventricle",
@@ -92,7 +88,6 @@ export const organs: OrganContentDictionary = {
           insight: "Structure matches function: a thicker myocardium supports a higher-pressure pump.",
           route: "Left atrium → left ventricle → aortic valve",
           hotspotId: "left-ventricle",
-          crossSection: true,
         },
         {
           id: "aorta",
@@ -119,7 +114,6 @@ export const organs: OrganContentDictionary = {
           explanation:
             "The left ventricle supplies the systemic circuit. Its thick myocardium creates the pressure needed to move blood throughout the body.",
           hotspotId: "left-ventricle",
-          crossSection: true,
         },
         {
           id: "returning-blood",
@@ -134,7 +128,6 @@ export const organs: OrganContentDictionary = {
           explanation:
             "The superior and inferior venae cavae return oxygen-poor blood from the body to the right atrium.",
           hotspotId: "right-atrium",
-          crossSection: true,
         },
         {
           id: "mitral-role",
@@ -149,7 +142,6 @@ export const organs: OrganContentDictionary = {
           explanation:
             "The mitral valve closes during left-ventricular contraction, helping keep blood moving forward toward the aorta.",
           hotspotId: "mitral",
-          crossSection: true,
         },
       ],
       sources: [
@@ -166,7 +158,6 @@ export const organs: OrganContentDictionary = {
         stepProgress: "Step {current} of {total}",
         showing: "Now showing",
         anteriorView: "Anterior view · anatomical right appears on your left",
-        interiorView: "Interior cutaway · anatomical right appears on your left",
         flow: "Blood-flow path",
         checkpoint: "Check your understanding",
         questionProgress: "Question {current} of {total}",
