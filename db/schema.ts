@@ -26,7 +26,12 @@ export const learners = sqliteTable(
   "learners",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
-    email: text("email").notNull(),
+    /**
+     * SHA-256 of the verified auth email — a stable per-user key that is NOT
+     * personally identifying. We deliberately never store the raw address; the
+     * app only ever shows `displayName`. See app/lib/progress/server.ts.
+     */
+    emailHash: text("email_hash").notNull(),
     displayName: text("display_name").notNull().default(""),
     fullName: text("full_name"),
     /** UI locale the learner was last seen in, e.g. "en", "hi". */
@@ -47,7 +52,7 @@ export const learners = sqliteTable(
     createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
-  (table) => [uniqueIndex("learners_email_unique").on(table.email)],
+  (table) => [uniqueIndex("learners_email_hash_unique").on(table.emailHash)],
 );
 
 export const progressEvents = sqliteTable(

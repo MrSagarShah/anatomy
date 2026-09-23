@@ -33,6 +33,18 @@ function isSchemaMissing(error: unknown): boolean {
 const UNAVAILABLE = { available: false } as const;
 const ANON = { available: true, authenticated: false } as const;
 
+/**
+ * SHA-256 of the normalized email — the only form of the address that ever
+ * leaves this function. We never persist or return the raw email, so the DB
+ * holds a stable per-user key with no PII. Web Crypto is available in both the
+ * Workers runtime and Node 20+.
+ */
+async function hashEmail(email: string): Promise<string> {
+  const data = new TextEncoder().encode(email.trim().toLowerCase());
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 type Db = Awaited<ReturnType<typeof import("../../../db")["getDb"]>>;
 type LearnerRow = Awaited<ReturnType<typeof import("../../../db/learners")["upsertLearner"]>>;
 
@@ -54,7 +66,7 @@ async function withLearner<T>(
     const { upsertLearner } = await import("../../../db/learners");
     const db = getDb();
     const learner = await upsertLearner(db, {
-      email: user.email,
+      emailHash: await hashEmail(user.email),
       displayName: user.displayName,
       fullName: user.fullName,
       locale,

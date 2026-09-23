@@ -1,6 +1,6 @@
 CREATE TABLE `learners` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`email` text NOT NULL,
+	`email_hash` text NOT NULL,
 	`display_name` text DEFAULT '' NOT NULL,
 	`full_name` text,
 	`locale` text DEFAULT 'en' NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE `learners` (
 	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `learners_email_unique` ON `learners` (`email`);--> statement-breakpoint
+CREATE UNIQUE INDEX `learners_email_hash_unique` ON `learners` (`email_hash`);--> statement-breakpoint
 CREATE TABLE `lesson_progress` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`learner_id` integer NOT NULL,

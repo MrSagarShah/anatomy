@@ -46,7 +46,6 @@ export type OnboardingInput = {
 };
 
 export type LearnerProfile = {
-  email: string;
   displayName: string;
   fullName: string | null;
   locale: string;

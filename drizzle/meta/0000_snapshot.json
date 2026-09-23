@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "7d1b3c1d-55d3-49f3-941e-58e85945a5c5",
+  "id": "85c21018-a792-476d-b7e1-db4f53a347e6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "learners": {
@@ -14,8 +14,8 @@
           "notNull": true,
           "autoincrement": true
         },
-        "email": {
-          "name": "email",
+        "email_hash": {
+          "name": "email_hash",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -98,10 +98,10 @@
         }
       },
       "indexes": {
-        "learners_email_unique": {
-          "name": "learners_email_unique",
+        "learners_email_hash_unique": {
+          "name": "learners_email_hash_unique",
           "columns": [
-            "email"
+            "email_hash"
           ],
           "isUnique": true
         }

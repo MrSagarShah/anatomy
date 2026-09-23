@@ -30,7 +30,6 @@ function parseFocusSystems(raw: string): string[] {
 
 export function toProfile(row: Learner): LearnerProfile {
   return {
-    email: row.email,
     displayName: row.displayName,
     fullName: row.fullName,
     locale: row.locale,
@@ -46,18 +45,18 @@ export function toProfile(row: Learner): LearnerProfile {
  *  the verified email from the auth headers. */
 export async function upsertLearner(
   db: Db,
-  input: { email: string; displayName: string; fullName: string | null; locale: string },
+  input: { emailHash: string; displayName: string; fullName: string | null; locale: string },
 ): Promise<Learner> {
   const rows = await db
     .insert(learners)
     .values({
-      email: input.email,
+      emailHash: input.emailHash,
       displayName: input.displayName,
       fullName: input.fullName,
       locale: input.locale,
     })
     .onConflictDoUpdate({
-      target: learners.email,
+      target: learners.emailHash,
       set: {
         displayName: input.displayName,
         fullName: input.fullName,
