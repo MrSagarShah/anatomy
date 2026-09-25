@@ -21,7 +21,7 @@ import {
 import type { Hotspot, Organ } from "../i18n/merge";
 import { format, type GuidedLesson, type UiDictionary } from "../i18n/types";
 import type { AnatomyViewer } from "../lib/three/viewer";
-import type { ProgressEventInput } from "../lib/progress/types";
+import type { LessonResume, ProgressEventInput } from "../lib/progress/types";
 
 type Props = {
   organ: Organ;
@@ -34,6 +34,8 @@ type Props = {
   onQuizExit: () => void;
   lesson: GuidedLesson | null;
   onLessonExit: () => void;
+  /** Reopen a guided lesson at the last recorded step or checkpoint. */
+  resume?: LessonResume;
   /** Records a learning event (best-effort, may be a no-op when tracking is off). */
   onEvent?: (event: ProgressEventInput) => void;
 };
@@ -187,22 +189,47 @@ function useAuthoringFlag() {
   );
 }
 
+function lastIndex(count: number): number {
+  return Math.max(0, count - 1);
+}
+
+function resumePhase(
+  resume: LessonResume | undefined,
+): "overview" | "steps" | "questions" {
+  if (!resume || resume.completed) return "overview";
+  if (resume.questionsAnswered > 0) return "questions";
+  if (resume.stepsCompleted > 0) return "steps";
+  return "overview";
+}
+
 function GuidedLessonPanel({
   lesson,
   onFocus,
   onExit,
   onEvent,
   organId,
+  resume,
 }: {
   lesson: GuidedLesson;
   onFocus: (hotspotId: string | null) => void;
   onExit: () => void;
   onEvent: (event: ProgressEventInput) => void;
   organId: string;
+  resume?: LessonResume;
 }) {
-  const [phase, setPhase] = useState<"overview" | "steps" | "questions" | "complete">("overview");
-  const [stepIndex, setStepIndex] = useState(0);
-  const [questionIndex, setQuestionIndex] = useState(0);
+  const [phase, setPhase] = useState<"overview" | "steps" | "questions" | "complete">(
+    () => resumePhase(resume),
+  );
+  const [stepIndex, setStepIndex] = useState(() => {
+    if (!resume || resume.completed || resume.questionsAnswered > 0 || resume.stepsCompleted <= 0) {
+      return 0;
+    }
+    return Math.min(resume.stepsCompleted, lastIndex(lesson.steps.length));
+  });
+  const [questionIndex, setQuestionIndex] = useState(() => {
+    if (!resume || resume.completed || resume.questionsAnswered <= 0) return 0;
+    return Math.min(resume.questionsAnswered, lastIndex(lesson.questions.length));
+  });
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const headingRef = useRef<HTMLHeadingElement>(null);
   const step = lesson.steps[stepIndex];
@@ -337,15 +364,32 @@ function GuidedLessonPanel({
                   className={`${chosen ? "chosen" : ""} ${correct ? "correct" : ""}`}
                   onClick={() => {
                     if (answer) return;
-                    setAnswers((current) => ({ ...current, [question.id]: option.id }));
+                    const correct = option.id === question.answerId;
+                    const nextAnswers = { ...answers, [question.id]: option.id };
+                    setAnswers(nextAnswers);
                     onEvent({
                       kind: "quiz_answer",
                       organId,
                       refId: question.id,
-                      correct: option.id === question.answerId,
+                      correct,
                       total: lesson.questions.length,
                       meta: { lessonId: lesson.id },
                     });
+                    // The summary also fires lesson_complete; this marks the
+                    // checkpoint itself so the activity log and rollup agree.
+                    if (questionIndex >= lesson.questions.length - 1) {
+                      const nextScore = lesson.questions.filter(
+                        (item) => nextAnswers[item.id] === item.answerId,
+                      ).length;
+                      onEvent({
+                        kind: "quiz_complete",
+                        organId,
+                        refId: lesson.id,
+                        value: nextScore,
+                        total: lesson.questions.length,
+                        meta: { lessonId: lesson.id },
+                      });
+                    }
                   }}
                   disabled={Boolean(answer)}
                 >
@@ -393,7 +437,7 @@ function GuidedLessonPanel({
   );
 }
 
-export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, quizActive, onQuizExit, lesson, onLessonExit, onEvent }: Props) {
+export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, quizActive, onQuizExit, lesson, onLessonExit, resume, onEvent }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<AnatomyViewer | null>(null);
   const organRef = useRef(organ);
@@ -542,6 +586,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
           key={lesson.id}
           lesson={lesson}
           organId={organ.id}
+          resume={resume}
           onEvent={onEvent ?? noEvent}
           onFocus={focusLessonHotspot}
           onExit={() => {

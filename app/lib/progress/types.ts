@@ -80,6 +80,12 @@ export type LessonProgressSummary = {
   lastSeenAt: string;
 };
 
+/** Subset the guided lesson needs to reopen at the last step or checkpoint. */
+export type LessonResume = Pick<
+  LessonProgressSummary,
+  "stepsCompleted" | "questionsAnswered" | "completed" | "totalSteps" | "totalQuestions"
+>;
+
 export type RecentActivity = {
   kind: ProgressEventKind;
   organId: string | null;

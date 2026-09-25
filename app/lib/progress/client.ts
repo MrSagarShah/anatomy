@@ -105,6 +105,7 @@ export function useProgress(locale: string, signedIn: boolean) {
       const scoring =
         event.kind === "lesson_complete" ||
         event.kind === "label_quiz_complete" ||
+        event.kind === "quiz_complete" ||
         event.kind === "quiz_answer" ||
         event.kind === "organ_view";
       if (scoring && signedIn) {
@@ -142,8 +143,33 @@ export function useProgress(locale: string, signedIn: boolean) {
   );
 
   const dismissOnboarding = useCallback(() => {
+    // Close immediately so skip feels instant; persist in the background so
+    // the modal does not return on the next visit. Empty body stamps
+    // onboardedAt without clearing answers already on the row.
     setState((s) => ({ ...s, needsOnboarding: false }));
-  }, []);
+    try {
+      void fetch(`/api/learner?locale=${locale}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({}),
+        keepalive: true,
+      })
+        .then(async (res) => {
+          const data = (await res.json()) as ProgressResponse;
+          if (data.available && data.authenticated) {
+            setState({
+              available: true,
+              authenticated: true,
+              needsOnboarding: false,
+              snapshot: data.snapshot,
+            });
+          }
+        })
+        .catch(() => {});
+    } catch {
+      // Persist is best-effort; the local dismiss already hid the modal.
+    }
+  }, [locale]);
 
   return { state, record, refresh, submitOnboarding, dismissOnboarding };
 }

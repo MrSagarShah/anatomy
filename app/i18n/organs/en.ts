@@ -197,6 +197,150 @@ export const organs: OrganContentDictionary = {
     tissue: "Cerebral cortex",
     comparison: "Brain vs. eye",
     conditions: ["Migraine", "Stroke", "Neurodegenerative disease", "Epilepsy", "Traumatic brain injury", "Meningitis", "Multiple sclerosis", "Brain aneurysm"],
+    lesson: {
+      id: "brain-lobes",
+      eyebrow: "Guided discovery · Brain",
+      title: "Four functional neighborhoods",
+      summary:
+        "Walk the cerebrum’s paired hemispheres and the cerebellum. Each highlight on the specimen marks a neighborhood with a distinct job: planning movement, sensing the body in space, hearing and memory, and coordinating action.",
+      duration: "5 min",
+      objectives: [
+        "Name the four mapped neighborhoods and the job each is best known for",
+        "Distinguish the cerebral lobes from the cerebellum",
+        "Explain why the cerebrum is described as paired hemispheres",
+      ],
+      steps: [
+        {
+          id: "overview",
+          eyebrow: "Orient yourself",
+          title: "The cerebrum is two hemispheres, not one mass",
+          body:
+            "A deep longitudinal fissure divides the cerebrum into right and left hemispheres. Each hemisphere is covered by cortex that anatomists group into lobes. This lesson maps three of those lobes plus the cerebellum. Vision begins mainly in the occipital lobe, which is not marked on this specimen.",
+          insight: "Functions overlap across regions; the lobe names are useful neighborhoods, not sealed compartments.",
+          route: "Hemispheres → cortical lobes → cerebellum",
+        },
+        {
+          id: "frontal",
+          eyebrow: "Planning and movement",
+          title: "Frontal lobe",
+          body:
+            "The frontal lobe lies anterior to the central sulcus. Its precentral gyrus is the primary motor cortex: upper motor neurons here issue commands that reach skeletal muscle via the spinal cord. Just ahead, premotor cortex helps plan a movement before it is executed.",
+          insight: "More anterior prefrontal cortex supports decision-making, short-term memory, and aspects of personality.",
+          route: "Cerebrum → frontal lobe → motor commands",
+          hotspotId: "frontal",
+        },
+        {
+          id: "parietal",
+          eyebrow: "Sensation and space",
+          title: "Parietal lobe",
+          body:
+            "Behind the central sulcus, the parietal lobe processes somatosensation — touch, pressure, pain, vibration, and the sense of where the body is in space. The postcentral gyrus is the primary somatosensory cortex.",
+          insight: "This neighborhood turns raw body sensation into a usable map of position and contact.",
+          route: "Body senses → parietal lobe",
+          hotspotId: "parietal",
+        },
+        {
+          id: "temporal",
+          eyebrow: "Hearing and memory",
+          title: "Temporal lobe",
+          body:
+            "The temporal lobe sits beneath the lateral sulcus. Superior temporal cortex includes the primary auditory areas. Deeper temporal structures are essential for forming long-term memories, though stored traces are often distributed to the regions that first perceived the event.",
+          insight: "Hearing is localized here; memory is assembled here and then widely networked.",
+          route: "Sound and experience → temporal lobe",
+          hotspotId: "temporal",
+        },
+        {
+          id: "cerebellum",
+          eyebrow: "Coordination, not a cerebral lobe",
+          title: "Cerebellum",
+          body:
+            "The cerebellum — the “little brain” — sits on the posterior brain stem and accounts for about one-tenth of brain mass. It receives a copy of descending motor commands and compares them with sensory feedback from muscles, joints, and balance organs.",
+          insight: "When the comparison does not match, the cerebellum issues corrections that keep movement smooth.",
+          route: "Frontal commands + sensory feedback → cerebellum",
+          hotspotId: "cerebellum",
+        },
+        {
+          id: "synthesis",
+          eyebrow: "Put the map together",
+          title: "Neighborhoods, not isolated boxes",
+          body:
+            "Frontal cortex plans and launches movement; parietal cortex reports the body in space; temporal cortex hears and helps encode memory; the cerebellum refines the result. The occipital lobe, unmarked here, begins visual processing. The two cerebral hemispheres communicate across the corpus callosum.",
+          insight: "A useful rule: cerebrum interprets and decides; cerebellum compares and coordinates.",
+          route: "Frontal · parietal · temporal · cerebellum",
+        },
+      ],
+      questions: [
+        {
+          id: "motor-planning",
+          prompt: "Which mapped region is primarily associated with planning and initiating voluntary movement?",
+          options: [
+            { id: "parietal", label: "Parietal lobe" },
+            { id: "frontal", label: "Frontal lobe" },
+            { id: "temporal", label: "Temporal lobe" },
+            { id: "cerebellum", label: "Cerebellum" },
+          ],
+          answerId: "frontal",
+          explanation:
+            "The frontal lobe contains the primary motor cortex and premotor areas that plan and issue commands for skeletal-muscle movement.",
+          hotspotId: "frontal",
+        },
+        {
+          id: "somatosensation",
+          prompt: "Where is somatosensation — touch, pressure, and body position — first processed at the cortical surface?",
+          options: [
+            { id: "frontal", label: "Frontal lobe" },
+            { id: "temporal", label: "Temporal lobe" },
+            { id: "parietal", label: "Parietal lobe" },
+            { id: "cerebellum", label: "Cerebellum" },
+          ],
+          answerId: "parietal",
+          explanation:
+            "The parietal lobe houses the primary somatosensory cortex, just behind the central sulcus, and contributes to spatial awareness of the body.",
+          hotspotId: "parietal",
+        },
+        {
+          id: "compare-and-correct",
+          prompt: "Which structure compares motor commands with sensory feedback to keep movement coordinated?",
+          options: [
+            { id: "temporal", label: "Temporal lobe" },
+            { id: "frontal", label: "Frontal lobe" },
+            { id: "parietal", label: "Parietal lobe" },
+            { id: "cerebellum", label: "Cerebellum" },
+          ],
+          answerId: "cerebellum",
+          explanation:
+            "The cerebellum is not a cerebral lobe. It compares descending commands with proprioceptive and balance feedback, then issues corrections.",
+          hotspotId: "cerebellum",
+        },
+      ],
+      sources: [
+        { label: "OpenStax Anatomy & Physiology 2e · The central nervous system", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/13-2-the-central-nervous-system" },
+        { label: "NINDS · Brain Basics: Know Your Brain", url: "https://www.ninds.nih.gov/health-information/public-education/brain-basics/brain-basics-know-your-brain" },
+      ],
+      evidenceReviewedAt: "2026-09-25",
+      reviewNote: "Educational draft · source-checked; clinical review still required before use as medical guidance.",
+      labels: {
+        objectives: "In this lesson",
+        begin: "Begin the journey",
+        previous: "Previous",
+        next: "Next structure",
+        stepProgress: "Step {current} of {total}",
+        showing: "Now showing",
+        anteriorView: "Anterior view · anatomical right appears on your left",
+        flow: "Functional map",
+        checkpoint: "Check your understanding",
+        questionProgress: "Question {current} of {total}",
+        correct: "Exactly right",
+        incorrect: "Take another look",
+        continue: "Continue",
+        complete: "Journey complete",
+        score: "You answered {score} of {total} correctly.",
+        retry: "Review again",
+        exit: "Return to free explore",
+        sources: "Sources",
+        reviewed: "Evidence reviewed {date}",
+      },
+    },
     hotspots: {
       "frontal": { label: "Frontal Lobe", detail: "Planning & movement" },
       "parietal": { label: "Parietal Lobe", detail: "Sensory integration" },
@@ -220,6 +364,161 @@ export const organs: OrganContentDictionary = {
     tissue: "Alveolar tissue",
     comparison: "Lungs vs. heart",
     conditions: ["Asthma", "COPD", "Pneumonia", "Pulmonary embolism", "Pulmonary fibrosis", "Bronchitis", "Cystic fibrosis", "Lung cancer"],
+    lesson: {
+      id: "lungs-airway",
+      eyebrow: "Guided discovery · Lungs",
+      title: "The path of inspired air",
+      summary:
+        "Follow air from the trachea into the main bronchi, then compare the three-lobed right lung with the two-lobed left. The base sits on the diaphragm — the reason the chest can change volume so gas exchange can occur deeper in the tissue.",
+      duration: "6 min",
+      objectives: [
+        "Trace inspired air from the trachea into the main bronchi",
+        "Contrast the right and left lungs by lobe count and cardiac notch",
+        "Relate the lung base to the diaphragm and the purpose of gas exchange",
+      ],
+      steps: [
+        {
+          id: "overview",
+          eyebrow: "Orient yourself",
+          title: "Conducting airways first, exchange later",
+          body:
+            "The respiratory system has a conducting zone that moves, warms, and filters air, and a respiratory zone where oxygen and carbon dioxide cross into blood. This walk-through follows the visible path: trachea, main bronchi, the two lungs, and the base on the diaphragm.",
+          insight: "Alveoli are the destination of this path, but they are microscopic and are not marked as a hotspot on this specimen.",
+          route: "Airway → lungs → exchange surface",
+        },
+        {
+          id: "trachea",
+          eyebrow: "The shared windpipe",
+          title: "Trachea",
+          body:
+            "After the larynx, air enters the trachea — a midline tube held open by C-shaped cartilaginous rings. It is a conducting structure: air passes through it but does not exchange gases here.",
+          insight: "Direction on inspiration: larynx → trachea → paired main bronchi.",
+          route: "Larynx → trachea",
+          hotspotId: "trachea",
+        },
+        {
+          id: "bronchus",
+          eyebrow: "The first split",
+          title: "Main bronchi",
+          body:
+            "The trachea divides into right and left main (principal) bronchi. Each primary bronchus enters its lung at the hilum, together with pulmonary vessels and nerves, then continues branching as the bronchial tree.",
+          insight: "Like the trachea, the main bronchi are passageways. Their job is to deliver air, not to exchange it.",
+          route: "Trachea → main bronchi → hilum",
+          hotspotId: "bronchus",
+        },
+        {
+          id: "right-lung",
+          eyebrow: "The larger field",
+          title: "Right lung",
+          body:
+            "The right lung is shorter and wider than the left and is divided into three lobes — superior, middle, and inferior. Each lobe receives its own secondary (lobar) bronchus from the right main bronchus.",
+          insight: "Three lobes give the right lung a larger volume than the left.",
+          route: "Right main bronchus → three lobes",
+          hotspotId: "right-lung",
+        },
+        {
+          id: "left-lung",
+          eyebrow: "Room for the heart",
+          title: "Left lung",
+          body:
+            "The left lung has two lobes — superior and inferior — and occupies a smaller volume. A cardiac notch indents its medial surface so the heart can sit in the mediastinum without crowding the airway field.",
+          insight: "Two lobes plus the cardiac notch are the structural signature of the left lung.",
+          route: "Left main bronchus → two lobes (cardiac notch)",
+          hotspotId: "left-lung",
+        },
+        {
+          id: "base",
+          eyebrow: "Against the diaphragm",
+          title: "Base of the lung",
+          body:
+            "Each lung is roughly pyramidal: the apex points toward the neck, and the broad base rests on the diaphragm. That dome-shaped muscle forms the floor of the thoracic cavity. When it contracts it flattens, expanding chest volume so air is drawn down the path you just traced.",
+          insight: "The base is a surface, not a chamber — it is where lung meets the primary muscle of quiet breathing.",
+          route: "Lobes → base → diaphragm",
+          hotspotId: "base",
+        },
+        {
+          id: "synthesis",
+          eyebrow: "Why the path exists",
+          title: "Delivery for diffusion",
+          body:
+            "Inspired air travels trachea → main bronchi → lobar branches inside a three-lobed right lung and a two-lobed left lung. Deeper still, bronchioles end in alveoli. Across that thin respiratory membrane, oxygen enters blood and carbon dioxide leaves it by simple diffusion.",
+          insight: "Complete path: airway → branching bronchi → lungs → alveolar surface → blood.",
+          route: "Trachea → bronchi → lungs → alveoli",
+        },
+      ],
+      questions: [
+        {
+          id: "first-split",
+          prompt: "Which structure divides to send air into the right and left lungs?",
+          options: [
+            { id: "base", label: "Base of the lung" },
+            { id: "trachea", label: "Trachea" },
+            { id: "left-lung", label: "Left lung" },
+            { id: "right-lung", label: "Right lung" },
+          ],
+          answerId: "trachea",
+          explanation:
+            "The trachea is the shared windpipe. It splits into the right and left main bronchi, which enter the lungs at the hilum.",
+          hotspotId: "trachea",
+        },
+        {
+          id: "lobe-count",
+          prompt: "Why does the left lung have two lobes rather than three?",
+          options: [
+            { id: "shorter-diaphragm", label: "The left hemidiaphragm sits higher" },
+            { id: "fewer-bronchi", label: "The left side has no main bronchus" },
+            { id: "cardiac-notch", label: "A cardiac notch leaves space for the heart" },
+            { id: "apex-missing", label: "The left lung has no apex" },
+          ],
+          answerId: "cardiac-notch",
+          explanation:
+            "The left lung occupies less volume than the right. Its cardiac notch is an indentation that accommodates the heart; it has two lobes rather than three.",
+          hotspotId: "left-lung",
+        },
+        {
+          id: "base-diaphragm",
+          prompt: "The base of each lung rests on which structure?",
+          options: [
+            { id: "trachea", label: "Trachea" },
+            { id: "bronchus", label: "Main bronchi" },
+            { id: "sternum", label: "Sternum" },
+            { id: "diaphragm", label: "Diaphragm" },
+          ],
+          answerId: "diaphragm",
+          explanation:
+            "The apex is superior; the base is the broad inferior surface that borders the diaphragm, the dome-shaped muscle that changes thoracic volume.",
+          hotspotId: "base",
+        },
+      ],
+      sources: [
+        { label: "OpenStax Anatomy & Physiology 2e · Respiratory organs", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/22-1-organs-and-structures-of-the-respiratory-system" },
+        { label: "OpenStax Anatomy & Physiology 2e · The lungs", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/22-2-the-lungs" },
+        { label: "NHLBI · How the lungs work · The respiratory system", url: "https://www.nhlbi.nih.gov/health/lungs/respiratory-system" },
+      ],
+      evidenceReviewedAt: "2026-09-25",
+      reviewNote: "Educational draft · source-checked; clinical review still required before use as medical guidance.",
+      labels: {
+        objectives: "In this lesson",
+        begin: "Begin the journey",
+        previous: "Previous",
+        next: "Next structure",
+        stepProgress: "Step {current} of {total}",
+        showing: "Now showing",
+        anteriorView: "Anterior view · anatomical right appears on your left",
+        flow: "Airway path",
+        checkpoint: "Check your understanding",
+        questionProgress: "Question {current} of {total}",
+        correct: "Exactly right",
+        incorrect: "Take another look",
+        continue: "Continue",
+        complete: "Journey complete",
+        score: "You answered {score} of {total} correctly.",
+        retry: "Review again",
+        exit: "Return to free explore",
+        sources: "Sources",
+        reviewed: "Evidence reviewed {date}",
+      },
+    },
     hotspots: {
       "trachea": { label: "Trachea", detail: "Carries air to the lungs" },
       "right-lung": { label: "Right Lung", detail: "Three lobes" },

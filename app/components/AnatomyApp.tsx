@@ -33,8 +33,64 @@ import { buildOrgans, indexOrgans, type Organ } from "../i18n/merge";
 import { format, type Dictionary, type UiDictionary } from "../i18n/types";
 import { useProgress } from "../lib/progress/client";
 import { progressCopy } from "../lib/progress/copy";
+import { recommendNext } from "../lib/progress/recommend";
 
-type Modal = "lesson" | "quiz" | "animation" | "system" | null;
+type NavMode = "explore" | "systems" | "library" | "lessons" | "notes" | "progress";
+type Modal = "animation" | "system" | null;
+
+const SAVED_KEY = "anatomy:saved-organs";
+const NOTES_KEY = "anatomy:notes";
+const MOBILE_LIBRARY_MQ = "(max-width: 760px)";
+
+function isMobileLibrary(): boolean {
+  return typeof window !== "undefined" && window.matchMedia(MOBILE_LIBRARY_MQ).matches;
+}
+
+function readSavedOrgans(): OrganId[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(SAVED_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((id): id is OrganId => typeof id === "string");
+  } catch {
+    return [];
+  }
+}
+
+function writeSavedOrgans(ids: OrganId[]) {
+  try {
+    window.localStorage.setItem(SAVED_KEY, JSON.stringify(ids));
+  } catch {
+    // Quota / private mode — keep the in-memory list for this session.
+  }
+}
+
+function readNotes(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(NOTES_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    const out: Record<string, string> = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      if (typeof value === "string") out[key] = value;
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+function writeNotes(notes: Record<string, string>) {
+  try {
+    window.localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+  } catch {
+    // Same as saved organs — memory still holds the draft.
+  }
+}
 
 /** Two-letter monogram for the profile pill, from a name or email. */
 function initialsOf(name: string): string {
@@ -150,8 +206,17 @@ export function AnatomyApp({
   const [lessonActive, setLessonActive] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
   const [reonboard, setReonboard] = useState(false);
+  const [nav, setNav] = useState<NavMode>("explore");
+  const [activeSystem, setActiveSystem] = useState<string | null>(null);
+  const [savedOnly, setSavedOnly] = useState(false);
+  const [savedIds, setSavedIds] = useState<OrganId[]>(readSavedOrgans);
+  const [notes, setNotes] = useState<Record<string, string>>(readNotes);
+  const [noteDraft, setNoteDraft] = useState("");
   const contentRef = useRef<HTMLDivElement>(null);
+  const libraryRef = useRef<HTMLElement>(null);
   const prefetched = useRef(new Set<OrganId>());
+  const noteTimer = useRef<number | null>(null);
+  const pendingNote = useRef<{ id: OrganId; value: string } | null>(null);
   const organ = organById[organId];
   const reference = organById[organId === "heart" ? "brain" : "heart"];
 
@@ -168,19 +233,59 @@ export function AnatomyApp({
     () => Object.fromEntries(organs.map((item) => [item.id, item.name])) as Record<string, string>,
     [organs],
   );
+  const focusSystems = useMemo(
+    () => progress.state.snapshot?.profile.focusSystems ?? [],
+    [progress.state.snapshot?.profile.focusSystems],
+  );
+  const savedSet = useMemo(() => new Set(savedIds), [savedIds]);
 
   // Record an exposure event whenever the learner lands on an organ (including
   // the initial heart). Best-effort; the recorder no-ops when tracking is off.
   useEffect(() => {
     record({ kind: "organ_view", organId });
   }, [organId, record]);
-  const filteredOrgans = useMemo(
-    () =>
-      organs.filter((item) =>
-        `${item.name} ${item.system}`.toLocaleLowerCase(locale.code).includes(query.toLocaleLowerCase(locale.code)),
-      ),
-    [organs, query, locale.code],
-  );
+
+  const persistNote = (id: OrganId, value: string) => {
+    setNotes((current) => {
+      const next = { ...current };
+      if (value.trim()) next[id] = value;
+      else delete next[id];
+      writeNotes(next);
+      return next;
+    });
+  };
+
+  const flushNote = () => {
+    if (noteTimer.current !== null) {
+      window.clearTimeout(noteTimer.current);
+      noteTimer.current = null;
+    }
+    const pending = pendingNote.current;
+    if (!pending) return;
+    pendingNote.current = null;
+    persistNote(pending.id, pending.value);
+  };
+
+  const flushNoteRef = useRef(flushNote);
+  flushNoteRef.current = flushNote;
+  useEffect(() => () => flushNoteRef.current(), []);
+
+  const filteredOrgans = useMemo(() => {
+    const needle = query.toLocaleLowerCase(locale.code);
+    let list = organs.filter((item) => {
+      if (needle && !`${item.name} ${item.system}`.toLocaleLowerCase(locale.code).includes(needle)) {
+        return false;
+      }
+      if (nav === "systems" && activeSystem && item.system !== activeSystem) return false;
+      if (savedOnly && !savedSet.has(item.id)) return false;
+      return true;
+    });
+    if (nav === "explore" && !needle && focusSystems.length > 0) {
+      const rank = (system: string) => (focusSystems.includes(system) ? 0 : 1);
+      list = [...list].sort((a, b) => rank(a.system) - rank(b.system));
+    }
+    return list;
+  }, [organs, query, locale.code, nav, activeSystem, savedOnly, savedSet, focusSystems]);
 
   useEffect(() => {
     if (!contentRef.current) return;
@@ -190,25 +295,137 @@ export function AnatomyApp({
     );
   }, [organId]);
 
-  const selectOrgan = (id: OrganId) => {
+  const selectOrgan = (id: OrganId, next?: { lesson?: boolean; quiz?: boolean }) => {
     if (organById[id].illustrated) {
       ["organ", "microscopic", "compare", "location"].forEach((asset) => {
         const image = new Image();
         image.src = `/anatomy/${id}/${asset}.webp`;
       });
     }
+    if (nav === "notes") flushNote();
     setOrganId(id);
     setMobileLibrary(false);
     setCompare(false);
-    setQuizActive(false);
-    setLessonActive(false);
+    setQuizActive(Boolean(next?.quiz));
+    setLessonActive(Boolean(next?.lesson));
+    if (nav === "notes") setNoteDraft(readNotes()[id] ?? notes[id] ?? "");
   };
 
+  /** View lesson / study cards: guided lesson when this organ has one, else the labelling quiz. */
   const openLesson = () => {
     setQuizActive(false);
     setModal(null);
-    if (organ.lesson) setLessonActive(true);
-    else setModal("lesson");
+    if (organ.lesson) {
+      setNav("lessons");
+      setLessonActive(true);
+    } else {
+      setLessonActive(false);
+      setQuizActive(true);
+    }
+  };
+
+  const focusLibrary = () => {
+    if (isMobileLibrary()) {
+      setMobileLibrary(true);
+      return;
+    }
+    libraryRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    libraryRef.current?.focus();
+  };
+
+  const goExplore = () => {
+    setNav("explore");
+    setActiveSystem(null);
+    setSavedOnly(false);
+    setDashboardOpen(false);
+    setLessonActive(false);
+    flushNote();
+  };
+
+  const goSystems = () => {
+    setNav("systems");
+    setActiveSystem(organ.system);
+    setSavedOnly(false);
+    setDashboardOpen(false);
+    setLessonActive(false);
+    flushNote();
+    if (isMobileLibrary()) setMobileLibrary(true);
+  };
+
+  const goLibrary = () => {
+    setNav("library");
+    setActiveSystem(null);
+    setSavedOnly(false);
+    setDashboardOpen(false);
+    setLessonActive(false);
+    flushNote();
+    focusLibrary();
+  };
+
+  const goLessons = () => {
+    setDashboardOpen(false);
+    setModal(null);
+    flushNote();
+    if (organ.lesson) {
+      setNav("lessons");
+      setQuizActive(false);
+      setLessonActive(true);
+      return;
+    }
+    const first = organs.find((item) => item.lesson);
+    if (first) {
+      setNav("lessons");
+      selectOrgan(first.id, { lesson: true });
+      return;
+    }
+    setNav("lessons");
+    setLessonActive(false);
+    setQuizActive(true);
+  };
+
+  const goNotes = () => {
+    setDashboardOpen(false);
+    setLessonActive(false);
+    setNoteDraft(readNotes()[organId] ?? notes[organId] ?? "");
+    setNav("notes");
+  };
+
+  const goProgress = () => {
+    flushNote();
+    setLessonActive(false);
+    setNav("progress");
+    setDashboardOpen(true);
+  };
+
+  const closeDashboard = () => {
+    setDashboardOpen(false);
+    setNav((current) => (current === "progress" ? "explore" : current));
+  };
+
+  const closeNotes = () => {
+    flushNote();
+    setNav("explore");
+  };
+
+  const toggleSaved = (id: OrganId) => {
+    setSavedIds((current) => {
+      const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id];
+      writeSavedOrgans(next);
+      return next;
+    });
+  };
+
+  const updateNote = (value: string) => {
+    setNoteDraft(value);
+    pendingNote.current = { id: organId, value };
+    if (noteTimer.current !== null) window.clearTimeout(noteTimer.current);
+    noteTimer.current = window.setTimeout(() => {
+      noteTimer.current = null;
+      const pending = pendingNote.current;
+      if (!pending) return;
+      pendingNote.current = null;
+      persistNote(pending.id, pending.value);
+    }, 300);
   };
 
   // Warms the model in the HTTP cache while the pointer is still travelling,
@@ -222,53 +439,142 @@ export function AnatomyApp({
   return (
     <main className={`app-shell ${lessonActive ? "lesson-mode" : ""}`}>
       <header className="topbar">
-        <button className="brand" type="button" onClick={() => selectOrgan("heart")} aria-label={t.brand.home}>
+        <button
+          className="brand"
+          type="button"
+          onClick={() => {
+            goExplore();
+            selectOrgan("heart");
+          }}
+          aria-label={t.brand.home}
+        >
           <strong>Anatomy Atelier<sup>✦</sup></strong>
           <em>{t.brand.tagline}</em>
         </button>
         <nav className="main-nav" aria-label="Primary navigation">
-          <button className="active"><Compass size={17} /> {t.nav.explore}</button>
-          <button><BrainCircuit size={17} /> {t.nav.systems}</button>
-          <button onClick={openLesson}><BookOpen size={17} /> {t.nav.lessons}</button>
-          <button><LibraryBig size={17} /> {t.nav.library}</button>
-          <button onClick={() => setDashboardOpen(true)}><Award size={17} /> {copy.nav}</button>
+          <button type="button" className={nav === "explore" ? "active" : ""} onClick={goExplore}>
+            <Compass size={17} /> <span>{t.nav.explore}</span>
+          </button>
+          <button type="button" className={nav === "systems" ? "active" : ""} onClick={goSystems}>
+            <BrainCircuit size={17} /> <span>{t.nav.systems}</span>
+          </button>
+          <button type="button" className={nav === "lessons" ? "active" : ""} onClick={goLessons}>
+            <BookOpen size={17} /> <span>{t.nav.lessons}</span>
+          </button>
+          <button type="button" className={nav === "library" ? "active" : ""} onClick={goLibrary}>
+            <LibraryBig size={17} /> <span>{t.nav.library}</span>
+          </button>
+          <button type="button" className={nav === "notes" ? "active" : ""} onClick={goNotes}>
+            <FileText size={17} /> <span>{t.nav.notes}</span>
+          </button>
+          <button type="button" className={nav === "progress" || dashboardOpen ? "active" : ""} onClick={goProgress}>
+            <Award size={17} /> <span>{copy.nav}</span>
+          </button>
         </nav>
         <label className="search-box">
           <Search size={17} />
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search.placeholder} />
         </label>
         <LanguageSwitcher locale={locale} t={t} />
-        <button className="profile" aria-label={t.profile.open} onClick={() => setDashboardOpen(true)}><span>{profileInitials}</span><ChevronDown size={15} /></button>
-        <button className="mobile-library-trigger" onClick={() => setMobileLibrary(true)} aria-label={t.library.open}><LibraryBig size={20} /></button>
+        <button className="profile" aria-label={t.profile.open} onClick={goProgress}><span>{profileInitials}</span><ChevronDown size={15} /></button>
+        <button className="mobile-library-trigger" onClick={() => { setNav("library"); setSavedOnly(false); setMobileLibrary(true); }} aria-label={t.library.open}><LibraryBig size={20} /></button>
       </header>
 
       <div className="workspace">
-        <aside className={`organ-library ${mobileLibrary ? "open" : ""}`}>
+        <aside ref={libraryRef} className={`organ-library ${mobileLibrary ? "open" : ""}`} tabIndex={-1}>
           <div className="panel-heading">
-            <span>{t.library.title}</span>
+            <span>{savedOnly ? t.library.saved : t.library.title}</span>
             <button aria-label={t.library.close} className="mobile-close" onClick={() => setMobileLibrary(false)}><X size={17} /></button>
-            <button aria-label={t.library.saved}><Bookmark size={17} /></button>
+            <button
+              type="button"
+              aria-label={t.library.saved}
+              aria-pressed={savedOnly}
+              className={savedOnly ? "on" : ""}
+              onClick={() => setSavedOnly((on) => !on)}
+            >
+              <Bookmark size={17} fill={savedOnly ? "currentColor" : "none"} />
+            </button>
           </div>
+          {nav === "systems" && (
+            <div className="library-systems" role="tablist" aria-label={t.nav.systems}>
+              {focusOptions.map((system) => (
+                <button
+                  key={system}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeSystem === system}
+                  className={`library-chip ${activeSystem === system ? "on" : ""}`}
+                  onClick={() => setActiveSystem(system)}
+                >
+                  {system}
+                </button>
+              ))}
+            </div>
+          )}
+          {nav === "explore" && !query && focusSystems.length > 0 && (
+            <p className="library-hint">{copy.onboarding.focusLabel}</p>
+          )}
           <div className="organ-list">
-            {filteredOrgans.map((item) => (
-              <button
-                type="button"
-                key={item.id}
-                className={`organ-item ${organId === item.id ? "active" : ""}`}
-                onClick={() => selectOrgan(item.id)}
-                onPointerEnter={() => prefetchOrgan(item.id)}
-                onFocus={() => prefetchOrgan(item.id)}
-                style={{ "--item-accent": item.accent } as React.CSSProperties}
-              >
-                <span className="organ-glyph">
-                  <OrganArt organ={item} asset="thumb" alt="" size={47} />
-                </span>
-                <span><b>{item.name}</b><small>{item.system}</small></span>
-                {organId === item.id && <Heart className="favorite" size={14} fill="currentColor" />}
-              </button>
-            ))}
+            {savedOnly && filteredOrgans.length === 0 && (
+              <p className="library-empty">{t.library.saved}</p>
+            )}
+            {filteredOrgans.map((item) => {
+              const isSaved = savedSet.has(item.id);
+              return (
+                <button
+                  type="button"
+                  key={item.id}
+                  className={`organ-item ${organId === item.id ? "active" : ""}`}
+                  onClick={() => selectOrgan(item.id)}
+                  onPointerEnter={() => prefetchOrgan(item.id)}
+                  onFocus={() => prefetchOrgan(item.id)}
+                  style={{ "--item-accent": item.accent } as React.CSSProperties}
+                >
+                  <span className="organ-glyph">
+                    <OrganArt organ={item} asset="thumb" alt="" size={47} />
+                  </span>
+                  <span><b>{item.name}</b><small>{item.system}</small></span>
+                  <span className="organ-item-meta">
+                    <span
+                      className={`organ-save ${isSaved ? "on" : ""}`}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={t.library.saved}
+                      aria-pressed={isSaved}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        event.preventDefault();
+                        toggleSaved(item.id);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.stopPropagation();
+                          event.preventDefault();
+                          toggleSaved(item.id);
+                        }
+                      }}
+                    >
+                      <Bookmark size={14} fill={isSaved ? "currentColor" : "none"} />
+                    </span>
+                    {organId === item.id && <Heart className="favorite" size={14} fill="currentColor" />}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-          <button className="view-all" onClick={() => setQuery("")}>{t.library.viewAll} <ArrowRight size={14} /></button>
+          <button
+            className="view-all"
+            onClick={() => {
+              setQuery("");
+              setSavedOnly(false);
+              if (nav !== "systems") {
+                setNav("explore");
+                setActiveSystem(null);
+              }
+            }}
+          >
+            {t.library.viewAll} <ArrowRight size={14} />
+          </button>
           <blockquote>
             <Sparkles size={18} />
             <p>{t.library.quoteLine1}<br />{t.library.quoteLine2}</p>
@@ -286,6 +592,7 @@ export function AnatomyApp({
           quizActive={quizActive}
           onQuizExit={() => setQuizActive(false)}
           lesson={lessonActive ? organ.lesson ?? null : null}
+          resume={progress.state.snapshot?.lessons.find((item) => item.organId === organ.id)}
           onLessonExit={() => setLessonActive(false)}
           onEvent={record}
         />
@@ -379,10 +686,27 @@ export function AnatomyApp({
         </article>
       </section>
 
-      {modal && <LearningModal type={modal} organ={organ} t={t} onClose={() => setModal(null)} />}
+      {modal && (
+        <LearningModal
+          type={modal}
+          organ={organ}
+          t={t}
+          onClose={() => setModal(null)}
+          onStudy={organ.lesson ? () => { setModal(null); setNav("lessons"); setLessonActive(true); } : undefined}
+        />
+      )}
+      {nav === "notes" && (
+        <NotesPanel
+          organ={organ}
+          t={t}
+          value={noteDraft}
+          onChange={updateNote}
+          onClose={closeNotes}
+        />
+      )}
       {mobileLibrary && <button className="drawer-backdrop" aria-label={t.library.close} onClick={() => setMobileLibrary(false)} />}
 
-      {progress.state.needsOnboarding && !dashboardOpen && (
+      {progress.state.needsOnboarding && !dashboardOpen && nav !== "notes" && (
         <OnboardingModal
           copy={copy}
           focusOptions={focusOptions}
@@ -395,13 +719,56 @@ export function AnatomyApp({
           copy={copy}
           state={progress.state}
           organLabel={(id) => organNameById[id] ?? id}
-          onClose={() => setDashboardOpen(false)}
+          catalog={organs.map((item) => ({ id: item.id, system: item.system }))}
+          onClose={closeDashboard}
           onEditBackground={() => {
             setDashboardOpen(false);
-            progress.dismissOnboarding();
-            // Re-open onboarding by asking the hook to treat this learner as
-            // needing it again; the form pre-fills nothing but overwrites cleanly.
-            window.setTimeout(() => setReonboard(true), 0);
+            setReonboard(true);
+          }}
+          onSelectOrgan={(id) => {
+            const target = organById[id as OrganId];
+            if (!target) return;
+            setDashboardOpen(false);
+            setNav("explore");
+            selectOrgan(target.id);
+          }}
+          onContinueLesson={(id) => {
+            const target = organById[id as OrganId];
+            if (!target) return;
+            setDashboardOpen(false);
+            if (target.lesson) {
+              setNav("lessons");
+              selectOrgan(target.id, { lesson: true });
+            } else {
+              setNav("explore");
+              selectOrgan(target.id);
+            }
+          }}
+          onKeepGoing={() => {
+            const snapshot = progress.state.snapshot;
+            const pick = recommendNext({
+              organs: organs.map((item) => ({ id: item.id, system: item.system })),
+              mastery:
+                snapshot?.organs.map((row) => ({
+                  organId: row.organId,
+                  mastery: row.mastery,
+                  lessonCompleted: row.lessonCompleted,
+                })) ?? [],
+              focusSystems,
+              priorKnowledge: snapshot?.profile.priorKnowledge,
+            });
+            const next =
+              (pick && organById[pick.organId as OrganId]) ??
+              organs.find((item) => item.lesson) ??
+              organs[0];
+            setDashboardOpen(false);
+            if (next.lesson) {
+              setNav("lessons");
+              selectOrgan(next.id, { lesson: true });
+            } else {
+              setNav("explore");
+              selectOrgan(next.id);
+            }
           }}
         />
       )}
@@ -409,6 +776,7 @@ export function AnatomyApp({
         <OnboardingModal
           copy={copy}
           focusOptions={focusOptions}
+          initial={progress.state.snapshot?.profile}
           onSubmit={(input) => {
             void progress.submitOnboarding(input);
             setReonboard(false);
@@ -421,10 +789,8 @@ export function AnatomyApp({
 }
 
 const MODAL_ICON: Record<Exclude<Modal, null>, string> = {
-  quiz: "?",
   animation: "▶",
   system: "⌖",
-  lesson: "✦",
 };
 
 function LearningModal({
@@ -432,20 +798,20 @@ function LearningModal({
   organ,
   t,
   onClose,
+  onStudy,
 }: {
   type: Exclude<Modal, null>;
   organ: Organ;
   t: UiDictionary;
   onClose: () => void;
+  onStudy?: () => void;
 }) {
   const vars = { organ: organ.name, location: organ.location };
   const title =
-    type === "quiz" ? format(t.modal.quizTitle, vars)
-    : type === "animation" ? format(t.modal.motionTitle, vars)
+    type === "animation" ? format(t.modal.motionTitle, vars)
     // Avoids gluing onto `system`, whose wording varies per organ, and stays
     // grammatical for the plural organs too.
-    : type === "system" ? format(t.modal.bodyTitle, vars)
-    : format(t.modal.insideTitle, vars);
+    : format(t.modal.bodyTitle, vars);
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
@@ -460,14 +826,7 @@ function LearningModal({
         <span className="modal-icon">{MODAL_ICON[type]}</span>
         <em>{t.modal.guided}</em>
         <h2 id="modal-title">{title}</h2>
-        {type === "quiz" ? (
-          <div className="quiz-options">
-            <p>{format(t.modal.quizPrompt, vars)}</p>
-            <button onClick={onClose}>{t.modal.quizA}</button>
-            <button onClick={onClose}>{t.modal.quizB}</button>
-            <button onClick={onClose}>{t.modal.quizC}</button>
-          </div>
-        ) : type === "system" ? (
+        {type === "system" ? (
           <>
             <p>{format(t.modal.systemIntro, vars)}</p>
             {/* Shown whole rather than cropped into the circular demo — the
@@ -484,11 +843,56 @@ function LearningModal({
           </>
         ) : (
           <>
-            <p>{t.modal.lessonBody}</p>
-            <div className={`modal-demo ${type === "animation" ? "moving" : ""}`}><OrganArt organ={organ} asset="organ" alt="" /></div>
-            <button className="lesson-button" onClick={onClose}>{t.modal.continueExploring} <ArrowRight size={16} /></button>
+            <p><Measure>{organ.function}</Measure></p>
+            <div className="modal-demo moving"><OrganArt organ={organ} asset="organ" alt="" /></div>
+            {onStudy && (
+              <button className="lesson-button" onClick={onStudy}>
+                {t.info.viewLesson} <ArrowRight size={16} />
+              </button>
+            )}
+            <button className={onStudy ? "modal-secondary" : "lesson-button"} onClick={onClose}>
+              {t.modal.continueExploring} {onStudy ? null : <ArrowRight size={16} />}
+            </button>
           </>
         )}
+      </section>
+    </div>
+  );
+}
+
+function NotesPanel({
+  organ,
+  t,
+  value,
+  onChange,
+  onClose,
+}: {
+  organ: Organ;
+  t: UiDictionary;
+  value: string;
+  onChange: (value: string) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
+      <section
+        className="learning-modal notes-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="notes-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <button className="modal-close" onClick={onClose} aria-label={t.modal.close}><X size={18} /></button>
+        <span className="modal-icon"><FileText size={20} /></span>
+        <em>{organ.name}</em>
+        <h2 id="notes-title">{t.nav.notes}</h2>
+        <textarea
+          className="notes-textarea"
+          dir="auto"
+          aria-label={t.nav.notes}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        />
       </section>
     </div>
   );

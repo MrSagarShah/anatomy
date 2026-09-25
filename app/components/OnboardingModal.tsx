@@ -14,6 +14,13 @@ type Props = {
   copy: ProgressCopy;
   /** Body systems the learner can choose to focus on, derived from the corpus. */
   focusOptions: string[];
+  /** Seed chips when editing an existing background so the form is not blank. */
+  initial?: {
+    educationLevel?: EducationLevel | null;
+    priorKnowledge?: PriorKnowledge | null;
+    studyGoal?: StudyGoal | null;
+    focusSystems?: string[];
+  };
   onSubmit: (input: OnboardingInput) => void;
   onSkip: () => void;
 };
@@ -30,12 +37,12 @@ const GOAL_ORDER: StudyGoal[] = ["exam", "career", "teaching", "curiosity", "ref
 
 /** First-run capture of the learner's educational background. Everything is
  *  optional — the learner can skip and is still tracked. */
-export function OnboardingModal({ copy, focusOptions, onSubmit, onSkip }: Props) {
+export function OnboardingModal({ copy, focusOptions, onSubmit, onSkip, initial }: Props) {
   const c = copy.onboarding;
-  const [level, setLevel] = useState<EducationLevel | null>(null);
-  const [knowledge, setKnowledge] = useState<PriorKnowledge | null>(null);
-  const [goal, setGoal] = useState<StudyGoal | null>(null);
-  const [focus, setFocus] = useState<Set<string>>(new Set());
+  const [level, setLevel] = useState<EducationLevel | null>(initial?.educationLevel ?? null);
+  const [knowledge, setKnowledge] = useState<PriorKnowledge | null>(initial?.priorKnowledge ?? null);
+  const [goal, setGoal] = useState<StudyGoal | null>(initial?.studyGoal ?? null);
+  const [focus, setFocus] = useState<Set<string>>(() => new Set(initial?.focusSystems ?? []));
 
   const toggleFocus = (slug: string) =>
     setFocus((current) => {

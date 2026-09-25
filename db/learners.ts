@@ -7,6 +7,7 @@ import {
   progressEvents,
   type Learner,
 } from "./schema";
+import { currentStreak } from "../app/lib/progress/recommend";
 import {
   computeMastery,
   type LearnerProfile,
@@ -73,15 +74,17 @@ export async function saveOnboarding(
   learnerId: number,
   input: OnboardingInput,
 ): Promise<Learner> {
+  // Skip (empty PATCH) must stamp onboardedAt without wiping answers the
+  // learner already saved — only overwrite a field when the request sent one.
   const rows = await db
     .update(learners)
     .set({
-      educationLevel: input.educationLevel ?? null,
-      priorKnowledge: input.priorKnowledge ?? null,
-      studyGoal: input.studyGoal ?? null,
-      focusSystems: JSON.stringify(input.focusSystems ?? []),
       onboardedAt: NOW,
       updatedAt: NOW,
+      ...(input.educationLevel !== undefined ? { educationLevel: input.educationLevel } : {}),
+      ...(input.priorKnowledge !== undefined ? { priorKnowledge: input.priorKnowledge } : {}),
+      ...(input.studyGoal !== undefined ? { studyGoal: input.studyGoal } : {}),
+      ...(input.focusSystems !== undefined ? { focusSystems: JSON.stringify(input.focusSystems) } : {}),
     })
     .where(eq(learners.id, learnerId))
     .returning();
@@ -376,28 +379,4 @@ export async function getSnapshot(
       createdAt: e.createdAt,
     })),
   };
-}
-
-/** Consecutive days (ending today or yesterday) present in the given descending
- *  list of ISO dates. Yesterday still counts so a streak isn't lost until a full
- *  day is missed. */
-function currentStreak(daysDesc: string[]): number {
-  if (daysDesc.length === 0) return 0;
-  const set = new Set(daysDesc);
-  const dayMs = 86_400_000;
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-
-  const iso = (d: Date) => d.toISOString().slice(0, 10);
-  let cursor = today;
-  if (!set.has(iso(cursor))) {
-    cursor = new Date(cursor.getTime() - dayMs);
-    if (!set.has(iso(cursor))) return 0;
-  }
-  let streak = 0;
-  while (set.has(iso(cursor))) {
-    streak += 1;
-    cursor = new Date(cursor.getTime() - dayMs);
-  }
-  return streak;
 }
