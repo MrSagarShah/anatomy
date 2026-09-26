@@ -31,6 +31,8 @@ export type OrganStructure = {
   illustrated: boolean;
   /** Latin binomial — intentionally identical in every locale. */
   scientificName: string;
+  /** Default organ to stand next to this one in Compare. */
+  compareWith: OrganId;
   hotspots: HotspotStructure[];
 };
 
@@ -42,6 +44,7 @@ export const organStructures: OrganStructure[] = [
     accent: "#ee7c6a",
     illustrated: true,
     scientificName: "Cor",
+    compareWith: "brain",
     hotspots: [
       { id: "aorta", ta: "Aorta", position: [-0.35, 1.65, 0.55], color: "#ee7c6a" },
       { id: "left-atrium", ta: "Atrium sinistrum", position: [0.82, 0.65, 0.5], color: "#f2a33b" },
@@ -58,6 +61,7 @@ export const organStructures: OrganStructure[] = [
     accent: "#c58696",
     illustrated: true,
     scientificName: "Encephalon",
+    compareWith: "eyeball",
     hotspots: [
       { id: "frontal", ta: "Lobus frontalis", position: [-0.7, 0.65, 0.8], color: "#ee7c6a" },
       { id: "parietal", ta: "Lobus parietalis", position: [0.15, 1.1, 0.65], color: "#f2a33b" },
@@ -72,6 +76,7 @@ export const organStructures: OrganStructure[] = [
     accent: "#dd8f8b",
     illustrated: true,
     scientificName: "Pulmones",
+    compareWith: "heart",
     hotspots: [
       { id: "trachea", ta: "Trachea", position: [0, 1.6, 0.2], color: "#6393d8" },
       { id: "right-lung", ta: "Pulmo dexter", position: [-1.2, 0.1, 0.7], color: "#ee7c6a" },
@@ -87,6 +92,7 @@ export const organStructures: OrganStructure[] = [
     accent: "#b86858",
     illustrated: true,
     scientificName: "Hepar",
+    compareWith: "intestine",
     hotspots: [
       { id: "right-lobe", ta: "Lobus hepatis dexter", position: [-0.75, 0.35, 0.75], color: "#ee7c6a" },
       { id: "left-lobe", ta: "Lobus hepatis sinister", position: [0.85, 0.25, 0.75], color: "#f2a33b" },
@@ -100,6 +106,7 @@ export const organStructures: OrganStructure[] = [
     accent: "#c96963",
     illustrated: true,
     scientificName: "Renes",
+    compareWith: "liver",
     hotspots: [
       { id: "cortex", ta: "Cortex renalis", position: [-0.9, 0.55, 0.7], color: "#ee7c6a" },
       { id: "medulla", ta: "Medulla renalis", position: [0.85, 0.2, 0.7], color: "#f2a33b" },
@@ -113,6 +120,7 @@ export const organStructures: OrganStructure[] = [
     accent: "#7294b9",
     illustrated: true,
     scientificName: "Oculus",
+    compareWith: "brain",
     hotspots: [
       { id: "cornea", ta: "Cornea", position: [-0.94, 0.05, 1.47], color: "#6393d8" },
       { id: "iris", ta: "Iris", position: [-1.22, -0.53, 1.15], color: "#f2a33b" },
@@ -126,6 +134,7 @@ export const organStructures: OrganStructure[] = [
     accent: "#d78b77",
     illustrated: true,
     scientificName: "Intestinum",
+    compareWith: "liver",
     hotspots: [
       { id: "duodenum", ta: "Duodenum", position: [0.6, 0.8, 0.75], color: "#f2a33b" },
       { id: "jejunum", ta: "Jejunum", position: [-0.45, 0.1, 0.82], color: "#ee7c6a" },
@@ -139,6 +148,7 @@ export const organStructures: OrganStructure[] = [
     accent: "#c69a5e",
     illustrated: true,
     scientificName: "Pancreas",
+    compareWith: "liver",
     hotspots: [
       { id: "head", ta: "Caput pancreatis", position: [-1.32, -0.36, 0.55], color: "#ee7c6a" },
       { id: "body", ta: "Corpus pancreatis", position: [0.05, 0.25, 0.45], color: "#f2a33b" },
@@ -153,6 +163,7 @@ export const organStructures: OrganStructure[] = [
     accent: "#c99277",
     illustrated: true,
     scientificName: "Integumentum",
+    compareWith: "intestine",
     hotspots: [
       { id: "epidermis", ta: "Epidermis", position: [-0.05, 0.88, 1.4], color: "#ee7c6a" },
       { id: "dermis", ta: "Dermis", position: [0.29, 0.05, 1.4], color: "#f2a33b" },

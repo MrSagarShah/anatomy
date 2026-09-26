@@ -249,6 +249,14 @@ test("resumePhase: completed or missing opens the overview", () => {
   assert.equal(resumePhase({ stepsCompleted: 2, questionsAnswered: 1, completed: false, totalSteps: 5, totalQuestions: 3 }), "questions");
 });
 
+test("every organ compares against a different catalog organ", async () => {
+  const { organIds, organStructures } = await import("../app/lib/anatomy-data");
+  for (const organ of organStructures) {
+    assert.notEqual(organ.compareWith, organ.id, organ.id);
+    assert.ok(organIds.includes(organ.compareWith), organ.compareWith);
+  }
+});
+
 test("lessonEntryPhase: advanced skips overview on a fresh start only", () => {
   assert.equal(lessonEntryPhase(undefined, "beginner"), "overview");
   assert.equal(lessonEntryPhase(undefined, "advanced"), "steps");

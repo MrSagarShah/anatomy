@@ -502,7 +502,7 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
    pushed down by an auto top margin. */
 .system-visual { overflow: hidden; border-radius: 12px; }
 
-.compare-strip { position: fixed; z-index: 20; left: 50%; bottom: 22px; transform: translateX(-50%); width: min(760px, calc(100% - 28px)); padding: 13px 16px; display: grid; grid-template-columns: 1fr auto 1fr 1.5fr auto; align-items: center; gap: 14px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,251,245,.94); backdrop-filter: blur(18px); box-shadow: 0 22px 60px rgba(64,43,29,.2); }
+.compare-strip { position: fixed; z-index: 20; left: 50%; bottom: 22px; transform: translateX(-50%); width: min(900px, calc(100% - 28px)); padding: 13px 16px; display: grid; grid-template-columns: 1fr auto 1.2fr 2fr auto; align-items: center; gap: 14px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,251,245,.94); backdrop-filter: blur(18px); box-shadow: 0 22px 60px rgba(64,43,29,.2); }
 .compare-strip > div { display: flex; flex-direction: column; }
 .compare-strip .compare-organ { position: relative; padding-inline-start: 45px; min-height: 38px; justify-content: center; }
 .compare-organ > img { position: absolute; inset-inline-start: 0; top: 50%; width: 38px; height: 38px; border-radius: 50%; object-fit: cover; transform: translateY(-50%); mix-blend-mode: multiply; }
@@ -510,10 +510,23 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
 .compare-strip strong { font: 500 20px var(--font-serif), serif; }
 .compare-strip small { color: var(--muted); font-size: 9px; }
 .compare-strip dl { margin: 0; display: flex; gap: 16px; }
-.compare-strip dl div { max-width: 130px; }
+.compare-strip dl div { max-width: 160px; }
 .compare-strip dt { color: var(--muted); font-size: 8px; text-transform: uppercase; }
 .compare-strip dd { margin: 3px 0 0; font: 500 10px/1.2 var(--font-serif), serif; }
+.compare-strip dd.compare-other { color: #756a62; font-weight: 400; }
 .compare-strip > button { border: 0; background: transparent; cursor: pointer; }
+.compare-jump { border: 0; padding: 0; background: transparent; text-align: start; cursor: pointer; color: inherit; }
+.compare-jump:hover strong { color: var(--coral); }
+.compare-pick { margin-top: 5px; }
+.compare-pick select {
+  max-width: 148px;
+  padding: 3px 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf8;
+  color: var(--ink);
+  font: 500 11px var(--font-sans), sans-serif;
+}
 
 .modal-backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(52,39,30,.24); backdrop-filter: blur(8px); }
 .learning-modal { width: min(460px, 100%); max-height: min(92vh, 900px); overflow: auto; scrollbar-width: none; position: relative; padding: 32px; border: 1px solid var(--line); border-radius: 26px; background: #fffaf2; box-shadow: 0 30px 90px rgba(63,42,28,.24); text-align: center; animation: modal-in .35s cubic-bezier(.2,.85,.3,1); }
@@ -630,8 +643,9 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
   .tip-note { width: 130px; min-height: 113px; padding: 11px; }
   .tip-note p { font-size: 12px; }
   .callout-body { width: 148px; top: -26px; }
-  .compare-strip { grid-template-columns: 1fr auto 1fr auto; }
-  .compare-strip dl { display: none; }
+  .compare-strip { grid-template-columns: 1fr auto 1fr auto; bottom: 86px; }
+  .compare-strip dl { display: flex; grid-column: 1 / -2; grid-row: 2; }
+  .compare-strip dl div { max-width: none; flex: 1; }
 }
 
 @media (max-width: 470px) {
@@ -1150,11 +1164,51 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
   background: rgba(255,252,247,.95);
   font-size: 11px;
 }
+.tour-bar {
+  position: absolute;
+  z-index: 6;
+  inset-inline: 90px 16px;
+  top: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 13px 14px 13px 18px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255,252,247,.94);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 30px rgba(75,54,40,.11);
+}
+.tour-bar > svg { flex: none; margin-top: 3px; color: var(--coral); }
+.tour-copy { min-width: 0; display: grid; gap: 2px; }
+.tour-copy em {
+  color: var(--muted);
+  font-style: normal;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .13em;
+}
+.tour-copy strong { font: 500 20px/1.15 var(--font-serif), serif; color: var(--coral); }
+.tour-copy p { margin: 2px 0 0; color: #6e655f; font: 500 12px/1.4 var(--font-serif), serif; }
+.tour-progress { margin-inline-start: auto; flex: none; color: var(--muted); font-size: 10px; letter-spacing: .08em; padding-top: 4px; }
+.tour-bar > button {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
 .authoring-panel > span { display: flex; align-items: center; gap: 5px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-size: 9px; }
 .authoring-panel code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .authoring-panel button { flex: none; padding: 4px 9px; border: 1px solid var(--line); border-radius: 7px; background: rgba(255,255,255,.5); cursor: pointer; font-size: 10px; }
 
 @media (max-width: 760px) {
+  .tour-bar { inset-inline: 10px; top: 10px; }
+  .tour-copy p { display: none; }
   .quiz-bar { inset-inline: 10px; top: 10px; gap: 10px; padding: 11px 11px 11px 15px; }
   .quiz-prompt strong { font-size: 18px; }
   .quiz-meta small { display: none; }

@@ -10,6 +10,7 @@ import {
   CircleDashed,
   Layers3,
   Maximize2,
+  Play,
   RotateCcw,
   ScanLine,
   Search,
@@ -41,6 +42,9 @@ type Props = {
   priorKnowledge?: PriorKnowledge | null;
   /** Records a learning event (best-effort, may be a no-op when tracking is off). */
   onEvent?: (event: ProgressEventInput) => void;
+  /** Walks every authored hotspot on the specimen. */
+  tourActive?: boolean;
+  onTourEnd?: () => void;
 };
 
 /** Stable no-op so children can always call the recorder unconditionally. */
@@ -442,7 +446,10 @@ function GuidedLessonPanel({
   );
 }
 
-export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, quizActive, onQuizExit, lesson, onLessonExit, resume, priorKnowledge, onEvent }: Props) {
+const TOUR_DWELL_MS = 2400;
+const TOUR_DWELL_REDUCED_MS = 700;
+
+export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, quizActive, onQuizExit, lesson, onLessonExit, resume, priorKnowledge, onEvent, tourActive = false, onTourEnd }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<AnatomyViewer | null>(null);
   const organRef = useRef(organ);
@@ -453,6 +460,9 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   const [progress, setProgress] = useState(0);
   const [slowLoad, setSlowLoad] = useState(false);
   const [activeTool, setActiveTool] = useState<string | null>(null);
+  const [tourStep, setTourStep] = useState(0);
+  const onTourEndRef = useRef(onTourEnd);
+  onTourEndRef.current = onTourEnd;
 
   // Opt-in coordinate probe for placing hotspots — not a user-facing feature.
   const authoring = useAuthoringFlag();
@@ -539,7 +549,44 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
 
   // A spinning specimen makes "click the mitral valve" a game of chance, so the
   // quiz holds the model still and restores the user's setting on exit.
-  useEffect(() => viewerRef.current?.setAutoRotate(autoRotate && !quizActive && !lesson), [autoRotate, lesson, quizActive]);
+  useEffect(() => viewerRef.current?.setAutoRotate(autoRotate && !quizActive && !lesson && !tourActive), [autoRotate, lesson, quizActive, tourActive]);
+
+  useEffect(() => {
+    if (!tourActive || lesson || quizActive || loading) {
+      if (!tourActive) setTourStep(0);
+      return;
+    }
+    const ids = organ.hotspots.map((hotspot) => hotspot.id);
+    if (ids.length === 0) {
+      onTourEndRef.current?.();
+      return;
+    }
+    let cancelled = false;
+    let index = 0;
+    let timer = 0;
+    const dwell = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? TOUR_DWELL_REDUCED_MS
+      : TOUR_DWELL_MS;
+
+    const step = () => {
+      if (cancelled) return;
+      if (index >= ids.length) {
+        viewerRef.current?.clearLessonFocus();
+        onTourEndRef.current?.();
+        return;
+      }
+      setTourStep(index);
+      viewerRef.current?.focusHotspot(ids[index]);
+      index += 1;
+      timer = window.setTimeout(step, dwell);
+    };
+    timer = window.setTimeout(step, 80);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+      viewerRef.current?.clearLessonFocus();
+    };
+  }, [lesson, loading, organ.id, quizActive, tourActive]);
   useEffect(() => viewerRef.current?.setQuizMode(quizActive), [quizActive]);
   useEffect(() => viewerRef.current?.setAuthoring(authoring), [authoring]);
 
@@ -562,6 +609,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
     if (tool === "reset") {
       viewer.reset();
       setActiveTool(null);
+      if (tourActive) onTourEndRef.current?.();
     }
   };
 
@@ -577,11 +625,11 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
 
   return (
     <section
-      className={`viewer-shell ${lesson ? "lesson-active" : ""}`}
+      className={`viewer-shell ${lesson ? "lesson-active" : ""} ${tourActive ? "tour-active" : ""}`}
       aria-label={format(t.viewer.title, { organ: organ.name })}
-      data-lesson-focus={lesson ? selected?.id ?? "" : undefined}
-      data-lesson-view={lesson ? "surface" : undefined}
-      data-lesson-hotspots={lesson ? "focused" : undefined}
+      data-lesson-focus={lesson || tourActive ? selected?.id ?? "" : undefined}
+      data-lesson-view={lesson || tourActive ? "surface" : undefined}
+      data-lesson-hotspots={lesson || tourActive ? "focused" : undefined}
     >
       <div className="viewer-glow" style={{ "--organ-accent": organ.accent } as React.CSSProperties} />
       <div ref={mountRef} className="three-mount" />
@@ -610,6 +658,23 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         </div>
       )}
 
+      {tourActive && !lesson && !quizActive && organ.hotspots[tourStep] && (
+        <div className="tour-bar" role="status" aria-live="polite">
+          <Play size={16} />
+          <div className="tour-copy">
+            <em>{t.cards.functionAnimation}</em>
+            <strong>{organ.hotspots[tourStep].label}</strong>
+            <p>{organ.hotspots[tourStep].detail}</p>
+          </div>
+          <span className="tour-progress">
+            {format(t.quiz.progress, { current: String(tourStep + 1), total: String(organ.hotspots.length) })}
+          </span>
+          <button type="button" onClick={() => onTourEndRef.current?.()} aria-label={t.modal.close}>
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       {!lesson && (
       <div className="viewer-tools" aria-label={t.tools.label}>
         {tools.map(({ id, label, icon: Icon }) => (
@@ -628,7 +693,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
       </div>
       )}
 
-      {!quizActive && !lesson && (
+      {!quizActive && !lesson && !tourActive && (
       <aside className="tip-note" aria-label={t.viewer.tip}>
         <span><Sparkles size={15} /> {t.viewer.tip}</span>
         <p>{t.viewer.tipDrag}<br />{t.viewer.tipScroll}<br />{t.viewer.tipClick}</p>
@@ -636,9 +701,9 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
       )}
 
       {selected && !quizActive && (
-        <div className={`hotspot-callout ${lesson ? "lesson-callout" : ""}`} ref={calloutRef} data-side="right">
+        <div className={`hotspot-callout ${lesson || tourActive ? "lesson-callout" : ""}`} ref={calloutRef} data-side="right">
           <div className="callout-body" style={{ "--hotspot-color": selected.color } as React.CSSProperties}>
-            {!lesson && (
+            {!lesson && !tourActive && (
               <button className="callout-close" type="button" onClick={() => viewerRef.current?.clearSelection()} aria-label={t.modal.close}>
                 <X size={13} />
               </button>
@@ -701,7 +766,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         </div>
       )}
 
-      {!quizActive && !lesson && (
+      {!quizActive && !lesson && !tourActive && (
       <button className="auto-rotate" type="button" onClick={() => onAutoRotate(!autoRotate)} aria-pressed={autoRotate}>
         <RotateCcw size={14} /> {t.viewer.autoRotate}
         <span className={`switch ${autoRotate ? "on" : ""}`}><i /></span>
