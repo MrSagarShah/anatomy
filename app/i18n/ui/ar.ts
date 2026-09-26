@@ -16,12 +16,12 @@ export const ui: UiDictionary = {
   language: { label: "اللغة", choose: "اختر لغة" },
   library: {
     title: "مكتبة الأعضاء", open: "فتح مكتبة الأعضاء", close: "إغلاق المكتبة",
-    saved: "الأعضاء المحفوظة", emptySaved: "لا توجد أعضاء محفوظة بعد. احفظ عضوًا من المكتبة.", viewAll: "عرض كل الأعضاء",
+    saved: "الأعضاء المحفوظة", emptySaved: "لا توجد أعضاء محفوظة بعد. احفظ عضوًا من المكتبة.", notesHint: "ستظهر ملاحظاتك هنا كبطاقات.", viewAll: "عرض كل الأعضاء",
     quoteLine1: "التعلّم", quoteLine2: "فعلٌ من أفعال الفضول.", quoteSign: "واصل الاستكشاف!",
   },
   tools: {
     label: "أدوات العارض ثلاثي الأبعاد", rotate: "تدوير", zoom: "تكبير", isolate: "عزل",
-    section: "مقطع عرضي", layers: "طبقات", compare: "مقارنة", reset: "إعادة ضبط",
+    section: "قصّة خارجية", layers: "شفافية", compare: "مقارنة", reset: "إعادة ضبط",
   },
   viewer: {
     title: "العارض التفاعلي: {organ}",

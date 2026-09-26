@@ -16,12 +16,12 @@ export const ui: UiDictionary = {
   language: { label: "Bahasa", choose: "Pilih bahasa" },
   library: {
     title: "Pustaka organ", open: "Buka pustaka organ", close: "Tutup pustaka",
-    saved: "Organ tersimpan", emptySaved: "Belum ada organ tersimpan. Tandai satu dari pustaka.", viewAll: "Lihat semua organ",
+    saved: "Organ tersimpan", emptySaved: "Belum ada organ tersimpan. Tandai satu dari pustaka.", notesHint: "Catatan yang kamu tulis muncul di sini sebagai chip.", viewAll: "Lihat semua organ",
     quoteLine1: "Belajar adalah", quoteLine2: "sebuah tindakan rasa ingin tahu.", quoteSign: "Teruslah menjelajah!",
   },
   tools: {
     label: "Alat penampil 3D", rotate: "Putar", zoom: "Perbesar", isolate: "Isolasi",
-    section: "Potongan melintang", layers: "Lapisan", compare: "Bandingkan", reset: "Atur ulang",
+    section: "Tampilan potong", layers: "Tembus pandang", compare: "Bandingkan", reset: "Atur ulang",
   },
   viewer: {
     title: "Penampil interaktif: {organ}",

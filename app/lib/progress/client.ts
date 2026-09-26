@@ -32,6 +32,8 @@ export type ProgressState = {
   /** True when the learner is signed in but hasn't answered onboarding. */
   needsOnboarding: boolean;
   snapshot: ProgressSnapshot | null;
+  /** True when the last identify/refresh failed and can be retried. */
+  loadError: boolean;
 };
 
 const INITIAL: ProgressState = {
@@ -39,6 +41,7 @@ const INITIAL: ProgressState = {
   authenticated: false,
   needsOnboarding: false,
   snapshot: null,
+  loadError: false,
 };
 
 /**
@@ -55,11 +58,11 @@ export function useProgress(locale: string, signedIn: boolean) {
       const res = await fetch(`/api/progress?locale=${locale}`, { cache: "no-store" });
       const data = (await res.json()) as ProgressResponse;
       if (!data.available) {
-        setState({ available: false, authenticated: false, needsOnboarding: false, snapshot: null });
+        setState({ available: false, authenticated: false, needsOnboarding: false, snapshot: null, loadError: false });
         return;
       }
       if (!data.authenticated) {
-        setState({ available: true, authenticated: false, needsOnboarding: false, snapshot: null });
+        setState({ available: true, authenticated: false, needsOnboarding: false, snapshot: null, loadError: false });
         return;
       }
       setState({
@@ -67,9 +70,10 @@ export function useProgress(locale: string, signedIn: boolean) {
         authenticated: true,
         needsOnboarding: !data.snapshot.profile.onboarded,
         snapshot: data.snapshot,
+        loadError: false,
       });
     } catch {
-      setState((s) => ({ ...s, available: s.available ?? false }));
+      setState((s) => ({ ...s, loadError: true }));
     }
   }, [locale]);
 
@@ -88,9 +92,10 @@ export function useProgress(locale: string, signedIn: boolean) {
             authenticated: false,
             needsOnboarding: false,
             snapshot: null,
+            loadError: false,
           });
         } catch {
-          setState((s) => ({ ...s, available: false }));
+          setState((s) => ({ ...s, loadError: true }));
         }
         return;
       }
@@ -133,10 +138,13 @@ export function useProgress(locale: string, signedIn: boolean) {
             authenticated: true,
             needsOnboarding: false,
             snapshot: data.snapshot,
+            loadError: false,
           });
+          return true;
         }
+        return false;
       } catch {
-        // Keep the onboarding modal open so the learner can retry.
+        return false;
       }
     },
     [locale],
@@ -162,6 +170,7 @@ export function useProgress(locale: string, signedIn: boolean) {
               authenticated: true,
               needsOnboarding: false,
               snapshot: data.snapshot,
+              loadError: false,
             });
           }
         })

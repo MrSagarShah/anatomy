@@ -12,8 +12,9 @@ import {
   Maximize2,
   Play,
   RotateCcw,
+  RotateCw,
   ScanLine,
-  Search,
+  ZoomIn,
   Check,
   Crosshair,
   Sparkles,
@@ -22,7 +23,7 @@ import {
 import type { Hotspot, Organ } from "../i18n/merge";
 import { format, type GuidedLesson, type UiDictionary } from "../i18n/types";
 import type { AnatomyViewer } from "../lib/three/viewer";
-import { lessonEntryPhase } from "../lib/progress/lesson-entry";
+import { lessonEntryPhase, lessonQuestionScore } from "../lib/progress/lesson-entry";
 import type { LessonResume, PriorKnowledge, ProgressEventInput } from "../lib/progress/types";
 
 type Props = {
@@ -231,11 +232,14 @@ function GuidedLessonPanel({
     return Math.min(resume.questionsAnswered, lastIndex(lesson.questions.length));
   });
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [priorCorrect, setPriorCorrect] = useState(() =>
+    resume && !resume.completed ? resume.questionsCorrect : 0,
+  );
   const headingRef = useRef<HTMLHeadingElement>(null);
   const step = lesson.steps[stepIndex];
   const question = lesson.questions[questionIndex];
   const answer = question ? answers[question.id] : undefined;
-  const score = lesson.questions.filter((item) => answers[item.id] === item.answerId).length;
+  const score = lessonQuestionScore(lesson.questions, answers, priorCorrect);
 
   // Emit completion once when the learner reaches the summary. Meta carries the
   // lesson id so the rollup can attribute steps/questions to this lesson.
@@ -303,6 +307,7 @@ function GuidedLessonPanel({
 
   const restart = () => {
     setAnswers({});
+    setPriorCorrect(0);
     setQuestionIndex(0);
     setStepIndex(0);
     setPhase("overview");
@@ -387,9 +392,7 @@ function GuidedLessonPanel({
                     // The summary also fires lesson_complete; this marks the
                     // checkpoint itself so the activity log and rollup agree.
                     if (questionIndex >= lesson.questions.length - 1) {
-                      const nextScore = lesson.questions.filter(
-                        (item) => nextAnswers[item.id] === item.answerId,
-                      ).length;
+                      const nextScore = lessonQuestionScore(lesson.questions, nextAnswers, priorCorrect);
                       onEvent({
                         kind: "quiz_complete",
                         organId,
@@ -633,8 +636,8 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   };
 
   const tools = [
-    { id: "rotate", label: t.tools.rotate, icon: RotateCcw },
-    { id: "zoom", label: t.tools.zoom, icon: Search },
+    { id: "rotate", label: t.tools.rotate, icon: RotateCw },
+    { id: "zoom", label: t.tools.zoom, icon: ZoomIn },
     { id: "isolate", label: t.tools.isolate, icon: CircleDashed },
     { id: "section", label: t.tools.section, icon: ScanLine },
     { id: "layers", label: t.tools.layers, icon: Layers3 },

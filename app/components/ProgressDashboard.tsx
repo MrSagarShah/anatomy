@@ -17,6 +17,7 @@ type Props = {
   onContinueLesson?: (organId: string) => void;
   onSelectOrgan?: (organId: string) => void;
   onKeepGoing?: () => void;
+  onRetry?: () => void;
 };
 
 function Stat({
@@ -71,6 +72,7 @@ export function ProgressDashboard({
   onContinueLesson,
   onSelectOrgan,
   onKeepGoing,
+  onRetry,
 }: Props) {
   const d = copy.dashboard;
   const signInHref = `/signin-with-chatgpt?return_to=${encodeURIComponent(
@@ -78,7 +80,16 @@ export function ProgressDashboard({
   )}`;
 
   let body: React.ReactNode;
-  if (state.available === null) {
+  if (state.loadError && !state.snapshot) {
+    body = (
+      <div className="pg-guest">
+        <p className="pg-note">{d.unavailable}</p>
+        {onRetry && (
+          <button type="button" className="lesson-button" onClick={onRetry}>{d.retry ?? "Try again"}</button>
+        )}
+      </div>
+    );
+  } else if (state.available === null) {
     body = <p className="pg-note" role="status" aria-busy="true">{d.loading ?? `${d.title}…`}</p>;
   } else if (state.available === false) {
     body = <p className="pg-note">{d.unavailable}</p>;

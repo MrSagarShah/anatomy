@@ -1,5 +1,14 @@
 import type { LessonResume, PriorKnowledge } from "./types";
 
+/** Prior checkpoint score plus answers recorded in this session. */
+export function lessonQuestionScore(
+  questions: Array<{ id: string; answerId: string }>,
+  answers: Record<string, string>,
+  priorCorrect = 0,
+) {
+  return priorCorrect + questions.filter((item) => answers[item.id] === item.answerId).length;
+}
+
 export function resumePhase(
   resume: LessonResume | undefined,
 ): "overview" | "steps" | "questions" {

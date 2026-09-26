@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { hydrateLibrary, parseNotes, parseSavedOrgans, sanitizeLibrary } from "../app/lib/progress/library";
-import { lessonEntryPhase, resumePhase } from "../app/lib/progress/lesson-entry";
+import { lessonEntryPhase, lessonQuestionScore, resumePhase } from "../app/lib/progress/lesson-entry";
 import { currentStreak, recommendNext } from "../app/lib/progress/recommend";
 import { computeMastery } from "../app/lib/progress/types";
 
@@ -242,11 +242,22 @@ test("hydrateLibrary: server snapshot wins once it has anything", () => {
   assert.deepEqual(next.notes, {});
 });
 
+test("lessonQuestionScore adds prior checkpoint credit to this session", () => {
+  const questions = [
+    { id: "q1", answerId: "a" },
+    { id: "q2", answerId: "b" },
+    { id: "q3", answerId: "c" },
+  ];
+  assert.equal(lessonQuestionScore(questions, { q3: "c" }, 2), 3);
+  assert.equal(lessonQuestionScore(questions, { q1: "a", q2: "x", q3: "c" }, 0), 2);
+  assert.equal(lessonQuestionScore(questions, {}, 0), 0);
+});
+
 test("resumePhase: completed or missing opens the overview", () => {
   assert.equal(resumePhase(undefined), "overview");
-  assert.equal(resumePhase({ stepsCompleted: 2, questionsAnswered: 0, completed: true, totalSteps: 5, totalQuestions: 3 }), "overview");
-  assert.equal(resumePhase({ stepsCompleted: 2, questionsAnswered: 0, completed: false, totalSteps: 5, totalQuestions: 3 }), "steps");
-  assert.equal(resumePhase({ stepsCompleted: 2, questionsAnswered: 1, completed: false, totalSteps: 5, totalQuestions: 3 }), "questions");
+  assert.equal(resumePhase({ stepsCompleted: 2, questionsAnswered: 0, questionsCorrect: 0, completed: true, totalSteps: 5, totalQuestions: 3 }), "overview");
+  assert.equal(resumePhase({ stepsCompleted: 2, questionsAnswered: 0, questionsCorrect: 0, completed: false, totalSteps: 5, totalQuestions: 3 }), "steps");
+  assert.equal(resumePhase({ stepsCompleted: 2, questionsAnswered: 1, questionsCorrect: 1, completed: false, totalSteps: 5, totalQuestions: 3 }), "questions");
 });
 
 test("organMatchesQuery hits scientific name, function, and hotspot labels", async () => {
@@ -281,14 +292,14 @@ test("lessonEntryPhase: advanced skips overview on a fresh start only", () => {
   assert.equal(lessonEntryPhase(undefined, "advanced"), "steps");
   assert.equal(
     lessonEntryPhase(
-      { stepsCompleted: 2, questionsAnswered: 0, completed: false, totalSteps: 5, totalQuestions: 3 },
+      { stepsCompleted: 2, questionsAnswered: 0, questionsCorrect: 0, completed: false, totalSteps: 5, totalQuestions: 3 },
       "advanced",
     ),
     "steps",
   );
   assert.equal(
     lessonEntryPhase(
-      { stepsCompleted: 0, questionsAnswered: 0, completed: true, totalSteps: 5, totalQuestions: 3 },
+      { stepsCompleted: 0, questionsAnswered: 0, questionsCorrect: 0, completed: true, totalSteps: 5, totalQuestions: 3 },
       "advanced",
     ),
     "overview",

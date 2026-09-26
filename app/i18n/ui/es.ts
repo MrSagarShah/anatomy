@@ -16,12 +16,12 @@ export const ui: UiDictionary = {
   language: { label: "Idioma", choose: "Elige un idioma" },
   library: {
     title: "Biblioteca de órganos", open: "Abrir biblioteca de órganos", close: "Cerrar biblioteca",
-    saved: "Órganos guardados", emptySaved: "Aún no hay órganos guardados. Marca uno en la biblioteca.", viewAll: "Ver todos los órganos",
+    saved: "Órganos guardados", emptySaved: "Aún no hay órganos guardados. Marca uno en la biblioteca.", notesHint: "Las notas que escribas aparecerán aquí como fichas.", viewAll: "Ver todos los órganos",
     quoteLine1: "Aprender es", quoteLine2: "un acto de curiosidad.", quoteSign: "¡Sigue explorando!",
   },
   tools: {
     label: "Herramientas del visor 3D", rotate: "Girar", zoom: "Zoom", isolate: "Aislar",
-    section: "Corte transversal", layers: "Capas", compare: "Comparar", reset: "Restablecer",
+    section: "Vista recortada", layers: "Transparencia", compare: "Comparar", reset: "Restablecer",
   },
   viewer: {
     title: "Visor interactivo: {organ}",

@@ -17,12 +17,13 @@ export const ui: UiDictionary = {
   library: {
     title: "Organ library", open: "Open organ library", close: "Close library", saved: "Saved organs",
     emptySaved: "No saved organs yet. Bookmark one from the library.",
+    notesHint: "Notes you write will show up as chips here.",
     viewAll: "View all organs",
     quoteLine1: "Learning is", quoteLine2: "an act of curiosity.", quoteSign: "Keep exploring!",
   },
   tools: {
     label: "3D viewer tools", rotate: "Rotate", zoom: "Zoom", isolate: "Isolate",
-    section: "Cross-section", layers: "Layers", compare: "Compare", reset: "Reset",
+    section: "Clip view", layers: "See-through", compare: "Compare", reset: "Reset",
   },
   viewer: {
     title: "{organ} interactive viewer",

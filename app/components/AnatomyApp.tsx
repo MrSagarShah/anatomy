@@ -26,7 +26,7 @@ import {
 import { OrganViewer } from "./OrganViewer";
 import { OnboardingModal } from "./OnboardingModal";
 import { ProgressDashboard } from "./ProgressDashboard";
-import type { OrganId } from "../lib/anatomy-data";
+import { organIds, type OrganId } from "../lib/anatomy-data";
 import type { LocaleConfig } from "../i18n/config";
 import { locales } from "../i18n/config";
 import { buildOrgans, indexOrgans, type Organ } from "../i18n/merge";
@@ -42,7 +42,31 @@ type Modal = "system" | "tissue" | "clinical" | null;
 
 const SAVED_KEY = "anatomy:saved-organs";
 const NOTES_KEY = "anatomy:notes";
+const VIEW_KEY = "anatomy:view";
 const MOBILE_LIBRARY_MQ = "(max-width: 760px)";
+
+function readViewOrgan(): OrganId | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(VIEW_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { organId?: string };
+    if (parsed.organId && (organIds as readonly string[]).includes(parsed.organId)) {
+      return parsed.organId as OrganId;
+    }
+  } catch {
+    // Private mode / bad JSON — start on the default heart.
+  }
+  return null;
+}
+
+function writeViewOrgan(id: OrganId) {
+  try {
+    window.sessionStorage.setItem(VIEW_KEY, JSON.stringify({ organId: id }));
+  } catch {
+    // Same as notes — memory still holds the current organ.
+  }
+}
 
 function isMobileLibrary(): boolean {
   return typeof window !== "undefined" && window.matchMedia(MOBILE_LIBRARY_MQ).matches;
@@ -162,7 +186,7 @@ function Measure({ children }: { children: string }) {
  * click anywhere on the control opens the picker, while the visible row
  * underneath stays fully styleable.
  */
-function LanguageSwitcher({ locale, t }: { locale: LocaleConfig; t: UiDictionary }) {
+function LanguageSwitcher({ locale, t, organId }: { locale: LocaleConfig; t: UiDictionary; organId: OrganId }) {
   return (
     <div className="language-switcher" title={t.language.label}>
       <Globe size={16} aria-hidden />
@@ -172,6 +196,7 @@ function LanguageSwitcher({ locale, t }: { locale: LocaleConfig; t: UiDictionary
         aria-label={t.language.choose}
         value={locale.code}
         onChange={(event) => {
+          writeViewOrgan(organId);
           window.location.pathname = `/${event.target.value}`;
         }}
       >
@@ -198,7 +223,7 @@ export function AnatomyApp({
   const organs = useMemo(() => buildOrgans(dictionary.organs), [dictionary.organs]);
   const organById = useMemo(() => indexOrgans(organs), [organs]);
 
-  const [organId, setOrganId] = useState<OrganId>("heart");
+  const [organId, setOrganId] = useState<OrganId>(() => readViewOrgan() ?? "heart");
   const [autoRotate, setAutoRotate] = useState(true);
   const [compare, setCompare] = useState(false);
   const [compareId, setCompareId] = useState<OrganId>("brain");
@@ -245,7 +270,7 @@ export function AnatomyApp({
     writeNotes(next.notes);
     if (next.uploadLocal) saveLibrary({ savedOrgans: next.savedOrgans, notes: next.notes });
   }, [progress.state.snapshot?.library, saveLibrary]);
-  const profileInitials = user ? initialsOf(user.displayName || user.email) : "MA";
+  const profileInitials = user ? initialsOf(user.displayName || user.email) : initialsOf(copy.profileGuest);
   const focusOptions = useMemo(
     () => [...new Set(organs.map((item) => item.system))],
     [organs],
@@ -264,6 +289,7 @@ export function AnatomyApp({
   // the initial heart). Best-effort; the recorder no-ops when tracking is off.
   useEffect(() => {
     record({ kind: "organ_view", organId });
+    writeViewOrgan(organId);
   }, [organId, record]);
 
   const persistNote = (id: OrganId, value: string) => {
@@ -296,6 +322,7 @@ export function AnatomyApp({
     let list = organs.filter((item) => {
       if (!organMatchesQuery(item, query, locale.code)) return false;
       if (nav === "systems" && activeSystem && item.system !== activeSystem) return false;
+      if (nav === "lessons" && !item.lesson) return false;
       if (savedOnly && !savedSet.has(item.id)) return false;
       return true;
     });
@@ -410,6 +437,7 @@ export function AnatomyApp({
     setDashboardOpen(false);
     setModal(null);
     setTourActive(false);
+    setCompare(false);
     flushNote();
     if (organ.lesson) {
       setNav("lessons");
@@ -521,7 +549,7 @@ export function AnatomyApp({
           <Search size={17} />
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search.placeholder} />
         </label>
-        <LanguageSwitcher locale={locale} t={t} />
+        <LanguageSwitcher locale={locale} t={t} organId={organId} />
         <button className="profile" aria-label={t.profile.open} onClick={goProgress}><span>{profileInitials}</span><ChevronDown size={15} /></button>
         <button className="mobile-library-trigger" onClick={() => { setNav("library"); setSavedOnly(false); setMobileLibrary(true); }} aria-label={t.library.open}><LibraryBig size={20} /></button>
       </header>
@@ -664,16 +692,16 @@ export function AnatomyApp({
           </dl>
           <div className="medical-note" data-reveal><Stethoscope size={16} /><p><b>{t.info.medical}</b>{organ.medical}</p></div>
           <div className="fun-note" data-reveal><Sparkles size={15} /><p><b>{t.info.didYouKnow}</b>{organ.funFact}</p></div>
-          <button className="lesson-button" data-reveal onClick={openLesson}>{t.info.viewLesson} <ArrowRight size={16} /></button>
+          <button className="lesson-button" data-reveal onClick={openLesson}>{organ.lesson ? t.info.viewLesson : t.quiz.start} <ArrowRight size={16} /></button>
           <div className="action-grid" data-reveal>
             <button onClick={startTour} className={tourActive ? "active" : ""}><Play size={15} /> {t.info.animate}</button>
-            <button onClick={() => { setTourActive(false); setLessonActive(false); setQuizActive(true); setModal(null); }}><CircleHelp size={15} /> {t.info.quiz}</button>
+            <button onClick={() => { setTourActive(false); setLessonActive(false); setCompare(false); setQuizActive(true); setModal(null); }}><CircleHelp size={15} /> {t.info.quiz}</button>
             <button onClick={() => (compare ? setCompare(false) : openCompare())} className={compare ? "active" : ""}><GitCompare size={15} /> {t.info.compare}</button>
           </div>
         </aside>
       </div>
 
-      {compare && (
+      {compare && !quizActive && !lessonActive && (
         <section className="compare-strip" aria-label={t.compare.title}>
           <div className="compare-organ">
             <OrganArt organ={organ} asset="thumb" alt="" />
@@ -841,6 +869,7 @@ export function AnatomyApp({
               selectOrgan(target.id);
             }
           }}
+          onRetry={() => void progress.refresh()}
           onKeepGoing={() => {
             const snapshot = progress.state.snapshot;
             const pick = recommendNext({
@@ -875,8 +904,9 @@ export function AnatomyApp({
           focusOptions={focusOptions}
           initial={progress.state.snapshot?.profile}
           onSubmit={(input) => {
-            void progress.submitOnboarding(input);
-            setReonboard(false);
+            void progress.submitOnboarding(input).then((ok) => {
+              if (ok) setReonboard(false);
+            });
           }}
           onSkip={() => setReonboard(false)}
         />
@@ -990,6 +1020,9 @@ function NotesPanel({
         <span className="modal-icon"><FileText size={20} /></span>
         <em>{organ.name}</em>
         <h2 id="notes-title">{t.nav.notes}</h2>
+        {withNotes.length === 0 && (
+          <p className="library-hint">{t.library.notesHint}</p>
+        )}
         {withNotes.length > 0 && (
           <div className="notes-switcher" role="tablist" aria-label={t.nav.notes}>
             {withNotes.map((item) => (

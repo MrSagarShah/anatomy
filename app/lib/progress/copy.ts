@@ -34,6 +34,7 @@ export type ProgressCopy = {
     close: string;
     empty: string;
     loading?: string;
+    retry?: string;
     unavailable: string;
     guest: string;
     backgroundTitle: string;
@@ -105,6 +106,7 @@ const en: ProgressCopy = {
     close: "Close progress",
     empty: "Start a lesson or a quiz and your growth will show up here.",
     loading: "Loading your progress…",
+    retry: "Try again",
     unavailable:
       "Progress tracking isn't connected in this environment yet. Explore freely — nothing is lost.",
     guest: "Sign in with ChatGPT to save your progress and pick up where you left off.",

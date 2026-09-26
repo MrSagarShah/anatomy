@@ -16,12 +16,12 @@ export const ui: UiDictionary = {
   language: { label: "言語", choose: "言語を選択" },
   library: {
     title: "臓器ライブラリ", open: "臓器ライブラリを開く", close: "ライブラリを閉じる",
-    saved: "保存した臓器", emptySaved: "保存した臓器はまだありません。ライブラリからブックマークしてください。", viewAll: "すべての臓器を見る",
+    saved: "保存した臓器", emptySaved: "保存した臓器はまだありません。ライブラリからブックマークしてください。", notesHint: "書いたメモはここにチップで表示されます。", viewAll: "すべての臓器を見る",
     quoteLine1: "学びとは", quoteLine2: "好奇心のいとなみ。", quoteSign: "探索を続けよう！",
   },
   tools: {
     label: "3D ビューアのツール", rotate: "回転", zoom: "ズーム", isolate: "単独表示",
-    section: "断面", layers: "レイヤー", compare: "比較", reset: "リセット",
+    section: "クリップ表示", layers: "透過", compare: "比較", reset: "リセット",
   },
   viewer: {
     title: "{organ}のインタラクティブビューア",

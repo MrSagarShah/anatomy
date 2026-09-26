@@ -16,12 +16,12 @@ export const ui: UiDictionary = {
   language: { label: "언어", choose: "언어 선택" },
   library: {
     title: "장기 라이브러리", open: "장기 라이브러리 열기", close: "라이브러리 닫기",
-    saved: "저장한 장기", emptySaved: "저장한 장기가 아직 없습니다. 라이브러리에서 북마크하세요.", viewAll: "모든 장기 보기",
+    saved: "저장한 장기", emptySaved: "저장한 장기가 아직 없습니다. 라이브러리에서 북마크하세요.", notesHint: "작성한 메모가 여기에 칩으로 나타납니다.", viewAll: "모든 장기 보기",
     quoteLine1: "배움은", quoteLine2: "호기심의 행위입니다.", quoteSign: "계속 탐색해 보세요!",
   },
   tools: {
     label: "3D 뷰어 도구", rotate: "회전", zoom: "확대", isolate: "단독 보기",
-    section: "단면", layers: "레이어", compare: "비교", reset: "초기화",
+    section: "잘라보기", layers: "투과", compare: "비교", reset: "초기화",
   },
   viewer: {
     title: "{organ} 인터랙티브 뷰어",
