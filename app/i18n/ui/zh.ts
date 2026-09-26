@@ -16,7 +16,7 @@ export const ui: UiDictionary = {
   language: { label: "语言", choose: "选择语言" },
   library: {
     title: "器官库", open: "打开器官库", close: "关闭器官库",
-    saved: "已收藏的器官", viewAll: "查看全部器官",
+    saved: "已收藏的器官", emptySaved: "还没有收藏的器官。从器官库中收藏一个吧。", viewAll: "查看全部器官",
     quoteLine1: "学习", quoteLine2: "是一种好奇心。", quoteSign: "继续探索吧！",
   },
   tools: {

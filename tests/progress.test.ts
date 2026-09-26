@@ -249,6 +249,25 @@ test("resumePhase: completed or missing opens the overview", () => {
   assert.equal(resumePhase({ stepsCompleted: 2, questionsAnswered: 1, completed: false, totalSteps: 5, totalQuestions: 3 }), "questions");
 });
 
+test("organMatchesQuery hits scientific name, function, and hotspot labels", async () => {
+  const { organMatchesQuery } = await import("../app/lib/organ-search");
+  const sample = {
+    name: "Heart",
+    system: "Cardiovascular",
+    scientificName: "Cor",
+    description: "A muscular pump",
+    function: "Circulates blood",
+    conditions: ["Arrhythmia"],
+    hotspots: [{ label: "Mitral valve", detail: "Guards the left atrioventricular orifice" }],
+  };
+  assert.equal(organMatchesQuery(sample, "", "en"), true);
+  assert.equal(organMatchesQuery(sample, "cor", "en"), true);
+  assert.equal(organMatchesQuery(sample, "circulates", "en"), true);
+  assert.equal(organMatchesQuery(sample, "mitral", "en"), true);
+  assert.equal(organMatchesQuery(sample, "arrhythmia", "en"), true);
+  assert.equal(organMatchesQuery(sample, "pancreas", "en"), false);
+});
+
 test("every organ compares against a different catalog organ", async () => {
   const { organIds, organStructures } = await import("../app/lib/anatomy-data");
   for (const organ of organStructures) {

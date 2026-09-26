@@ -35,6 +35,7 @@ import { useProgress } from "../lib/progress/client";
 import { progressCopy } from "../lib/progress/copy";
 import { hydrateLibrary } from "../lib/progress/library";
 import { recommendNext } from "../lib/progress/recommend";
+import { organMatchesQuery } from "../lib/organ-search";
 
 type NavMode = "explore" | "systems" | "library" | "lessons" | "notes" | "progress";
 type Modal = "system" | null;
@@ -292,16 +293,13 @@ export function AnatomyApp({
   useEffect(() => () => flushNoteRef.current(), []);
 
   const filteredOrgans = useMemo(() => {
-    const needle = query.toLocaleLowerCase(locale.code);
     let list = organs.filter((item) => {
-      if (needle && !`${item.name} ${item.system}`.toLocaleLowerCase(locale.code).includes(needle)) {
-        return false;
-      }
+      if (!organMatchesQuery(item, query, locale.code)) return false;
       if (nav === "systems" && activeSystem && item.system !== activeSystem) return false;
       if (savedOnly && !savedSet.has(item.id)) return false;
       return true;
     });
-    if (nav === "explore" && !needle && focusSystems.length > 0) {
+    if (nav === "explore" && !query.trim() && focusSystems.length > 0) {
       const rank = (system: string) => (focusSystems.includes(system) ? 0 : 1);
       list = [...list].sort((a, b) => rank(a.system) - rank(b.system));
     }
@@ -397,7 +395,7 @@ export function AnatomyApp({
   const goLibrary = () => {
     setNav("library");
     setActiveSystem(null);
-    setSavedOnly(false);
+    setSavedOnly(true);
     setDashboardOpen(false);
     setLessonActive(false);
     flushNote();
@@ -560,49 +558,41 @@ export function AnatomyApp({
           )}
           <div className="organ-list">
             {savedOnly && filteredOrgans.length === 0 && (
-              <p className="library-empty">{t.library.saved}</p>
+              <p className="library-empty">{t.library.emptySaved}</p>
             )}
             {filteredOrgans.map((item) => {
               const isSaved = savedSet.has(item.id);
               return (
-                <button
-                  type="button"
+                <div
                   key={item.id}
                   className={`organ-item ${organId === item.id ? "active" : ""}`}
-                  onClick={() => selectOrgan(item.id)}
-                  onPointerEnter={() => prefetchOrgan(item.id)}
-                  onFocus={() => prefetchOrgan(item.id)}
                   style={{ "--item-accent": item.accent } as React.CSSProperties}
                 >
-                  <span className="organ-glyph">
-                    <OrganArt organ={item} asset="thumb" alt="" size={47} />
-                  </span>
-                  <span><b>{item.name}</b><small>{item.system}</small></span>
+                  <button
+                    type="button"
+                    className="organ-pick"
+                    onClick={() => selectOrgan(item.id, nav === "lessons" && item.lesson ? { lesson: true } : undefined)}
+                    onPointerEnter={() => prefetchOrgan(item.id)}
+                    onFocus={() => prefetchOrgan(item.id)}
+                  >
+                    <span className="organ-glyph">
+                      <OrganArt organ={item} asset="thumb" alt="" size={47} />
+                    </span>
+                    <span><b>{item.name}</b><small>{item.system}</small></span>
+                  </button>
                   <span className="organ-item-meta">
-                    <span
+                    <button
+                      type="button"
                       className={`organ-save ${isSaved ? "on" : ""}`}
-                      role="button"
-                      tabIndex={0}
                       aria-label={t.library.saved}
                       aria-pressed={isSaved}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        event.preventDefault();
-                        toggleSaved(item.id);
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.stopPropagation();
-                          event.preventDefault();
-                          toggleSaved(item.id);
-                        }
-                      }}
+                      onClick={() => toggleSaved(item.id)}
                     >
                       <Bookmark size={14} fill={isSaved ? "currentColor" : "none"} />
-                    </span>
+                    </button>
                     {organId === item.id && <Heart className="favorite" size={14} fill="currentColor" />}
                   </span>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -672,7 +662,7 @@ export function AnatomyApp({
           <div className="action-grid" data-reveal>
             <button onClick={startTour} className={tourActive ? "active" : ""}><Play size={15} /> {t.info.animate}</button>
             <button onClick={() => { setTourActive(false); setLessonActive(false); setQuizActive(true); setModal(null); }}><CircleHelp size={15} /> {t.info.quiz}</button>
-            <button onClick={() => { setTourActive(false); setCompare(!compare); }} className={compare ? "active" : ""}><Share2 size={15} /> {t.info.compare}</button>
+            <button onClick={() => (compare ? setCompare(false) : openCompare())} className={compare ? "active" : ""}><Share2 size={15} /> {t.info.compare}</button>
           </div>
         </aside>
       </div>
@@ -791,10 +781,13 @@ export function AnatomyApp({
       {nav === "notes" && (
         <NotesPanel
           organ={organ}
+          organs={organs}
+          notes={notes}
           t={t}
           value={noteDraft}
           onChange={updateNote}
           onClose={closeNotes}
+          onSelect={(id) => selectOrgan(id)}
         />
       )}
       {mobileLibrary && <button className="drawer-backdrop" aria-label={t.library.close} onClick={() => setMobileLibrary(false)} />}
@@ -924,17 +917,24 @@ function LearningModal({
 
 function NotesPanel({
   organ,
+  organs,
+  notes,
   t,
   value,
   onChange,
   onClose,
+  onSelect,
 }: {
   organ: Organ;
+  organs: Organ[];
+  notes: Record<string, string>;
   t: UiDictionary;
   value: string;
   onChange: (value: string) => void;
   onClose: () => void;
+  onSelect: (id: OrganId) => void;
 }) {
+  const withNotes = organs.filter((item) => (notes[item.id] ?? "").trim());
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
       <section
@@ -948,6 +948,22 @@ function NotesPanel({
         <span className="modal-icon"><FileText size={20} /></span>
         <em>{organ.name}</em>
         <h2 id="notes-title">{t.nav.notes}</h2>
+        {withNotes.length > 0 && (
+          <div className="notes-switcher" role="tablist" aria-label={t.nav.notes}>
+            {withNotes.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={item.id === organ.id}
+                className={`library-chip ${item.id === organ.id ? "on" : ""}`}
+                onClick={() => onSelect(item.id)}
+              >
+                {item.name}
+              </button>
+            ))}
+          </div>
+        )}
         <textarea
           className="notes-textarea"
           dir="auto"

@@ -206,14 +206,26 @@ button:focus-visible, input:focus-visible, canvas:focus-visible {
   text-align: start;
   min-height: 70px;
   display: grid;
-  grid-template-columns: 54px 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   padding: 8px 10px;
   border: 1px solid transparent;
   border-radius: 15px;
   background: transparent;
+}
+.organ-pick {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: start;
   cursor: pointer;
+  color: inherit;
 }
 .organ-item.active { background: rgba(253,234,226,.72); border-color: color-mix(in srgb, var(--item-accent), transparent 55%); box-shadow: 0 8px 20px rgba(195,91,70,.07); }
 .organ-glyph {
@@ -563,6 +575,12 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
 .notes-panel { text-align: start; }
 .notes-panel .modal-icon { margin-inline: 0; }
 .notes-panel > em, .notes-panel h2 { text-align: start; }
+.notes-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 4px;
+}
 .notes-textarea {
   width: 100%;
   min-height: 180px;

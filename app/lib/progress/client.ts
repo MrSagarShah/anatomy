@@ -105,6 +105,7 @@ export function useProgress(locale: string, signedIn: boolean) {
       recordProgress(event, locale);
       const scoring =
         event.kind === "lesson_complete" ||
+        event.kind === "lesson_step" ||
         event.kind === "label_quiz_complete" ||
         event.kind === "quiz_complete" ||
         event.kind === "quiz_answer" ||
@@ -133,11 +134,9 @@ export function useProgress(locale: string, signedIn: boolean) {
             needsOnboarding: false,
             snapshot: data.snapshot,
           });
-        } else {
-          setState((s) => ({ ...s, needsOnboarding: false }));
         }
       } catch {
-        setState((s) => ({ ...s, needsOnboarding: false }));
+        // Keep the onboarding modal open so the learner can retry.
       }
     },
     [locale],

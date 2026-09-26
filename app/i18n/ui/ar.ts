@@ -16,7 +16,7 @@ export const ui: UiDictionary = {
   language: { label: "اللغة", choose: "اختر لغة" },
   library: {
     title: "مكتبة الأعضاء", open: "فتح مكتبة الأعضاء", close: "إغلاق المكتبة",
-    saved: "الأعضاء المحفوظة", viewAll: "عرض كل الأعضاء",
+    saved: "الأعضاء المحفوظة", emptySaved: "لا توجد أعضاء محفوظة بعد. احفظ عضوًا من المكتبة.", viewAll: "عرض كل الأعضاء",
     quoteLine1: "التعلّم", quoteLine2: "فعلٌ من أفعال الفضول.", quoteSign: "واصل الاستكشاف!",
   },
   tools: {

@@ -16,7 +16,7 @@ export const ui: UiDictionary = {
   language: { label: "Bahasa", choose: "Pilih bahasa" },
   library: {
     title: "Pustaka organ", open: "Buka pustaka organ", close: "Tutup pustaka",
-    saved: "Organ tersimpan", viewAll: "Lihat semua organ",
+    saved: "Organ tersimpan", emptySaved: "Belum ada organ tersimpan. Tandai satu dari pustaka.", viewAll: "Lihat semua organ",
     quoteLine1: "Belajar adalah", quoteLine2: "sebuah tindakan rasa ingin tahu.", quoteSign: "Teruslah menjelajah!",
   },
   tools: {

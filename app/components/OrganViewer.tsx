@@ -459,7 +459,8 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [slowLoad, setSlowLoad] = useState(false);
-  const [activeTool, setActiveTool] = useState<string | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [toolOn, setToolOn] = useState({ isolate: false, section: false, layers: false });
   const [tourStep, setTourStep] = useState(0);
   const onTourEndRef = useRef(onTourEnd);
   onTourEndRef.current = onTourEnd;
@@ -474,7 +475,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   const pickRef = useRef<(hotspot: Hotspot) => void>(() => {});
   const authorRef = useRef<(point: { x: number; y: number; z: number }) => void>(() => {});
   const focusLessonHotspot = useCallback((id: string | null) => {
-    setActiveTool(null);
+    setToolOn({ isolate: false, section: false, layers: false });
     viewerRef.current?.focusHotspot(id);
   }, []);
   useEffect(() => {
@@ -517,7 +518,10 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         onLoading: (isLoading, value) => {
           setLoading(isLoading);
           setProgress(value);
-          if (isLoading) setSlowLoad(false);
+          if (isLoading) {
+            setSlowLoad(false);
+            setLoadFailed(false);
+          }
         },
         onPick: (hotspot) => pickRef.current(hotspot),
         onAuthorPoint: (point) => authorRef.current(point),
@@ -530,6 +534,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
       viewer.setOrgan(current.model, current.hotspots, current.accent).catch(() => {
         setLoading(false);
         setProgress(0);
+        setLoadFailed(true);
       });
     });
 
@@ -541,9 +546,12 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   }, []);
 
   useEffect(() => {
+    setToolOn({ isolate: false, section: false, layers: false });
+    setLoadFailed(false);
     viewerRef.current?.setOrgan(organ.model, organ.hotspots, organ.accent).catch(() => {
       setLoading(false);
       setProgress(0);
+      setLoadFailed(true);
     });
   }, [organ]);
 
@@ -597,18 +605,29 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
     viewerRef.current?.attachCallout(node);
   }, []);
 
+  const retryLoad = () => {
+    setLoadFailed(false);
+    setLoading(true);
+    setProgress(0);
+    viewerRef.current?.setOrgan(organ.model, organ.hotspots, organ.accent).catch(() => {
+      setLoading(false);
+      setProgress(0);
+      setLoadFailed(true);
+    });
+  };
+
   const handleTool = (tool: string) => {
     const viewer = viewerRef.current;
     if (!viewer) return;
-    if (tool === "rotate") onAutoRotate(!autoRotate);
-    if (tool === "zoom") viewer.zoom(-1);
-    if (tool === "isolate") setActiveTool(viewer.toggleIsolate() ? tool : null);
-    if (tool === "section") setActiveTool(viewer.toggleCrossSection() ? tool : null);
-    if (tool === "layers") setActiveTool(viewer.toggleLayers() ? tool : null);
+    if (tool === "rotate") viewer.nudgeRotate();
+    if (tool === "zoom") viewer.zoomTowardSelection();
+    if (tool === "isolate") setToolOn((on) => ({ ...on, isolate: viewer.toggleIsolate() }));
+    if (tool === "section") setToolOn((on) => ({ ...on, section: viewer.toggleCrossSection() }));
+    if (tool === "layers") setToolOn((on) => ({ ...on, layers: viewer.toggleLayers() }));
     if (tool === "compare") onCompare();
     if (tool === "reset") {
       viewer.reset();
-      setActiveTool(null);
+      setToolOn({ isolate: false, section: false, layers: false });
       if (tourActive) onTourEndRef.current?.();
     }
   };
@@ -675,21 +694,28 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         </div>
       )}
 
-      {!lesson && (
+      {!lesson && !quizActive && (
       <div className="viewer-tools" aria-label={t.tools.label}>
-        {tools.map(({ id, label, icon: Icon }) => (
+        {tools.map(({ id, label, icon: Icon }) => {
+          const pressed =
+            (id === "isolate" && toolOn.isolate) ||
+            (id === "section" && toolOn.section) ||
+            (id === "layers" && toolOn.layers) ||
+            (id === "compare" && compare);
+          return (
           <button
             key={id}
             type="button"
-            className={`tool-button ${(activeTool === id || (id === "compare" && compare)) ? "active" : ""}`}
+            className={`tool-button ${pressed ? "active" : ""}`}
             onClick={() => handleTool(id)}
-            aria-pressed={activeTool === id || (id === "compare" && compare)}
+            aria-pressed={pressed}
             title={label}
           >
             <Icon size={19} strokeWidth={1.65} />
             <span>{label}</span>
           </button>
-        ))}
+          );
+        })}
       </div>
       )}
 
@@ -758,11 +784,18 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         </div>
       )}
 
-      {loading && slowLoad && (
+      {loading && slowLoad && !loadFailed && (
         <div className="model-loader" role="status" aria-live="polite">
           <div className="loader-orbit"><Maximize2 size={20} /></div>
           <strong>{format(t.viewer.loading, { organ: organ.name })}</strong>
           <span>{Math.max(8, Math.round(progress * 100))}%</span>
+        </div>
+      )}
+
+      {loadFailed && (
+        <div className="model-loader" role="alert">
+          <strong>{format(t.viewer.loading, { organ: organ.name })}</strong>
+          <button type="button" className="lesson-button" onClick={retryLoad}>{t.quiz.retry}</button>
         </div>
       )}
 

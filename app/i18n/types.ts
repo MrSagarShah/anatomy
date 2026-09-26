@@ -91,7 +91,7 @@ export type UiDictionary = {
   profile: { open: string };
   language: { label: string; choose: string };
   library: {
-    title: string; open: string; close: string; saved: string; viewAll: string;
+    title: string; open: string; close: string; saved: string; emptySaved: string; viewAll: string;
     quoteLine1: string; quoteLine2: string; quoteSign: string;
   };
   tools: { label: string; rotate: string; zoom: string; isolate: string; section: string; layers: string; compare: string; reset: string };

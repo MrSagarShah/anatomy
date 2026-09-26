@@ -78,7 +78,9 @@ export function ProgressDashboard({
   )}`;
 
   let body: React.ReactNode;
-  if (state.available === false) {
+  if (state.available === null) {
+    body = <p className="pg-note" role="status" aria-busy="true">{d.loading ?? `${d.title}…`}</p>;
+  } else if (state.available === false) {
     body = <p className="pg-note">{d.unavailable}</p>;
   } else if (!state.authenticated || !state.snapshot) {
     body = (
