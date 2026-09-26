@@ -7,9 +7,10 @@ Explore heart, brain, lungs, liver, kidneys, eye, intestine, pancreas, and
 skin. The UI ships in English, Spanish, Hindi, Chinese, Arabic, Portuguese,
 French, German, Japanese, Russian, Indonesian, and Korean.
 
-Guided lessons ship for heart (`heart-blood-flow`), brain (`brain-lobes`),
-and lungs (`lungs-airway`) in all twelve locales. Other organs still open
-the 3D specimen and labelling quiz.
+Guided lessons ship for all nine organs in all twelve locales:
+`heart-blood-flow`, `brain-lobes`, `lungs-airway`, `liver-dual-blood`,
+`kidneys-filter-path`, `eye-light-path`, `intestine-absorb`,
+`pancreas-dual-gland`, and `skin-layers`.
 
 This app runs on [vinext](https://github.com/cloudflare/vinext). It does
 not use `wrangler.jsonc`. `.openai/hosting.json` declares the Sites D1
