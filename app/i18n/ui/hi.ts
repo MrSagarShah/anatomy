@@ -16,7 +16,7 @@ export const ui: UiDictionary = {
   language: { label: "भाषा", choose: "भाषा चुनें" },
   library: {
     title: "अंग संग्रह", open: "अंग संग्रह खोलें", close: "संग्रह बंद करें",
-    saved: "सहेजे गए अंग", viewAll: "सभी अंग देखें",
+    saved: "सहेजे गए अंग", emptySaved: "अभी कोई सहेजा गया अंग नहीं है। संग्रह से एक बुकमार्क करें।", viewAll: "सभी अंग देखें",
     quoteLine1: "सीखना", quoteLine2: "जिज्ञासा का कार्य है।", quoteSign: "खोजते रहिए!",
   },
   tools: {

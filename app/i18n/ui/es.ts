@@ -16,7 +16,7 @@ export const ui: UiDictionary = {
   language: { label: "Idioma", choose: "Elige un idioma" },
   library: {
     title: "Biblioteca de órganos", open: "Abrir biblioteca de órganos", close: "Cerrar biblioteca",
-    saved: "Órganos guardados", viewAll: "Ver todos los órganos",
+    saved: "Órganos guardados", emptySaved: "Aún no hay órganos guardados. Marca uno en la biblioteca.", viewAll: "Ver todos los órganos",
     quoteLine1: "Aprender es", quoteLine2: "un acto de curiosidad.", quoteSign: "¡Sigue explorando!",
   },
   tools: {

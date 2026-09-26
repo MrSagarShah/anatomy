@@ -10,6 +10,7 @@ import {
   CircleDashed,
   Layers3,
   Maximize2,
+  Play,
   RotateCcw,
   ScanLine,
   Search,
@@ -21,6 +22,8 @@ import {
 import type { Hotspot, Organ } from "../i18n/merge";
 import { format, type GuidedLesson, type UiDictionary } from "../i18n/types";
 import type { AnatomyViewer } from "../lib/three/viewer";
+import { lessonEntryPhase } from "../lib/progress/lesson-entry";
+import type { LessonResume, PriorKnowledge, ProgressEventInput } from "../lib/progress/types";
 
 type Props = {
   organ: Organ;
@@ -33,7 +36,19 @@ type Props = {
   onQuizExit: () => void;
   lesson: GuidedLesson | null;
   onLessonExit: () => void;
+  /** Reopen a guided lesson at the last recorded step or checkpoint. */
+  resume?: LessonResume;
+  /** Advanced learners skip the orientation card on a fresh start. */
+  priorKnowledge?: PriorKnowledge | null;
+  /** Records a learning event (best-effort, may be a no-op when tracking is off). */
+  onEvent?: (event: ProgressEventInput) => void;
+  /** Walks every authored hotspot on the specimen. */
+  tourActive?: boolean;
+  onTourEnd?: () => void;
 };
+
+/** Stable no-op so children can always call the recorder unconditionally. */
+const noEvent: (event: ProgressEventInput) => void = () => {};
 
 /** Fisher–Yates. The quiz asks for every structure once, in a fresh order. */
 function shuffle<T>(items: T[]): T[] {
@@ -52,7 +67,7 @@ type PickRef = { current: (hotspot: Hotspot) => void };
  * organ, so switching specimens restarts it without a resetting effect.
  */
 function LabelQuiz({
-  hotspots, t, pickRef, flash, screenY, onExit,
+  hotspots, t, pickRef, flash, screenY, onExit, onEvent, organId,
 }: {
   hotspots: Hotspot[];
   t: UiDictionary;
@@ -60,6 +75,8 @@ function LabelQuiz({
   flash: (id: string, correct: boolean) => void;
   screenY: (id: string) => number | null;
   onExit: () => void;
+  onEvent: (event: ProgressEventInput) => void;
+  organId: string;
 }) {
   const [seed, setSeed] = useState(0);
   const [step, setStep] = useState(0);
@@ -71,6 +88,16 @@ function LabelQuiz({
   const target = order[step];
   const finished = step >= order.length;
 
+  // Report the final score once the round completes (each round has a fresh
+  // `seed`, so a retry reports again). Depends only on the finished transition.
+  const reportedSeed = useRef(-1);
+  useEffect(() => {
+    if (finished && order.length > 0 && reportedSeed.current !== seed) {
+      reportedSeed.current = seed;
+      onEvent({ kind: "label_quiz_complete", organId, value: score, total: order.length });
+    }
+  }, [finished, onEvent, order.length, organId, score, seed]);
+
   // Refreshed after every render so the viewer's long-lived callback always
   // sees the current question. Writing a ref in an effect is safe; writing one
   // during render is not.
@@ -78,6 +105,7 @@ function LabelQuiz({
     pickRef.current = (hotspot) => {
       if (!target || answer) return;   // ignore extra clicks while feedback shows
       const correct = hotspot.id === target.id;
+      onEvent({ kind: "label_answer", organId, refId: target.id, correct });
       flash(hotspot.id, correct);
       // A miss also marks where the answer actually was — otherwise the learner
       // is told they were wrong but never shown the right structure.
@@ -168,18 +196,40 @@ function useAuthoringFlag() {
   );
 }
 
+function lastIndex(count: number): number {
+  return Math.max(0, count - 1);
+}
+
 function GuidedLessonPanel({
   lesson,
   onFocus,
   onExit,
+  onEvent,
+  organId,
+  resume,
+  priorKnowledge,
 }: {
   lesson: GuidedLesson;
-  onFocus: (hotspotId: string | null, crossSection?: boolean) => void;
+  onFocus: (hotspotId: string | null) => void;
   onExit: () => void;
+  onEvent: (event: ProgressEventInput) => void;
+  organId: string;
+  resume?: LessonResume;
+  priorKnowledge?: PriorKnowledge | null;
 }) {
-  const [phase, setPhase] = useState<"overview" | "steps" | "questions" | "complete">("overview");
-  const [stepIndex, setStepIndex] = useState(0);
-  const [questionIndex, setQuestionIndex] = useState(0);
+  const [phase, setPhase] = useState<"overview" | "steps" | "questions" | "complete">(
+    () => lessonEntryPhase(resume, priorKnowledge),
+  );
+  const [stepIndex, setStepIndex] = useState(() => {
+    if (!resume || resume.completed || resume.questionsAnswered > 0 || resume.stepsCompleted <= 0) {
+      return 0;
+    }
+    return Math.min(resume.stepsCompleted, lastIndex(lesson.steps.length));
+  });
+  const [questionIndex, setQuestionIndex] = useState(() => {
+    if (!resume || resume.completed || resume.questionsAnswered <= 0) return 0;
+    return Math.min(resume.questionsAnswered, lastIndex(lesson.questions.length));
+  });
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const headingRef = useRef<HTMLHeadingElement>(null);
   const step = lesson.steps[stepIndex];
@@ -187,22 +237,58 @@ function GuidedLessonPanel({
   const answer = question ? answers[question.id] : undefined;
   const score = lesson.questions.filter((item) => answers[item.id] === item.answerId).length;
 
+  // Emit completion once when the learner reaches the summary. Meta carries the
+  // lesson id so the rollup can attribute steps/questions to this lesson.
+  const completeReported = useRef(false);
+  useEffect(() => {
+    if (phase === "complete" && !completeReported.current) {
+      completeReported.current = true;
+      onEvent({
+        kind: "lesson_complete",
+        organId,
+        refId: lesson.id,
+        value: score,
+        total: lesson.questions.length,
+        meta: { lessonId: lesson.id },
+      });
+    }
+    if (phase === "overview") completeReported.current = false;
+  }, [phase, onEvent, organId, lesson.id, lesson.questions.length, score]);
+
+  const skippedOverview = useRef(false);
+  useEffect(() => {
+    if (skippedOverview.current) return;
+    if (lessonEntryPhase(resume, priorKnowledge) !== "steps") return;
+    if (resume && (resume.stepsCompleted > 0 || resume.questionsAnswered > 0)) return;
+    skippedOverview.current = true;
+    onEvent({ kind: "lesson_start", organId, refId: lesson.id, meta: { lessonId: lesson.id } });
+  }, [lesson.id, onEvent, organId, priorKnowledge, resume]);
+
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true });
   }, [phase, stepIndex, questionIndex]);
 
   useEffect(() => {
-    if (phase === "steps") onFocus(step?.hotspotId ?? null, step?.crossSection);
-    else if (phase === "questions" && answer) onFocus(question?.hotspotId ?? null, question?.crossSection);
+    if (phase === "steps") onFocus(step?.hotspotId ?? null);
+    else if (phase === "questions" && answer) onFocus(question?.hotspotId ?? null);
     else onFocus(null);
-  }, [answer, onFocus, phase, question?.crossSection, question?.hotspotId, step?.crossSection, step?.hotspotId]);
+  }, [answer, onFocus, phase, question?.hotspotId, step?.hotspotId]);
 
   const begin = () => {
+    onEvent({ kind: "lesson_start", organId, refId: lesson.id, meta: { lessonId: lesson.id } });
     setStepIndex(0);
     setPhase("steps");
   };
 
   const nextStep = () => {
+    onEvent({
+      kind: "lesson_step",
+      organId,
+      refId: step?.id,
+      value: stepIndex,
+      total: lesson.steps.length,
+      meta: { lessonId: lesson.id },
+    });
     if (stepIndex < lesson.steps.length - 1) setStepIndex((value) => value + 1);
     else {
       setQuestionIndex(0);
@@ -285,7 +371,35 @@ function GuidedLessonPanel({
                   key={option.id}
                   type="button"
                   className={`${chosen ? "chosen" : ""} ${correct ? "correct" : ""}`}
-                  onClick={() => !answer && setAnswers((current) => ({ ...current, [question.id]: option.id }))}
+                  onClick={() => {
+                    if (answer) return;
+                    const correct = option.id === question.answerId;
+                    const nextAnswers = { ...answers, [question.id]: option.id };
+                    setAnswers(nextAnswers);
+                    onEvent({
+                      kind: "quiz_answer",
+                      organId,
+                      refId: question.id,
+                      correct,
+                      total: lesson.questions.length,
+                      meta: { lessonId: lesson.id },
+                    });
+                    // The summary also fires lesson_complete; this marks the
+                    // checkpoint itself so the activity log and rollup agree.
+                    if (questionIndex >= lesson.questions.length - 1) {
+                      const nextScore = lesson.questions.filter(
+                        (item) => nextAnswers[item.id] === item.answerId,
+                      ).length;
+                      onEvent({
+                        kind: "quiz_complete",
+                        organId,
+                        refId: lesson.id,
+                        value: nextScore,
+                        total: lesson.questions.length,
+                        meta: { lessonId: lesson.id },
+                      });
+                    }
+                  }}
                   disabled={Boolean(answer)}
                 >
                   <span>{option.label}</span>
@@ -332,7 +446,10 @@ function GuidedLessonPanel({
   );
 }
 
-export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, quizActive, onQuizExit, lesson, onLessonExit }: Props) {
+const TOUR_DWELL_MS = 2400;
+const TOUR_DWELL_REDUCED_MS = 700;
+
+export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, quizActive, onQuizExit, lesson, onLessonExit, resume, priorKnowledge, onEvent, tourActive = false, onTourEnd }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<AnatomyViewer | null>(null);
   const organRef = useRef(organ);
@@ -342,8 +459,11 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [slowLoad, setSlowLoad] = useState(false);
-  const [activeTool, setActiveTool] = useState<string | null>(null);
-  const [lessonCrossSection, setLessonCrossSection] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [toolOn, setToolOn] = useState({ isolate: false, section: false, layers: false });
+  const [tourStep, setTourStep] = useState(0);
+  const onTourEndRef = useRef(onTourEnd);
+  onTourEndRef.current = onTourEnd;
 
   // Opt-in coordinate probe for placing hotspots — not a user-facing feature.
   const authoring = useAuthoringFlag();
@@ -354,9 +474,9 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   // The viewer captures its callbacks once, so live handlers go through refs.
   const pickRef = useRef<(hotspot: Hotspot) => void>(() => {});
   const authorRef = useRef<(point: { x: number; y: number; z: number }) => void>(() => {});
-  const focusLessonHotspot = useCallback((id: string | null, crossSection = false) => {
-    setLessonCrossSection(Boolean(id) && crossSection);
-    viewerRef.current?.focusHotspot(id, crossSection);
+  const focusLessonHotspot = useCallback((id: string | null) => {
+    setToolOn({ isolate: false, section: false, layers: false });
+    viewerRef.current?.focusHotspot(id);
   }, []);
   useEffect(() => {
     authorRef.current = setAuthorPoint;
@@ -398,7 +518,10 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         onLoading: (isLoading, value) => {
           setLoading(isLoading);
           setProgress(value);
-          if (isLoading) setSlowLoad(false);
+          if (isLoading) {
+            setSlowLoad(false);
+            setLoadFailed(false);
+          }
         },
         onPick: (hotspot) => pickRef.current(hotspot),
         onAuthorPoint: (point) => authorRef.current(point),
@@ -411,6 +534,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
       viewer.setOrgan(current.model, current.hotspots, current.accent).catch(() => {
         setLoading(false);
         setProgress(0);
+        setLoadFailed(true);
       });
     });
 
@@ -422,15 +546,55 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   }, []);
 
   useEffect(() => {
+    setToolOn({ isolate: false, section: false, layers: false });
+    setLoadFailed(false);
     viewerRef.current?.setOrgan(organ.model, organ.hotspots, organ.accent).catch(() => {
       setLoading(false);
       setProgress(0);
+      setLoadFailed(true);
     });
   }, [organ]);
 
   // A spinning specimen makes "click the mitral valve" a game of chance, so the
   // quiz holds the model still and restores the user's setting on exit.
-  useEffect(() => viewerRef.current?.setAutoRotate(autoRotate && !quizActive && !lesson), [autoRotate, lesson, quizActive]);
+  useEffect(() => viewerRef.current?.setAutoRotate(autoRotate && !quizActive && !lesson && !tourActive), [autoRotate, lesson, quizActive, tourActive]);
+
+  useEffect(() => {
+    if (!tourActive || lesson || quizActive || loading) {
+      if (!tourActive) setTourStep(0);
+      return;
+    }
+    const ids = organ.hotspots.map((hotspot) => hotspot.id);
+    if (ids.length === 0) {
+      onTourEndRef.current?.();
+      return;
+    }
+    let cancelled = false;
+    let index = 0;
+    let timer = 0;
+    const dwell = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? TOUR_DWELL_REDUCED_MS
+      : TOUR_DWELL_MS;
+
+    const step = () => {
+      if (cancelled) return;
+      if (index >= ids.length) {
+        viewerRef.current?.clearLessonFocus();
+        onTourEndRef.current?.();
+        return;
+      }
+      setTourStep(index);
+      viewerRef.current?.focusHotspot(ids[index]);
+      index += 1;
+      timer = window.setTimeout(step, dwell);
+    };
+    timer = window.setTimeout(step, 80);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+      viewerRef.current?.clearLessonFocus();
+    };
+  }, [lesson, loading, organ.id, quizActive, tourActive]);
   useEffect(() => viewerRef.current?.setQuizMode(quizActive), [quizActive]);
   useEffect(() => viewerRef.current?.setAuthoring(authoring), [authoring]);
 
@@ -441,18 +605,30 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
     viewerRef.current?.attachCallout(node);
   }, []);
 
+  const retryLoad = () => {
+    setLoadFailed(false);
+    setLoading(true);
+    setProgress(0);
+    viewerRef.current?.setOrgan(organ.model, organ.hotspots, organ.accent).catch(() => {
+      setLoading(false);
+      setProgress(0);
+      setLoadFailed(true);
+    });
+  };
+
   const handleTool = (tool: string) => {
     const viewer = viewerRef.current;
     if (!viewer) return;
-    if (tool === "rotate") onAutoRotate(!autoRotate);
-    if (tool === "zoom") viewer.zoom(-1);
-    if (tool === "isolate") setActiveTool(viewer.toggleIsolate() ? tool : null);
-    if (tool === "section") setActiveTool(viewer.toggleCrossSection() ? tool : null);
-    if (tool === "layers") setActiveTool(viewer.toggleLayers() ? tool : null);
+    if (tool === "rotate") viewer.nudgeRotate();
+    if (tool === "zoom") viewer.zoomTowardSelection();
+    if (tool === "isolate") setToolOn((on) => ({ ...on, isolate: viewer.toggleIsolate() }));
+    if (tool === "section") setToolOn((on) => ({ ...on, section: viewer.toggleCrossSection() }));
+    if (tool === "layers") setToolOn((on) => ({ ...on, layers: viewer.toggleLayers() }));
     if (tool === "compare") onCompare();
     if (tool === "reset") {
       viewer.reset();
-      setActiveTool(null);
+      setToolOn({ isolate: false, section: false, layers: false });
+      if (tourActive) onTourEndRef.current?.();
     }
   };
 
@@ -467,7 +643,13 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   ];
 
   return (
-    <section className={`viewer-shell ${lesson ? "lesson-active" : ""}`} aria-label={format(t.viewer.title, { organ: organ.name })}>
+    <section
+      className={`viewer-shell ${lesson ? "lesson-active" : ""} ${tourActive ? "tour-active" : ""}`}
+      aria-label={format(t.viewer.title, { organ: organ.name })}
+      data-lesson-focus={lesson || tourActive ? selected?.id ?? "" : undefined}
+      data-lesson-view={lesson || tourActive ? "surface" : undefined}
+      data-lesson-hotspots={lesson || tourActive ? "focused" : undefined}
+    >
       <div className="viewer-glow" style={{ "--organ-accent": organ.accent } as React.CSSProperties} />
       <div ref={mountRef} className="three-mount" />
 
@@ -475,10 +657,13 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         <GuidedLessonPanel
           key={lesson.id}
           lesson={lesson}
+          organId={organ.id}
+          resume={resume}
+          priorKnowledge={priorKnowledge}
+          onEvent={onEvent ?? noEvent}
           onFocus={focusLessonHotspot}
           onExit={() => {
-            setLessonCrossSection(false);
-            viewerRef.current?.focusHotspot(null, false);
+            viewerRef.current?.clearLessonFocus();
             onLessonExit();
           }}
         />
@@ -488,29 +673,53 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         <div className="lesson-target" role="status" aria-live="polite">
           <Crosshair size={17} />
           <span><small>{lesson.labels.showing}</small><strong>{selected.label}</strong></span>
-          <em>{lessonCrossSection ? lesson.labels.interiorView : lesson.labels.anteriorView}</em>
+          <em>{lesson.labels.anteriorView}</em>
         </div>
       )}
 
-      {!lesson && (
+      {tourActive && !lesson && !quizActive && organ.hotspots[tourStep] && (
+        <div className="tour-bar" role="status" aria-live="polite">
+          <Play size={16} />
+          <div className="tour-copy">
+            <em>{t.cards.functionAnimation}</em>
+            <strong>{organ.hotspots[tourStep].label}</strong>
+            <p>{organ.hotspots[tourStep].detail}</p>
+          </div>
+          <span className="tour-progress">
+            {format(t.quiz.progress, { current: String(tourStep + 1), total: String(organ.hotspots.length) })}
+          </span>
+          <button type="button" onClick={() => onTourEndRef.current?.()} aria-label={t.modal.close}>
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
+      {!lesson && !quizActive && (
       <div className="viewer-tools" aria-label={t.tools.label}>
-        {tools.map(({ id, label, icon: Icon }) => (
+        {tools.map(({ id, label, icon: Icon }) => {
+          const pressed =
+            (id === "isolate" && toolOn.isolate) ||
+            (id === "section" && toolOn.section) ||
+            (id === "layers" && toolOn.layers) ||
+            (id === "compare" && compare);
+          return (
           <button
             key={id}
             type="button"
-            className={`tool-button ${(activeTool === id || (id === "compare" && compare)) ? "active" : ""}`}
+            className={`tool-button ${pressed ? "active" : ""}`}
             onClick={() => handleTool(id)}
-            aria-pressed={activeTool === id || (id === "compare" && compare)}
+            aria-pressed={pressed}
             title={label}
           >
             <Icon size={19} strokeWidth={1.65} />
             <span>{label}</span>
           </button>
-        ))}
+          );
+        })}
       </div>
       )}
 
-      {!quizActive && !lesson && (
+      {!quizActive && !lesson && !tourActive && (
       <aside className="tip-note" aria-label={t.viewer.tip}>
         <span><Sparkles size={15} /> {t.viewer.tip}</span>
         <p>{t.viewer.tipDrag}<br />{t.viewer.tipScroll}<br />{t.viewer.tipClick}</p>
@@ -518,9 +727,9 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
       )}
 
       {selected && !quizActive && (
-        <div className={`hotspot-callout ${lesson ? "lesson-callout" : ""}`} ref={calloutRef} data-side="right">
+        <div className={`hotspot-callout ${lesson || tourActive ? "lesson-callout" : ""}`} ref={calloutRef} data-side="right">
           <div className="callout-body" style={{ "--hotspot-color": selected.color } as React.CSSProperties}>
-            {!lesson && (
+            {!lesson && !tourActive && (
               <button className="callout-close" type="button" onClick={() => viewerRef.current?.clearSelection()} aria-label={t.modal.close}>
                 <X size={13} />
               </button>
@@ -542,6 +751,8 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         <LabelQuiz
           key={organ.id}
           hotspots={organ.hotspots}
+          organId={organ.id}
+          onEvent={onEvent ?? noEvent}
           t={t}
           pickRef={pickRef}
           flash={(id, correct) => viewerRef.current?.flash(id, correct)}
@@ -573,7 +784,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         </div>
       )}
 
-      {loading && slowLoad && (
+      {loading && slowLoad && !loadFailed && (
         <div className="model-loader" role="status" aria-live="polite">
           <div className="loader-orbit"><Maximize2 size={20} /></div>
           <strong>{format(t.viewer.loading, { organ: organ.name })}</strong>
@@ -581,7 +792,14 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         </div>
       )}
 
-      {!quizActive && !lesson && (
+      {loadFailed && (
+        <div className="model-loader" role="alert">
+          <strong>{format(t.viewer.loading, { organ: organ.name })}</strong>
+          <button type="button" className="lesson-button" onClick={retryLoad}>{t.quiz.retry}</button>
+        </div>
+      )}
+
+      {!quizActive && !lesson && !tourActive && (
       <button className="auto-rotate" type="button" onClick={() => onAutoRotate(!autoRotate)} aria-pressed={autoRotate}>
         <RotateCcw size={14} /> {t.viewer.autoRotate}
         <span className={`switch ${autoRotate ? "on" : ""}`}><i /></span>

@@ -16,7 +16,7 @@ export const ui: UiDictionary = {
   language: { label: "언어", choose: "언어 선택" },
   library: {
     title: "장기 라이브러리", open: "장기 라이브러리 열기", close: "라이브러리 닫기",
-    saved: "저장한 장기", viewAll: "모든 장기 보기",
+    saved: "저장한 장기", emptySaved: "저장한 장기가 아직 없습니다. 라이브러리에서 북마크하세요.", viewAll: "모든 장기 보기",
     quoteLine1: "배움은", quoteLine2: "호기심의 행위입니다.", quoteSign: "계속 탐색해 보세요!",
   },
   tools: {

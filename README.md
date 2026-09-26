@@ -1,98 +1,135 @@
-# vinext-starter
+# Anatomy Atelier
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+A 3D anatomy atelier: nine organs, twelve locales, a labelling quiz, guided
+lessons, and ChatGPT-signed-in learner progress on Cloudflare D1.
+
+Explore heart, brain, lungs, liver, kidneys, eye, intestine, pancreas, and
+skin. The UI ships in English, Spanish, Hindi, Chinese, Arabic, Portuguese,
+French, German, Japanese, Russian, Indonesian, and Korean.
+
+Guided lessons ship for all nine organs in all twelve locales:
+`heart-blood-flow`, `brain-lobes`, `lungs-airway`, `liver-dual-blood`,
+`kidneys-filter-path`, `eye-light-path`, `intestine-absorb`,
+`pancreas-dual-gland`, and `skin-layers`.
+
+This app runs on [vinext](https://github.com/cloudflare/vinext). It does
+not use `wrangler.jsonc`. `.openai/hosting.json` declares the Sites D1
+binding; `vite.config.ts` simulates that binding for local Miniflare.
 
 ## Prerequisites
 
 - Node.js `>=22.13.0`
 
-## Quick Start
+## Quick start
 
 ```bash
 npm install
 npm run dev
+```
+
+```bash
 npm run build
 ```
 
-This starter does not use `wrangler.jsonc`.
+## Scripts
 
-## Included Shape
+- `npm run dev` — vinext / Vite local server
+- `npm run build` — vinext production build
+- `npm run build:next` — Next.js build only
+- `npm run db:generate` — generate Drizzle migrations after `db/schema.ts` changes
+- `npm run i18n:audit` — check locale coverage
+- `npm run test:progress` — unit tests for mastery, recommend-next, and streaks
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
+## Auth
 
-## Workspace Auth Headers
+Identity comes from OpenAI Sites / ChatGPT headers, not from an app-owned
+login. The verified address is `oai-authenticated-user-email`. Helpers live
+in `app/chatgpt-auth.ts` (`getChatGPTUser`, `requireChatGPTUser`, sign-in /
+sign-out paths). Dispatch owns `/signin-with-chatgpt`,
+`/signout-with-chatgpt`, and `/callback` — do not add app routes for those
+paths.
 
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
+Progress keys each learner by the SHA-256 of the normalized email. The raw
+address is never stored. See `app/lib/progress/server.ts`.
 
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
+## Data
 
-Treat the full name as optional and fall back to email when it is absent:
+Learner progress uses Cloudflare D1 through the `DB` binding:
 
-```tsx
-import { headers } from "next/headers";
+- `.openai/hosting.json` sets `"d1": "DB"` (R2 stays unused)
+- `db/schema.ts` defines `learners` (background, saved organs, notes),
+  `progress_events`, `organ_mastery`, and `lesson_progress`
+- `drizzle/0000_messy_inhumans.sql` is the initial migration;
+  `drizzle/0001_glossy_stature.sql` adds `saved_organs` and `notes`
+- `db/index.ts` opens Drizzle against `env.DB`
 
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
+Without the D1 binding — or if the tables have not been applied — the
+progress API returns `{ available: false }` and the UI hides progress
+instead of crashing.
 
-  const displayName = fullName ?? email;
-  // ...
+This repo has no `wrangler.jsonc`. Local Vite uses the placeholder
+database id already in `vite.config.ts` (`site-creator-d1`). Do not treat
+that placeholder as a production `database_id`.
+
+## Applying migrations
+
+`drizzle-kit migrate` is not wired here: `drizzle.config.ts` has no
+database URL and no D1 HTTP credentials. Use Wrangler against the SQL
+file.
+
+### Local Miniflare (same persist as `npm run dev`)
+
+`@cloudflare/vite-plugin` persists D1 under `.wrangler/state`. Wrangler
+still needs a config that names the same binding Vite injects. This
+project does not commit one. Write a throwaway config (do not check it
+in) that matches `vite.config.ts`:
+
+```jsonc
+{
+  "name": "anatomy-atelier-local-d1",
+  "compatibility_date": "2026-09-25",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "site-creator-d1",
+      "database_id": "00000000-0000-4000-8000-000000000000"
+    }
+  ]
 }
 ```
 
-## Optional Dispatch-Owned ChatGPT Sign-In
+Then, with Node `>=22.13` and that file as `--config`:
 
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
+```bash
+npx wrangler d1 execute site-creator-d1 \
+  --local \
+  --persist-to=.wrangler/state \
+  --file=./drizzle/0000_messy_inhumans.sql \
+  --config=/path/to/that-wrangler.jsonc
+```
 
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
+That creates `learners`, `lesson_progress`, `organ_mastery`, and
+`progress_events` in the local persist directory. Re-run only if you
+wipe `.wrangler/state`.
 
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
+### Production D1
 
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
+The dedicated database is `anatomy-atelier`. Schema
+(`learners` including `saved_organs` and `notes`, `lesson_progress`,
+`organ_mastery`, `progress_events`) is already applied remotely. Later
+schema changes:
 
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
+```bash
+npx wrangler d1 execute anatomy-atelier \
+  --remote \
+  --file=./drizzle/<new-migration>.sql
+```
 
-## Useful Commands
+`.openai/hosting.json` declares the binding name `DB`. Point the OpenAI
+Sites / Cloudflare control plane at this D1 so the live site can write
+progress. Do not reuse an unrelated D1 from another project.
 
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
+## Learn more
 
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+- [vinext](https://github.com/cloudflare/vinext)
+- [Drizzle D1 guide](https://orm.drizzle.team/docs/get-started/d1-new)

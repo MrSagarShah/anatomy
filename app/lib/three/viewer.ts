@@ -46,6 +46,7 @@ export class AnatomyViewer {
   private depthMaterial = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: true, depthTest: true });
   private crossSection = false;
   private isolated = false;
+  private layered = false;
 
   private width = 1;
   private height = 1;
@@ -247,6 +248,10 @@ export class AnatomyViewer {
   async setOrgan(modelUrl: string, hotspots: Hotspot[], accent: string) {
     const request = ++this.loadRequest;
     this.select(null);
+    this.isolated = false;
+    this.layered = false;
+    this.applyIsolateVisuals();
+    if (this.crossSection) this.setCrossSection(false);
     this.callbacks.onLoading(true, 0);
 
     const outgoing = this.organ;
@@ -553,6 +558,7 @@ export class AnatomyViewer {
     if (this.selectedId === id) return;
     this.selectedId = id;
     this.busy(0.4);
+    if (this.isolated) this.applyIsolateDots();
     const marker = this.hotspots.list.find((item) => item.hotspot.id === id);
     this.callbacks.onSelect(marker?.hotspot ?? null);
   }
@@ -566,8 +572,12 @@ export class AnatomyViewer {
    * Guided lessons use the same authored anchors as free exploration, so the
    * instructional camera never drifts away from the anatomy it describes.
    */
-  focusHotspot(id: string | null, crossSection = false) {
-    this.setCrossSection(Boolean(id) && crossSection);
+  focusHotspot(id: string | null) {
+    // The current GLB is a closed exterior mesh, not a sectional anatomy
+    // model. Clipping it removes half the specimen without revealing chambers.
+    this.setCrossSection(false);
+    this.hotspots.focusOnly(id);
+    this.busy(0.5);
     if (!id || !this.organ) {
       this.select(null);
       return;
@@ -585,6 +595,13 @@ export class AnatomyViewer {
     this.select(id);
   }
 
+  clearLessonFocus() {
+    this.setCrossSection(false);
+    this.hotspots.showAll();
+    this.select(null);
+    this.busy(0.5);
+  }
+
   /** The callout is positioned imperatively so tracking a spinning model never
    *  triggers a React render. */
   attachCallout(element: HTMLElement | null) {
@@ -598,7 +615,10 @@ export class AnatomyViewer {
     const point = this.hotspots.screenPosition(this.selectedId, this.camera, this.width, this.height);
     if (!point) return;
     this.calloutEl.style.transform = `translate3d(${Math.round(point.x)}px, ${Math.round(point.y)}px, 0)`;
-    this.calloutEl.dataset.side = point.x > this.width * 0.6 ? "left" : "right";
+    const rtl = document.documentElement.dir === "rtl";
+    this.calloutEl.dataset.side = rtl
+      ? (point.x < this.width * 0.4 ? "right" : "left")
+      : (point.x > this.width * 0.6 ? "left" : "right");
     this.calloutEl.dataset.behind = point.opacity < 0.3 ? "true" : "false";
   }
 
@@ -626,6 +646,12 @@ export class AnatomyViewer {
 
   reset() {
     this.select(null);
+    this.setCrossSection(false);
+    this.isolated = false;
+    this.layered = false;
+    this.applyIsolateVisuals();
+    this.applyIsolateDots();
+    this.applyLayers();
     this.tween(this.camera.position, { ...HOME_CAMERA, duration: 0.8, ease: "power3.out" });
     this.tween(this.controls.target, { ...HOME_TARGET, duration: 0.8, ease: "power3.out" });
     if (this.organ) this.tween(this.organ.pivot.rotation, { x: 0.05, y: -0.28, z: 0, duration: 0.8, ease: "power3.out" });
@@ -639,12 +665,37 @@ export class AnatomyViewer {
     });
   }
 
-  toggleIsolate() {
-    this.isolated = !this.isolated;
+  /** Dollies in unless already close, then dollies back out. */
+  zoomTowardSelection() {
+    this.zoom(this.camera.position.z <= 6.2 ? 1 : -1);
+  }
+
+  /** Quarter-turn the specimen so Rotate is distinct from auto-rotate. */
+  nudgeRotate() {
+    if (!this.organ) return;
+    this.tween(this.organ.pivot.rotation, {
+      y: this.organ.pivot.rotation.y + Math.PI / 2,
+      duration: 0.55,
+      ease: "power2.out",
+    });
+  }
+
+  private applyIsolateVisuals() {
     const plinth = this.plinth.material as THREE.MeshStandardMaterial;
     plinth.transparent = true;
-    this.tween(plinth, { opacity: this.isolated ? 0.15 : 1, duration: 0.45 });
-    this.tween(this.contactShadow.material, { opacity: this.isolated ? 0.08 : 0.55, duration: 0.45 });
+    this.tween(plinth, { opacity: this.isolated ? 0.12 : 1, duration: 0.45 });
+    this.tween(this.contactShadow.material, { opacity: this.isolated ? 0.06 : 0.55, duration: 0.45 });
+  }
+
+  private applyIsolateDots() {
+    if (this.isolated && this.selectedId) this.hotspots.focusOnly(this.selectedId);
+    else this.hotspots.showAll();
+  }
+
+  toggleIsolate() {
+    this.isolated = !this.isolated;
+    this.applyIsolateVisuals();
+    this.applyIsolateDots();
     return this.isolated;
   }
 
@@ -680,17 +731,24 @@ export class AnatomyViewer {
     this.dirty = true;
   }
 
-  toggleLayers() {
-    if (!this.organ) return false;
-    let enabled = false;
+  private applyLayers() {
+    if (!this.organ) return;
     this.materials(this.organ).forEach((material) => {
       if (material instanceof THREE.MeshStandardMaterial) {
-        material.wireframe = !material.wireframe;
-        enabled = material.wireframe;
+        material.transparent = this.layered;
+        material.opacity = this.layered ? 0.36 : 1;
+        material.depthWrite = !this.layered;
+        material.wireframe = false;
+        material.needsUpdate = true;
       }
     });
     this.dirty = true;
-    return enabled;
+  }
+
+  toggleLayers() {
+    this.layered = !this.layered;
+    this.applyLayers();
+    return this.layered;
   }
 
   dispose() {

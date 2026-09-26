@@ -48,7 +48,6 @@ export const organs: OrganContentDictionary = {
           insight: "Direction: body → right atrium.",
           route: "Body → right atrium",
           hotspotId: "right-atrium",
-          crossSection: true,
         },
         {
           id: "right-ventricle",
@@ -59,7 +58,6 @@ export const organs: OrganContentDictionary = {
           insight: "The pulmonary arteries are unusual: they carry oxygen-poor blood.",
           route: "Right atrium → tricuspid valve → right ventricle → pulmonary artery",
           hotspotId: "right-ventricle",
-          crossSection: true,
         },
         {
           id: "left-atrium",
@@ -70,7 +68,6 @@ export const organs: OrganContentDictionary = {
           insight: "The pulmonary veins are unusual: they carry oxygen-rich blood.",
           route: "Lungs → pulmonary veins → left atrium",
           hotspotId: "left-atrium",
-          crossSection: true,
         },
         {
           id: "mitral",
@@ -81,7 +78,6 @@ export const organs: OrganContentDictionary = {
           insight: "Valves respond to pressure differences; they do not actively pull themselves open.",
           route: "Left atrium → mitral valve → left ventricle",
           hotspotId: "mitral",
-          crossSection: true,
         },
         {
           id: "left-ventricle",
@@ -92,7 +88,6 @@ export const organs: OrganContentDictionary = {
           insight: "Structure matches function: a thicker myocardium supports a higher-pressure pump.",
           route: "Left atrium → left ventricle → aortic valve",
           hotspotId: "left-ventricle",
-          crossSection: true,
         },
         {
           id: "aorta",
@@ -119,7 +114,6 @@ export const organs: OrganContentDictionary = {
           explanation:
             "The left ventricle supplies the systemic circuit. Its thick myocardium creates the pressure needed to move blood throughout the body.",
           hotspotId: "left-ventricle",
-          crossSection: true,
         },
         {
           id: "returning-blood",
@@ -134,7 +128,6 @@ export const organs: OrganContentDictionary = {
           explanation:
             "The superior and inferior venae cavae return oxygen-poor blood from the body to the right atrium.",
           hotspotId: "right-atrium",
-          crossSection: true,
         },
         {
           id: "mitral-role",
@@ -149,7 +142,6 @@ export const organs: OrganContentDictionary = {
           explanation:
             "The mitral valve closes during left-ventricular contraction, helping keep blood moving forward toward the aorta.",
           hotspotId: "mitral",
-          crossSection: true,
         },
       ],
       sources: [
@@ -166,7 +158,6 @@ export const organs: OrganContentDictionary = {
         stepProgress: "Step {current} of {total}",
         showing: "Now showing",
         anteriorView: "Anterior view · anatomical right appears on your left",
-        interiorView: "Interior cutaway · anatomical right appears on your left",
         flow: "Blood-flow path",
         checkpoint: "Check your understanding",
         questionProgress: "Question {current} of {total}",
@@ -206,6 +197,150 @@ export const organs: OrganContentDictionary = {
     tissue: "Cerebral cortex",
     comparison: "Brain vs. eye",
     conditions: ["Migraine", "Stroke", "Neurodegenerative disease", "Epilepsy", "Traumatic brain injury", "Meningitis", "Multiple sclerosis", "Brain aneurysm"],
+    lesson: {
+      id: "brain-lobes",
+      eyebrow: "Guided discovery · Brain",
+      title: "Four functional neighborhoods",
+      summary:
+        "Walk the cerebrum’s paired hemispheres and the cerebellum. Each highlight on the specimen marks a neighborhood with a distinct job: planning movement, sensing the body in space, hearing and memory, and coordinating action.",
+      duration: "5 min",
+      objectives: [
+        "Name the four mapped neighborhoods and the job each is best known for",
+        "Distinguish the cerebral lobes from the cerebellum",
+        "Explain why the cerebrum is described as paired hemispheres",
+      ],
+      steps: [
+        {
+          id: "overview",
+          eyebrow: "Orient yourself",
+          title: "The cerebrum is two hemispheres, not one mass",
+          body:
+            "A deep longitudinal fissure divides the cerebrum into right and left hemispheres. Each hemisphere is covered by cortex that anatomists group into lobes. This lesson maps three of those lobes plus the cerebellum. Vision begins mainly in the occipital lobe, which is not marked on this specimen.",
+          insight: "Functions overlap across regions; the lobe names are useful neighborhoods, not sealed compartments.",
+          route: "Hemispheres → cortical lobes → cerebellum",
+        },
+        {
+          id: "frontal",
+          eyebrow: "Planning and movement",
+          title: "Frontal lobe",
+          body:
+            "The frontal lobe lies anterior to the central sulcus. Its precentral gyrus is the primary motor cortex: upper motor neurons here issue commands that reach skeletal muscle via the spinal cord. Just ahead, premotor cortex helps plan a movement before it is executed.",
+          insight: "More anterior prefrontal cortex supports decision-making, short-term memory, and aspects of personality.",
+          route: "Cerebrum → frontal lobe → motor commands",
+          hotspotId: "frontal",
+        },
+        {
+          id: "parietal",
+          eyebrow: "Sensation and space",
+          title: "Parietal lobe",
+          body:
+            "Behind the central sulcus, the parietal lobe processes somatosensation — touch, pressure, pain, vibration, and the sense of where the body is in space. The postcentral gyrus is the primary somatosensory cortex.",
+          insight: "This neighborhood turns raw body sensation into a usable map of position and contact.",
+          route: "Body senses → parietal lobe",
+          hotspotId: "parietal",
+        },
+        {
+          id: "temporal",
+          eyebrow: "Hearing and memory",
+          title: "Temporal lobe",
+          body:
+            "The temporal lobe sits beneath the lateral sulcus. Superior temporal cortex includes the primary auditory areas. Deeper temporal structures are essential for forming long-term memories, though stored traces are often distributed to the regions that first perceived the event.",
+          insight: "Hearing is localized here; memory is assembled here and then widely networked.",
+          route: "Sound and experience → temporal lobe",
+          hotspotId: "temporal",
+        },
+        {
+          id: "cerebellum",
+          eyebrow: "Coordination, not a cerebral lobe",
+          title: "Cerebellum",
+          body:
+            "The cerebellum — the “little brain” — sits on the posterior brain stem and accounts for about one-tenth of brain mass. It receives a copy of descending motor commands and compares them with sensory feedback from muscles, joints, and balance organs.",
+          insight: "When the comparison does not match, the cerebellum issues corrections that keep movement smooth.",
+          route: "Frontal commands + sensory feedback → cerebellum",
+          hotspotId: "cerebellum",
+        },
+        {
+          id: "synthesis",
+          eyebrow: "Put the map together",
+          title: "Neighborhoods, not isolated boxes",
+          body:
+            "Frontal cortex plans and launches movement; parietal cortex reports the body in space; temporal cortex hears and helps encode memory; the cerebellum refines the result. The occipital lobe, unmarked here, begins visual processing. The two cerebral hemispheres communicate across the corpus callosum.",
+          insight: "A useful rule: cerebrum interprets and decides; cerebellum compares and coordinates.",
+          route: "Frontal · parietal · temporal · cerebellum",
+        },
+      ],
+      questions: [
+        {
+          id: "motor-planning",
+          prompt: "Which mapped region is primarily associated with planning and initiating voluntary movement?",
+          options: [
+            { id: "parietal", label: "Parietal lobe" },
+            { id: "frontal", label: "Frontal lobe" },
+            { id: "temporal", label: "Temporal lobe" },
+            { id: "cerebellum", label: "Cerebellum" },
+          ],
+          answerId: "frontal",
+          explanation:
+            "The frontal lobe contains the primary motor cortex and premotor areas that plan and issue commands for skeletal-muscle movement.",
+          hotspotId: "frontal",
+        },
+        {
+          id: "somatosensation",
+          prompt: "Where is somatosensation — touch, pressure, and body position — first processed at the cortical surface?",
+          options: [
+            { id: "frontal", label: "Frontal lobe" },
+            { id: "temporal", label: "Temporal lobe" },
+            { id: "parietal", label: "Parietal lobe" },
+            { id: "cerebellum", label: "Cerebellum" },
+          ],
+          answerId: "parietal",
+          explanation:
+            "The parietal lobe houses the primary somatosensory cortex, just behind the central sulcus, and contributes to spatial awareness of the body.",
+          hotspotId: "parietal",
+        },
+        {
+          id: "compare-and-correct",
+          prompt: "Which structure compares motor commands with sensory feedback to keep movement coordinated?",
+          options: [
+            { id: "temporal", label: "Temporal lobe" },
+            { id: "frontal", label: "Frontal lobe" },
+            { id: "parietal", label: "Parietal lobe" },
+            { id: "cerebellum", label: "Cerebellum" },
+          ],
+          answerId: "cerebellum",
+          explanation:
+            "The cerebellum is not a cerebral lobe. It compares descending commands with proprioceptive and balance feedback, then issues corrections.",
+          hotspotId: "cerebellum",
+        },
+      ],
+      sources: [
+        { label: "OpenStax Anatomy & Physiology 2e · The central nervous system", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/13-2-the-central-nervous-system" },
+        { label: "NINDS · Brain Basics: Know Your Brain", url: "https://www.ninds.nih.gov/health-information/public-education/brain-basics/brain-basics-know-your-brain" },
+      ],
+      evidenceReviewedAt: "2026-09-25",
+      reviewNote: "Educational draft · source-checked; clinical review still required before use as medical guidance.",
+      labels: {
+        objectives: "In this lesson",
+        begin: "Begin the journey",
+        previous: "Previous",
+        next: "Next structure",
+        stepProgress: "Step {current} of {total}",
+        showing: "Now showing",
+        anteriorView: "Anterior view · anatomical right appears on your left",
+        flow: "Functional map",
+        checkpoint: "Check your understanding",
+        questionProgress: "Question {current} of {total}",
+        correct: "Exactly right",
+        incorrect: "Take another look",
+        continue: "Continue",
+        complete: "Journey complete",
+        score: "You answered {score} of {total} correctly.",
+        retry: "Review again",
+        exit: "Return to free explore",
+        sources: "Sources",
+        reviewed: "Evidence reviewed {date}",
+      },
+    },
     hotspots: {
       "frontal": { label: "Frontal Lobe", detail: "Planning & movement" },
       "parietal": { label: "Parietal Lobe", detail: "Sensory integration" },
@@ -229,6 +364,161 @@ export const organs: OrganContentDictionary = {
     tissue: "Alveolar tissue",
     comparison: "Lungs vs. heart",
     conditions: ["Asthma", "COPD", "Pneumonia", "Pulmonary embolism", "Pulmonary fibrosis", "Bronchitis", "Cystic fibrosis", "Lung cancer"],
+    lesson: {
+      id: "lungs-airway",
+      eyebrow: "Guided discovery · Lungs",
+      title: "The path of inspired air",
+      summary:
+        "Follow air from the trachea into the main bronchi, then compare the three-lobed right lung with the two-lobed left. The base sits on the diaphragm — the reason the chest can change volume so gas exchange can occur deeper in the tissue.",
+      duration: "6 min",
+      objectives: [
+        "Trace inspired air from the trachea into the main bronchi",
+        "Contrast the right and left lungs by lobe count and cardiac notch",
+        "Relate the lung base to the diaphragm and the purpose of gas exchange",
+      ],
+      steps: [
+        {
+          id: "overview",
+          eyebrow: "Orient yourself",
+          title: "Conducting airways first, exchange later",
+          body:
+            "The respiratory system has a conducting zone that moves, warms, and filters air, and a respiratory zone where oxygen and carbon dioxide cross into blood. This walk-through follows the visible path: trachea, main bronchi, the two lungs, and the base on the diaphragm.",
+          insight: "Alveoli are the destination of this path, but they are microscopic and are not marked as a hotspot on this specimen.",
+          route: "Airway → lungs → exchange surface",
+        },
+        {
+          id: "trachea",
+          eyebrow: "The shared windpipe",
+          title: "Trachea",
+          body:
+            "After the larynx, air enters the trachea — a midline tube held open by C-shaped cartilaginous rings. It is a conducting structure: air passes through it but does not exchange gases here.",
+          insight: "Direction on inspiration: larynx → trachea → paired main bronchi.",
+          route: "Larynx → trachea",
+          hotspotId: "trachea",
+        },
+        {
+          id: "bronchus",
+          eyebrow: "The first split",
+          title: "Main bronchi",
+          body:
+            "The trachea divides into right and left main (principal) bronchi. Each primary bronchus enters its lung at the hilum, together with pulmonary vessels and nerves, then continues branching as the bronchial tree.",
+          insight: "Like the trachea, the main bronchi are passageways. Their job is to deliver air, not to exchange it.",
+          route: "Trachea → main bronchi → hilum",
+          hotspotId: "bronchus",
+        },
+        {
+          id: "right-lung",
+          eyebrow: "The larger field",
+          title: "Right lung",
+          body:
+            "The right lung is shorter and wider than the left and is divided into three lobes — superior, middle, and inferior. Each lobe receives its own secondary (lobar) bronchus from the right main bronchus.",
+          insight: "Three lobes give the right lung a larger volume than the left.",
+          route: "Right main bronchus → three lobes",
+          hotspotId: "right-lung",
+        },
+        {
+          id: "left-lung",
+          eyebrow: "Room for the heart",
+          title: "Left lung",
+          body:
+            "The left lung has two lobes — superior and inferior — and occupies a smaller volume. A cardiac notch indents its medial surface so the heart can sit in the mediastinum without crowding the airway field.",
+          insight: "Two lobes plus the cardiac notch are the structural signature of the left lung.",
+          route: "Left main bronchus → two lobes (cardiac notch)",
+          hotspotId: "left-lung",
+        },
+        {
+          id: "base",
+          eyebrow: "Against the diaphragm",
+          title: "Base of the lung",
+          body:
+            "Each lung is roughly pyramidal: the apex points toward the neck, and the broad base rests on the diaphragm. That dome-shaped muscle forms the floor of the thoracic cavity. When it contracts it flattens, expanding chest volume so air is drawn down the path you just traced.",
+          insight: "The base is a surface, not a chamber — it is where lung meets the primary muscle of quiet breathing.",
+          route: "Lobes → base → diaphragm",
+          hotspotId: "base",
+        },
+        {
+          id: "synthesis",
+          eyebrow: "Why the path exists",
+          title: "Delivery for diffusion",
+          body:
+            "Inspired air travels trachea → main bronchi → lobar branches inside a three-lobed right lung and a two-lobed left lung. Deeper still, bronchioles end in alveoli. Across that thin respiratory membrane, oxygen enters blood and carbon dioxide leaves it by simple diffusion.",
+          insight: "Complete path: airway → branching bronchi → lungs → alveolar surface → blood.",
+          route: "Trachea → bronchi → lungs → alveoli",
+        },
+      ],
+      questions: [
+        {
+          id: "first-split",
+          prompt: "Which structure divides to send air into the right and left lungs?",
+          options: [
+            { id: "base", label: "Base of the lung" },
+            { id: "trachea", label: "Trachea" },
+            { id: "left-lung", label: "Left lung" },
+            { id: "right-lung", label: "Right lung" },
+          ],
+          answerId: "trachea",
+          explanation:
+            "The trachea is the shared windpipe. It splits into the right and left main bronchi, which enter the lungs at the hilum.",
+          hotspotId: "trachea",
+        },
+        {
+          id: "lobe-count",
+          prompt: "Why does the left lung have two lobes rather than three?",
+          options: [
+            { id: "shorter-diaphragm", label: "The left hemidiaphragm sits higher" },
+            { id: "fewer-bronchi", label: "The left side has no main bronchus" },
+            { id: "cardiac-notch", label: "A cardiac notch leaves space for the heart" },
+            { id: "apex-missing", label: "The left lung has no apex" },
+          ],
+          answerId: "cardiac-notch",
+          explanation:
+            "The left lung occupies less volume than the right. Its cardiac notch is an indentation that accommodates the heart; it has two lobes rather than three.",
+          hotspotId: "left-lung",
+        },
+        {
+          id: "base-diaphragm",
+          prompt: "The base of each lung rests on which structure?",
+          options: [
+            { id: "trachea", label: "Trachea" },
+            { id: "bronchus", label: "Main bronchi" },
+            { id: "sternum", label: "Sternum" },
+            { id: "diaphragm", label: "Diaphragm" },
+          ],
+          answerId: "diaphragm",
+          explanation:
+            "The apex is superior; the base is the broad inferior surface that borders the diaphragm, the dome-shaped muscle that changes thoracic volume.",
+          hotspotId: "base",
+        },
+      ],
+      sources: [
+        { label: "OpenStax Anatomy & Physiology 2e · Respiratory organs", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/22-1-organs-and-structures-of-the-respiratory-system" },
+        { label: "OpenStax Anatomy & Physiology 2e · The lungs", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/22-2-the-lungs" },
+        { label: "NHLBI · How the lungs work · The respiratory system", url: "https://www.nhlbi.nih.gov/health/lungs/respiratory-system" },
+      ],
+      evidenceReviewedAt: "2026-09-25",
+      reviewNote: "Educational draft · source-checked; clinical review still required before use as medical guidance.",
+      labels: {
+        objectives: "In this lesson",
+        begin: "Begin the journey",
+        previous: "Previous",
+        next: "Next structure",
+        stepProgress: "Step {current} of {total}",
+        showing: "Now showing",
+        anteriorView: "Anterior view · anatomical right appears on your left",
+        flow: "Airway path",
+        checkpoint: "Check your understanding",
+        questionProgress: "Question {current} of {total}",
+        correct: "Exactly right",
+        incorrect: "Take another look",
+        continue: "Continue",
+        complete: "Journey complete",
+        score: "You answered {score} of {total} correctly.",
+        retry: "Review again",
+        exit: "Return to free explore",
+        sources: "Sources",
+        reviewed: "Evidence reviewed {date}",
+      },
+    },
     hotspots: {
       "trachea": { label: "Trachea", detail: "Carries air to the lungs" },
       "right-lung": { label: "Right Lung", detail: "Three lobes" },
@@ -253,6 +543,140 @@ export const organs: OrganContentDictionary = {
     tissue: "Hepatic lobules",
     comparison: "Liver vs. intestine",
     conditions: ["Fatty liver disease", "Hepatitis", "Cirrhosis", "Gallstones", "Haemochromatosis", "Liver cancer", "Autoimmune hepatitis", "Portal hypertension"],
+    lesson: {
+      id: "liver-dual-blood",
+      eyebrow: "Guided discovery · Liver",
+      title: "Two inflows, one metabolic factory",
+      summary:
+        "Map the large right lobe, the left lobe that crosses the midline, and the portal vein that brings nutrient-rich blood from the gut. The liver is unusual: most of its blood arrives already used by the digestive tract.",
+      duration: "5 min",
+      objectives: [
+        "Distinguish the right and left hepatic lobes on the specimen",
+        "Explain why the portal vein is the liver’s main inflow",
+        "Relate dual blood supply to metabolism and bile production",
+      ],
+      steps: [
+        {
+          id: "overview",
+          eyebrow: "Orient yourself",
+          title: "The liver sits under the diaphragm on the right",
+          body:
+            "The liver is the largest internal organ. It occupies the right upper abdomen and extends across the midline. Functionally it is a chemical factory: it processes absorbed nutrients, makes plasma proteins, stores glycogen, and produces bile. Structurally it has two inflows — the hepatic portal vein and the hepatic artery — and two outflows — hepatic veins into the inferior vena cava, and bile toward the gut.",
+          insight: "Most organs receive one arterial supply. The liver receives portal blood from the gut and arterial blood from the celiac trunk.",
+          route: "Gut + artery → liver → veins and bile",
+        },
+        {
+          id: "right-lobe",
+          eyebrow: "The larger field",
+          title: "Right lobe",
+          body:
+            "The right lobe is the larger of the two main lobes visible here. A falciform ligament on the anterior surface marks the boundary with the left lobe. Most of the liver’s bulk, and therefore most of its metabolic work, lives on this right-sided mass under the right hemidiaphragm.",
+          insight: "On the inferior surface, anatomists also name caudate and quadrate lobes — smaller territories that are not marked on this specimen.",
+          route: "Diaphragm → right lobe",
+          hotspotId: "right-lobe",
+        },
+        {
+          id: "left-lobe",
+          eyebrow: "Across the midline",
+          title: "Left lobe",
+          body:
+            "The left lobe is smaller and extends toward the left upper abdomen, crossing the midline. It still contains the same repeating units — hepatic lobules — in which plates of hepatocytes meet blood in sinusoids. Function is not split by side the way lung lobes are; both lobes run the same chemistry.",
+          insight: "Lobe names are topographic. A hepatocyte in the left lobe does the same jobs as one in the right.",
+          route: "Midline → left lobe",
+          hotspotId: "left-lobe",
+        },
+        {
+          id: "portal",
+          eyebrow: "The unusual inflow",
+          title: "Hepatic portal vein",
+          body:
+            "The hepatic portal vein collects blood from the stomach, intestines, spleen, and pancreas and delivers it to the liver before that blood returns to the heart. About three-quarters of hepatic blood flow is portal — nutrient-rich, relatively oxygen-poor. The hepatic artery, not marked here, supplies the remaining oxygenated quarter.",
+          insight: "Portal means “gateway”: absorbed molecules meet hepatocytes before they enter the general circulation.",
+          route: "Gut capillaries → portal vein → sinusoids",
+          hotspotId: "portal",
+        },
+        {
+          id: "synthesis",
+          eyebrow: "Put the map together",
+          title: "Process, then release",
+          body:
+            "Blood from the portal vein and hepatic artery mixes in sinusoids, contacts hepatocytes, then leaves through hepatic veins. Bile travels in the opposite direction, toward the porta hepatis and the gut. That arrangement lets the liver sample what you absorb, store or convert it, and send leftover waste toward the intestine as bile.",
+          insight: "Complete path: gut → portal vein → lobules → hepatic veins; bile leaves toward the duodenum.",
+          route: "Right lobe · left lobe · portal inflow",
+        },
+      ],
+      questions: [
+        {
+          id: "larger-lobe",
+          prompt: "Which lobe forms most of the liver’s visible bulk under the right hemidiaphragm?",
+          options: [
+            { id: "left-lobe", label: "Left lobe" },
+            { id: "right-lobe", label: "Right lobe" },
+            { id: "portal", label: "Portal vein" },
+            { id: "caudate", label: "Caudate lobe only" },
+          ],
+          answerId: "right-lobe",
+          explanation:
+            "The right lobe is the larger of the two main lobes on this specimen and occupies the right upper abdomen beneath the diaphragm.",
+          hotspotId: "right-lobe",
+        },
+        {
+          id: "portal-job",
+          prompt: "What does the hepatic portal vein carry to the liver?",
+          options: [
+            { id: "bile-out", label: "Bile leaving toward the gut" },
+            { id: "pure-oxygen", label: "Only fully oxygenated arterial blood" },
+            { id: "gut-blood", label: "Nutrient-rich blood from the digestive tract" },
+            { id: "urine", label: "Filtered waste toward the bladder" },
+          ],
+          answerId: "gut-blood",
+          explanation:
+            "The portal vein collects blood from the stomach, intestines, spleen, and pancreas. Hepatocytes see those absorbed nutrients before the blood returns to the heart.",
+          hotspotId: "portal",
+        },
+        {
+          id: "dual-supply",
+          prompt: "Why is the liver said to have a dual blood supply?",
+          options: [
+            { id: "two-lobes-only", label: "Because it has a right lobe and a left lobe" },
+            { id: "portal-and-artery", label: "It receives portal venous blood and hepatic arterial blood" },
+            { id: "two-ureters", label: "Each lobe drains through its own ureter" },
+            { id: "paired-organs", label: "There is a left liver and a right liver as separate organs" },
+          ],
+          answerId: "portal-and-artery",
+          explanation:
+            "Most hepatic blood is portal (from the gut). The hepatic artery supplies oxygenated blood. Both empty into sinusoids around hepatocytes.",
+          hotspotId: "portal",
+        },
+      ],
+      sources: [
+        { label: "OpenStax Anatomy & Physiology 2e · Liver, pancreas, and gallbladder", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-6-accessory-organs-in-digestion-the-liver-pancreas-and-gallbladder" },
+        { label: "NIDDK · The liver and how it works (liver disease overview)", url: "https://www.niddk.nih.gov/health-information/liver-disease" },
+      ],
+      evidenceReviewedAt: "2026-09-26",
+      reviewNote: "Educational draft · source-checked; clinical review still required before use as medical guidance.",
+      labels: {
+        objectives: "In this lesson",
+        begin: "Begin the journey",
+        previous: "Previous",
+        next: "Next structure",
+        stepProgress: "Step {current} of {total}",
+        showing: "Now showing",
+        anteriorView: "Anterior view · anatomical right appears on your left",
+        flow: "Dual blood path",
+        checkpoint: "Check your understanding",
+        questionProgress: "Question {current} of {total}",
+        correct: "Exactly right",
+        incorrect: "Take another look",
+        continue: "Continue",
+        complete: "Journey complete",
+        score: "You answered {score} of {total} correctly.",
+        retry: "Review again",
+        exit: "Return to free explore",
+        sources: "Sources",
+        reviewed: "Evidence reviewed {date}",
+      },
+    },
     hotspots: {
       "right-lobe": { label: "Right Lobe", detail: "Largest hepatic lobe" },
       "left-lobe": { label: "Left Lobe", detail: "Crosses the midline" },
@@ -275,6 +699,140 @@ export const organs: OrganContentDictionary = {
     tissue: "Renal cortex",
     comparison: "Kidneys vs. liver",
     conditions: ["Kidney stones", "Chronic kidney disease", "Urinary infection", "Glomerulonephritis", "Polycystic kidney disease", "Renal hypertension", "Acute kidney injury", "Nephrotic syndrome"],
+    lesson: {
+      id: "kidneys-filter-path",
+      eyebrow: "Guided discovery · Kidneys",
+      title: "From filtrate to ureter",
+      summary:
+        "Follow the work of a kidney from the outer cortex, where blood is filtered, through the medulla that concentrates the fluid, and out the ureter toward the bladder. Almost everything filtered is reclaimed; only a small volume leaves as urine.",
+      duration: "5 min",
+      objectives: [
+        "Locate the renal cortex and name it as the start of filtration",
+        "Explain how the medulla concentrates tubular fluid",
+        "Trace urine from the kidney into the ureter",
+      ],
+      steps: [
+        {
+          id: "overview",
+          eyebrow: "Orient yourself",
+          title: "Paired filters beside the spine",
+          body:
+            "The kidneys sit retroperitoneal on either side of the vertebral column, roughly from T12 to L3. Each is a bean-shaped filter that sets blood volume, electrolytes, and acid–base balance while removing nitrogenous waste. Blood enters through a renal artery; processed fluid leaves as urine through a ureter.",
+          insight: "About 180 L of filtrate is formed each day. Only 1–2 L is excreted; the rest is reabsorbed.",
+          route: "Renal artery → nephron → ureter",
+        },
+        {
+          id: "cortex",
+          eyebrow: "Where filtration begins",
+          title: "Renal cortex",
+          body:
+            "The cortex is the outer layer. It contains renal corpuscles — a glomerulus of capillaries cupped by Bowman’s capsule — where blood is filtered under pressure. The resulting filtrate enters a tubule that will reclaim water, salts, glucose, and amino acids.",
+          insight: "Filtration is passive and non-selective for small solutes. Selectivity comes later, in the tubule.",
+          route: "Renal artery → glomerulus → filtrate",
+          hotspotId: "cortex",
+        },
+        {
+          id: "medulla",
+          eyebrow: "Where urine is concentrated",
+          title: "Renal medulla",
+          body:
+            "Deep to the cortex, the medulla is organized into pyramids. Loops of Henle and collecting ducts run here. A salt gradient in the medullary interstitium lets the kidney reabsorb large volumes of water when antidiuretic hormone makes collecting ducts permeable.",
+          insight: "Without the medullary gradient, you could not produce urine more concentrated than blood plasma.",
+          route: "Cortex tubules → medullary loops → collecting ducts",
+          hotspotId: "medulla",
+        },
+        {
+          id: "ureter",
+          eyebrow: "The exit pipe",
+          title: "Ureter",
+          body:
+            "Collecting ducts empty into minor and major calyces, then the renal pelvis. From there, a muscular ureter carries urine to the bladder by peristalsis. The ureter is a conduit, not a filter — composition has already been set by the nephron.",
+          insight: "Direction: pyramid → pelvis → ureter → bladder. The bladder stores; it does not refine chemistry.",
+          route: "Pelvis → ureter → bladder",
+          hotspotId: "ureter",
+        },
+        {
+          id: "synthesis",
+          eyebrow: "Put the path together",
+          title: "Filter, reclaim, drain",
+          body:
+            "Blood is filtered in cortical glomeruli. Tubules and the medullary gradient reclaim almost all water and useful solutes. The leftover fluid — urine — leaves through the ureter. That is why a kidney can process a plasma volume many times a day without dehydrating you.",
+          insight: "Complete path: artery → cortex (filter) → medulla (concentrate) → ureter.",
+          route: "Cortex · medulla · ureter",
+        },
+      ],
+      questions: [
+        {
+          id: "where-filter",
+          prompt: "Where does filtration of blood first occur in the kidney?",
+          options: [
+            { id: "ureter", label: "Ureter" },
+            { id: "medulla", label: "Renal medulla only" },
+            { id: "cortex", label: "Renal cortex" },
+            { id: "bladder", label: "Bladder wall" },
+          ],
+          answerId: "cortex",
+          explanation:
+            "Renal corpuscles — glomerulus plus Bowman’s capsule — live in the cortex. That is where filtrate is formed from blood.",
+          hotspotId: "cortex",
+        },
+        {
+          id: "medulla-job",
+          prompt: "What is the medulla’s distinctive job in this path?",
+          options: [
+            { id: "make-erythropoietin-only", label: "It is only an endocrine gland" },
+            { id: "store-urine", label: "It stores urine like a bladder" },
+            { id: "concentrate", label: "It houses the gradient that concentrates tubular fluid" },
+            { id: "filter-first", label: "It contains the glomeruli that first filter blood" },
+          ],
+          answerId: "concentrate",
+          explanation:
+            "Medullary pyramids hold loops of Henle and collecting ducts. The interstitial salt gradient there lets the kidney concentrate urine.",
+          hotspotId: "medulla",
+        },
+        {
+          id: "ureter-role",
+          prompt: "What does the ureter do?",
+          options: [
+            { id: "filter-again", label: "It filters blood a second time" },
+            { id: "carry-urine", label: "It carries urine from the renal pelvis to the bladder" },
+            { id: "make-renin", label: "It secretes renin into the artery" },
+            { id: "absorb-glucose", label: "It reabsorbs glucose from filtrate" },
+          ],
+          answerId: "carry-urine",
+          explanation:
+            "The ureter is a muscular conduit. Composition of urine is set by nephrons before fluid reaches the pelvis and ureter.",
+          hotspotId: "ureter",
+        },
+      ],
+      sources: [
+        { label: "OpenStax Anatomy & Physiology 2e · Gross anatomy of the kidney", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-3-gross-anatomy-of-the-kidney" },
+        { label: "NIDDK · Your kidneys & how they work", url: "https://www.niddk.nih.gov/health-information/kidney-disease/kidneys-how-they-work" },
+      ],
+      evidenceReviewedAt: "2026-09-26",
+      reviewNote: "Educational draft · source-checked; clinical review still required before use as medical guidance.",
+      labels: {
+        objectives: "In this lesson",
+        begin: "Begin the journey",
+        previous: "Previous",
+        next: "Next structure",
+        stepProgress: "Step {current} of {total}",
+        showing: "Now showing",
+        anteriorView: "Anterior view · anatomical right appears on your left",
+        flow: "Filter path",
+        checkpoint: "Check your understanding",
+        questionProgress: "Question {current} of {total}",
+        correct: "Exactly right",
+        incorrect: "Take another look",
+        continue: "Continue",
+        complete: "Journey complete",
+        score: "You answered {score} of {total} correctly.",
+        retry: "Review again",
+        exit: "Return to free explore",
+        sources: "Sources",
+        reviewed: "Evidence reviewed {date}",
+      },
+    },
     hotspots: {
       "cortex": { label: "Renal Cortex", detail: "Outer filtering layer" },
       "medulla": { label: "Renal Medulla", detail: "Concentrates urine" },
@@ -297,6 +855,140 @@ export const organs: OrganContentDictionary = {
     tissue: "Retinal layers",
     comparison: "Eye vs. brain",
     conditions: ["Myopia", "Cataract", "Glaucoma", "Macular degeneration", "Retinal detachment", "Dry eye disease", "Astigmatism", "Conjunctivitis"],
+    lesson: {
+      id: "eye-light-path",
+      eyebrow: "Guided discovery · Eye",
+      title: "From light to optic nerve",
+      summary:
+        "Trace a photon from the clear cornea, through the aperture controlled by the iris, to the optic nerve that carries the retina’s signal into the brain. The lens and retina finish the path; they are not marked on this specimen.",
+      duration: "5 min",
+      objectives: [
+        "Name the cornea as the first and strongest focusing surface",
+        "Explain how the iris sets how much light enters",
+        "Identify the optic nerve as the exit path for visual signals",
+      ],
+      steps: [
+        {
+          id: "overview",
+          eyebrow: "Orient yourself",
+          title: "A camera built from living tissue",
+          body:
+            "The eye sits in the bony orbit. Light must be focused onto a neural sheet — the retina — then encoded as spikes that leave through the optic nerve. This walk-through follows the three marked structures: the cornea that first bends light, the iris that sets the pupil, and the optic nerve that leaves the back of the globe.",
+          insight: "The lens, not marked here, provides the adjustable focus for near and far. The retina converts photons into neural signals.",
+          route: "Light → focus → retina → nerve",
+        },
+        {
+          id: "cornea",
+          eyebrow: "The first lens",
+          title: "Cornea",
+          body:
+            "The cornea is the transparent anterior window. It has no blood vessels; it takes oxygen from the tear film and aqueous humor. Its curved surface provides most of the eye’s fixed refractive power — roughly two-thirds of the bending that aims light toward the retina.",
+          insight: "Clouding of the cornea scatters light before it ever reaches the lens or retina.",
+          route: "Air → tear film → cornea",
+          hotspotId: "cornea",
+        },
+        {
+          id: "iris",
+          eyebrow: "The aperture",
+          title: "Iris",
+          body:
+            "Behind the cornea, the pigmented iris surrounds the pupil. Smooth muscle in the iris constricts or dilates that opening, controlling how much light reaches the lens. In bright light the pupil narrows; in dim light it widens.",
+          insight: "Eye color is iris pigment. The pupil is a hole, not a structure — you see the dark interior through it.",
+          route: "Cornea → pupil (iris) → lens",
+          hotspotId: "iris",
+        },
+        {
+          id: "optic",
+          eyebrow: "The cable out",
+          title: "Optic nerve",
+          body:
+            "Photoreceptors in the retina transduce light. Retinal ganglion-cell axons gather at the optic disc and leave as the optic nerve (cranial nerve II). There are no photoreceptors at the disc — that is the blind spot. The nerve carries a spatiotemporal map, not a picture file.",
+          insight: "Direction: retina → optic nerve → chiasm → visual cortex. The brain constructs the image you experience.",
+          route: "Retina → optic disc → optic nerve",
+          hotspotId: "optic",
+        },
+        {
+          id: "synthesis",
+          eyebrow: "Put the path together",
+          title: "Bend, meter, transmit",
+          body:
+            "The cornea does most of the focusing. The iris meters light through the pupil. The lens (unmarked) fine-tunes focus onto the retina. Ganglion-cell axons leave as the optic nerve. Damage anywhere on that chain — cloudy cornea, stuck iris, compressed nerve — changes what the brain can use.",
+          insight: "Complete path: cornea → pupil → lens → retina → optic nerve.",
+          route: "Cornea · iris · optic nerve",
+        },
+      ],
+      questions: [
+        {
+          id: "first-focus",
+          prompt: "Which marked structure provides most of the eye’s fixed focusing power?",
+          options: [
+            { id: "iris", label: "Iris" },
+            { id: "optic", label: "Optic nerve" },
+            { id: "cornea", label: "Cornea" },
+            { id: "pupil", label: "Pupil muscle" },
+          ],
+          answerId: "cornea",
+          explanation:
+            "The cornea’s curved, avascular surface supplies about two-thirds of the eye’s refractive power before light reaches the adjustable lens.",
+          hotspotId: "cornea",
+        },
+        {
+          id: "iris-job",
+          prompt: "What is the iris’s main optical job?",
+          options: [
+            { id: "sense-color", label: "It is the photoreceptor layer" },
+            { id: "carry-signal", label: "It carries axons to the brain" },
+            { id: "set-aperture", label: "It sets pupil size and therefore how much light enters" },
+            { id: "make-tears", label: "It secretes the tear film" },
+          ],
+          answerId: "set-aperture",
+          explanation:
+            "Iris smooth muscle constricts or dilates the pupil, metering light that continues toward the lens and retina.",
+          hotspotId: "iris",
+        },
+        {
+          id: "nerve-out",
+          prompt: "What leaves the eye through the optic nerve?",
+          options: [
+            { id: "tears", label: "Tears from the lacrimal gland" },
+            { id: "focused-light", label: "A beam of focused light" },
+            { id: "neural-spikes", label: "Axons carrying retinal ganglion-cell signals" },
+            { id: "aqueous", label: "Aqueous humor draining from the anterior chamber" },
+          ],
+          answerId: "neural-spikes",
+          explanation:
+            "The optic nerve is cranial nerve II: bundled axons of retinal ganglion cells. Light has already been transduced in the retina.",
+          hotspotId: "optic",
+        },
+      ],
+      sources: [
+        { label: "OpenStax Anatomy & Physiology 2e · Sensory perception (vision)", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/14-1-sensory-perception" },
+        { label: "National Eye Institute · How the eyes work", url: "https://www.nei.nih.gov/learn-about-eye-health/healthy-vision/how-eyes-work" },
+      ],
+      evidenceReviewedAt: "2026-09-26",
+      reviewNote: "Educational draft · source-checked; clinical review still required before use as medical guidance.",
+      labels: {
+        objectives: "In this lesson",
+        begin: "Begin the journey",
+        previous: "Previous",
+        next: "Next structure",
+        stepProgress: "Step {current} of {total}",
+        showing: "Now showing",
+        anteriorView: "Anterior view · anatomical right appears on your left",
+        flow: "Light path",
+        checkpoint: "Check your understanding",
+        questionProgress: "Question {current} of {total}",
+        correct: "Exactly right",
+        incorrect: "Take another look",
+        continue: "Continue",
+        complete: "Journey complete",
+        score: "You answered {score} of {total} correctly.",
+        retry: "Review again",
+        exit: "Return to free explore",
+        sources: "Sources",
+        reviewed: "Evidence reviewed {date}",
+      },
+    },
     hotspots: {
       "cornea": { label: "Cornea", detail: "Clear focusing surface" },
       "iris": { label: "Iris", detail: "Controls light entry" },
@@ -319,6 +1011,140 @@ export const organs: OrganContentDictionary = {
     tissue: "Intestinal villi",
     comparison: "Intestine vs. liver",
     conditions: ["Irritable bowel syndrome", "Inflammatory bowel disease", "Celiac disease", "Diverticulitis", "Intestinal obstruction", "Colorectal polyps", "Crohn's disease", "Lactose intolerance"],
+    lesson: {
+      id: "intestine-absorb",
+      eyebrow: "Guided discovery · Intestine",
+      title: "Mix, absorb, reclaim water",
+      summary:
+        "Walk the gut from the duodenum, where bile and pancreatic juice meet chyme, through the jejunum that absorbs most nutrients, to the colon that reclaims water. Surface area — folds, villi, microvilli — is the reason this tube can feed the rest of the body.",
+      duration: "5 min",
+      objectives: [
+        "Place the duodenum as the first small-intestine segment that receives secretions",
+        "Identify the jejunum as the major nutrient-absorption region",
+        "Explain the colon’s job of reclaiming water",
+      ],
+      steps: [
+        {
+          id: "overview",
+          eyebrow: "Orient yourself",
+          title: "A long tube with two jobs",
+          body:
+            "The small intestine digests and absorbs nutrients. The large intestine (colon) reclaims water and electrolytes and houses much of the microbiome. Food leaving the stomach as chyme enters the duodenum, then the jejunum and ileum (the ileum is not marked here), then the colon.",
+          insight: "Length plus folded mucosa gives the small intestine a huge exchange surface — the “inner garden” is mostly surface area.",
+          route: "Stomach → small intestine → colon",
+        },
+        {
+          id: "duodenum",
+          eyebrow: "The mixing chamber",
+          title: "Duodenum",
+          body:
+            "The duodenum is the first, C-shaped segment of the small intestine, wrapped around the head of the pancreas. It receives chyme from the stomach, bile from the liver and gallbladder, and enzyme-rich juice from the pancreas. Neutralization and chemical digestion accelerate here.",
+          insight: "Bile emulsifies fat; pancreatic enzymes cut protein, carbohydrate, and fat into absorbable pieces.",
+          route: "Stomach → duodenum + bile + pancreatic juice",
+          hotspotId: "duodenum",
+        },
+        {
+          id: "jejunum",
+          eyebrow: "The absorption field",
+          title: "Jejunum",
+          body:
+            "The jejunum is the middle stretch of small intestine and the primary site of nutrient absorption. Its circular folds and villi are especially well developed. Amino acids, sugars, fatty acids, vitamins, and minerals cross the epithelium into blood or lymph.",
+          insight: "Absorption is the point of digestion. If the jejunal surface is damaged, calories and micronutrients are lost in stool.",
+          route: "Duodenum → jejunum → blood and lymph",
+          hotspotId: "jejunum",
+        },
+        {
+          id: "colon",
+          eyebrow: "The water reclaimer",
+          title: "Colon",
+          body:
+            "What remains after the small intestine enters the colon. Here the mucosa reabsorbs water and salts, compacting residue into feces. Resident microbes ferment leftover fiber and produce vitamins such as vitamin K and some B vitamins.",
+          insight: "The colon is not the main nutrient absorber. Its job is salvage — water, electrolytes, and microbial products.",
+          route: "Ileum → colon → rectum",
+          hotspotId: "colon",
+        },
+        {
+          id: "synthesis",
+          eyebrow: "Put the path together",
+          title: "Prepare, take up, dry",
+          body:
+            "The duodenum mixes and chemically prepares chyme. The jejunum absorbs most of what you ate. The colon reclaims water so you do not lose liters of fluid each day. The unmarked ileum, between jejunum and colon, specializes in bile salts and vitamin B12.",
+          insight: "Complete path: stomach → duodenum → jejunum → ileum → colon.",
+          route: "Duodenum · jejunum · colon",
+        },
+      ],
+      questions: [
+        {
+          id: "duodenum-mix",
+          prompt: "Why is the duodenum more than just “the first segment”?",
+          options: [
+            { id: "stores-feces", label: "It stores feces until defecation" },
+            { id: "receives-secretions", label: "It receives bile and pancreatic juice that continue digestion" },
+            { id: "filters-blood", label: "It filters portal blood like the liver" },
+            { id: "makes-insulin", label: "It is the primary source of insulin" },
+          ],
+          answerId: "receives-secretions",
+          explanation:
+            "The C-shaped duodenum accepts chyme, bile, and pancreatic enzymes. Chemical digestion is completed there before the jejunum absorbs the products.",
+          hotspotId: "duodenum",
+        },
+        {
+          id: "jejunum-absorb",
+          prompt: "Which marked region is the major site of nutrient absorption?",
+          options: [
+            { id: "colon", label: "Colon" },
+            { id: "duodenum", label: "Duodenum" },
+            { id: "jejunum", label: "Jejunum" },
+            { id: "stomach", label: "Stomach" },
+          ],
+          answerId: "jejunum",
+          explanation:
+            "The jejunum has especially tall folds and villi. Most amino acids, sugars, fats, and many vitamins cross here into blood or lymph.",
+          hotspotId: "jejunum",
+        },
+        {
+          id: "colon-water",
+          prompt: "What is the colon’s main job in this lesson’s path?",
+          options: [
+            { id: "first-enzymes", label: "It secretes the first digestive enzymes" },
+            { id: "reclaim-water", label: "It reclaims water and electrolytes from leftover material" },
+            { id: "absorb-protein", label: "It absorbs most dietary protein" },
+            { id: "make-bile", label: "It produces bile" },
+          ],
+          answerId: "reclaim-water",
+          explanation:
+            "After the small intestine has taken up nutrients, the colon reabsorbs water and salts and hosts microbes that ferment leftover fiber.",
+          hotspotId: "colon",
+        },
+      ],
+      sources: [
+        { label: "OpenStax Anatomy & Physiology 2e · Small and large intestines", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-5-the-small-and-large-intestines" },
+        { label: "NIDDK · Your digestive system & how it works", url: "https://www.niddk.nih.gov/health-information/digestive-diseases/digestive-system-how-it-works" },
+      ],
+      evidenceReviewedAt: "2026-09-26",
+      reviewNote: "Educational draft · source-checked; clinical review still required before use as medical guidance.",
+      labels: {
+        objectives: "In this lesson",
+        begin: "Begin the journey",
+        previous: "Previous",
+        next: "Next structure",
+        stepProgress: "Step {current} of {total}",
+        showing: "Now showing",
+        anteriorView: "Anterior view · anatomical right appears on your left",
+        flow: "Digestive path",
+        checkpoint: "Check your understanding",
+        questionProgress: "Question {current} of {total}",
+        correct: "Exactly right",
+        incorrect: "Take another look",
+        continue: "Continue",
+        complete: "Journey complete",
+        score: "You answered {score} of {total} correctly.",
+        retry: "Review again",
+        exit: "Return to free explore",
+        sources: "Sources",
+        reviewed: "Evidence reviewed {date}",
+      },
+    },
     hotspots: {
       "duodenum": { label: "Duodenum", detail: "First small-intestine segment" },
       "jejunum": { label: "Jejunum", detail: "Major absorption region" },
@@ -341,6 +1167,150 @@ export const organs: OrganContentDictionary = {
     tissue: "Pancreatic acini",
     comparison: "Pancreas vs. liver",
     conditions: ["Pancreatitis", "Type 1 diabetes", "Pancreatic cancer", "Type 2 diabetes", "Exocrine insufficiency", "Pancreatic cysts", "Gallstone pancreatitis", "Insulinoma"],
+    lesson: {
+      id: "pancreas-dual-gland",
+      eyebrow: "Guided discovery · Pancreas",
+      title: "One gland, two secretions",
+      summary:
+        "Walk the pancreas from the head in the duodenal curve, across the body that crosses the spine, to the tail near the spleen. The pancreatic duct carries digestive enzymes to the gut; scattered islets, not marked here, release insulin and glucagon into blood.",
+      duration: "5 min",
+      objectives: [
+        "Locate head, body, and tail on the specimen",
+        "Explain that the duct delivers exocrine enzymes to the duodenum",
+        "Distinguish the bulky enzyme gland from the small endocrine islets",
+      ],
+      steps: [
+        {
+          id: "overview",
+          eyebrow: "Orient yourself",
+          title: "A retroperitoneal gland with two careers",
+          body:
+            "The pancreas lies behind the stomach, stretching from the duodenal loop on the right to the spleen on the left. About 98% of its mass is exocrine: acinar cells make enzyme-rich juice. About 2% is endocrine: islets of Langerhans release insulin and glucagon into the bloodstream.",
+          insight: "Same organ, different destinations. Enzymes go into a duct; hormones go into capillaries.",
+          route: "Gland → duct to gut · islets to blood",
+        },
+        {
+          id: "head",
+          eyebrow: "In the duodenal curve",
+          title: "Head",
+          body:
+            "The head of the pancreas sits in the C of the duodenum. This is where the main pancreatic duct typically joins the common bile duct at the hepatopancreatic ampulla, so bile and pancreatic juice enter the gut together.",
+          insight: "A stone in the shared outflow can inflame both the biliary tree and the pancreas.",
+          route: "Duodenum cradles the head",
+          hotspotId: "head",
+        },
+        {
+          id: "body",
+          eyebrow: "Across the spine",
+          title: "Body",
+          body:
+            "The body crosses the midline, anterior to the vertebral column and great vessels. It is the long mid-portion of the gland, packed with acini that synthesize proteases, lipase, and amylase in inactive or safe forms until they reach the gut.",
+          insight: "Enzymes are stored as zymogens so the pancreas does not digest itself.",
+          route: "Head → body across L1–L2",
+          hotspotId: "body",
+        },
+        {
+          id: "tail",
+          eyebrow: "Toward the spleen",
+          title: "Tail",
+          body:
+            "The tail tapers toward the hilum of the spleen in the left upper abdomen. Islets are scattered through the gland but are relatively more numerous toward the tail. That is anatomy, not a reason to treat the tail as “the hormone end” only — islets exist throughout.",
+          insight: "The tail is still mostly acinar tissue. Endocrine cells are islands in an enzyme sea.",
+          route: "Body → tail → splenic hilum",
+          hotspotId: "tail",
+        },
+        {
+          id: "duct",
+          eyebrow: "The enzyme highway",
+          title: "Pancreatic duct",
+          body:
+            "The main pancreatic duct runs the length of the gland and empties into the duodenum. It carries the daily 1–1.5 L of alkaline, enzyme-rich juice that finishes chemical digestion. Hormones do not travel this duct — they enter blood in the islets.",
+          insight: "Block the duct and enzymes back up into the gland; that is one path to pancreatitis.",
+          route: "Acini → pancreatic duct → duodenum",
+          hotspotId: "duct",
+        },
+        {
+          id: "synthesis",
+          eyebrow: "Put the map together",
+          title: "Enzymes one way, hormones the other",
+          body:
+            "Head, body, and tail are one continuous exocrine gland drained by the pancreatic duct into the duodenum. Islets sprinkled through that mass secrete insulin and glucagon into blood so glucose stays in range. Lose the duct and digestion fails; lose the islets and blood sugar is unregulated.",
+          insight: "Complete map: head · body · tail · duct to gut; islets to capillaries.",
+          route: "Head · body · tail · duct",
+        },
+      ],
+      questions: [
+        {
+          id: "head-duodenum",
+          prompt: "Which part of the pancreas sits in the curve of the duodenum?",
+          options: [
+            { id: "tail", label: "Tail" },
+            { id: "body", label: "Body" },
+            { id: "head", label: "Head" },
+            { id: "duct", label: "Pancreatic duct only" },
+          ],
+          answerId: "head",
+          explanation:
+            "The head is nestled in the duodenal C. The main pancreatic duct usually joins the bile duct here to enter the gut.",
+          hotspotId: "head",
+        },
+        {
+          id: "duct-job",
+          prompt: "What travels in the pancreatic duct?",
+          options: [
+            { id: "insulin", label: "Insulin on its way to muscle" },
+            { id: "enzymes", label: "Enzyme-rich juice toward the duodenum" },
+            { id: "bile-only", label: "Only bile from the liver" },
+            { id: "urine", label: "Urine from the kidney" },
+          ],
+          answerId: "enzymes",
+          explanation:
+            "The duct is the exocrine outflow. Insulin and glucagon leave islets via blood, not via this duct.",
+          hotspotId: "duct",
+        },
+        {
+          id: "dual-career",
+          prompt: "About 2% of the pancreas makes hormones. What is the rest mainly doing?",
+          options: [
+            { id: "filtering-blood", label: "Filtering blood like a kidney" },
+            { id: "storing-bile", label: "Storing bile" },
+            { id: "exocrine-enzymes", label: "Making digestive enzymes for the duct" },
+            { id: "pumping-blood", label: "Pumping blood like a heart" },
+          ],
+          answerId: "exocrine-enzymes",
+          explanation:
+            "Acinar tissue is the bulk of the gland. It secretes enzymes into the duct. Islets are a small endocrine minority.",
+          hotspotId: "body",
+        },
+      ],
+      sources: [
+        { label: "OpenStax Anatomy & Physiology 2e · Liver, pancreas, and gallbladder", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/23-6-accessory-organs-in-digestion-the-liver-pancreas-and-gallbladder" },
+        { label: "NIDDK · The pancreas in diabetes", url: "https://www.niddk.nih.gov/health-information/diabetes/overview/what-is-diabetes" },
+      ],
+      evidenceReviewedAt: "2026-09-26",
+      reviewNote: "Educational draft · source-checked; clinical review still required before use as medical guidance.",
+      labels: {
+        objectives: "In this lesson",
+        begin: "Begin the journey",
+        previous: "Previous",
+        next: "Next structure",
+        stepProgress: "Step {current} of {total}",
+        showing: "Now showing",
+        anteriorView: "Anterior view · anatomical right appears on your left",
+        flow: "Gland map",
+        checkpoint: "Check your understanding",
+        questionProgress: "Question {current} of {total}",
+        correct: "Exactly right",
+        incorrect: "Take another look",
+        continue: "Continue",
+        complete: "Journey complete",
+        score: "You answered {score} of {total} correctly.",
+        retry: "Review again",
+        exit: "Return to free explore",
+        sources: "Sources",
+        reviewed: "Evidence reviewed {date}",
+      },
+    },
     hotspots: {
       "head": { label: "Head", detail: "Cradled by the duodenum" },
       "body": { label: "Body", detail: "Crosses the spine" },
@@ -364,6 +1334,150 @@ export const organs: OrganContentDictionary = {
     tissue: "Epidermal layers",
     comparison: "Skin vs. intestine",
     conditions: ["Eczema", "Psoriasis", "Melanoma", "Acne vulgaris", "Cellulitis", "Contact dermatitis", "Rosacea", "Vitiligo"],
+    lesson: {
+      id: "skin-layers",
+      eyebrow: "Guided discovery · Skin",
+      title: "Three layers and a follicle",
+      summary:
+        "Read the integument from the outside in: epidermis as the living barrier, dermis as the working middle with vessels and nerves, hypodermis as fat and insulation, and the hair follicle as an epidermal invagination that anchors each hair.",
+      duration: "5 min",
+      objectives: [
+        "Order epidermis, dermis, and hypodermis from superficial to deep",
+        "Assign barrier, vascular, and insulating jobs to the correct layer",
+        "Describe the hair follicle as an epidermal downgrowth, not a separate organ",
+      ],
+      steps: [
+        {
+          id: "overview",
+          eyebrow: "Orient yourself",
+          title: "The largest organ is a sandwich",
+          body:
+            "Skin covers about two square metres and weighs several kilograms. It is not a wrapper. It is a stacked organ: a keratinized epithelium on the outside, a connective-tissue dermis beneath, and a fatty hypodermis (subcutis) that tethers the skin to deeper fascia. Appendages — hair, glands, nails — grow from that stack.",
+          insight: "Surface area is large, but thickness is millimetres. Function comes from layering, not bulk.",
+          route: "Outside → epidermis → dermis → hypodermis",
+        },
+        {
+          id: "epidermis",
+          eyebrow: "The barrier",
+          title: "Epidermis",
+          body:
+            "The epidermis is keratinized stratified squamous epithelium. It has no blood vessels; nutrients diffuse from the dermis. Keratinocytes flatten as they rise, fill with keratin, and form a dry, water-resistant surface. Melanocytes in the basal layer add pigment that absorbs ultraviolet light.",
+          insight: "A cut that bleeds has gone through the epidermis into the dermis. Superficial scrapes often do not bleed.",
+          route: "Air → stratum corneum → living epidermis",
+          hotspotId: "epidermis",
+        },
+        {
+          id: "dermis",
+          eyebrow: "The working middle",
+          title: "Dermis",
+          body:
+            "The dermis is dense connective tissue rich in collagen and elastin. It houses blood vessels, lymphatics, sensory endings, sweat glands, and sebaceous glands. Temperature regulation and much of touch happen here, not in the avascular epidermis.",
+          insight: "Blushing, sweating, and most skin sensation are dermal events.",
+          route: "Epidermis → papillary and reticular dermis",
+          hotspotId: "dermis",
+        },
+        {
+          id: "hypodermis",
+          eyebrow: "Fat and padding",
+          title: "Hypodermis",
+          body:
+            "Deep to the dermis, the hypodermis (tela subcutanea) is loose connective tissue and adipose. It insulates, stores energy, and lets skin slide over muscle. Larger vessels and nerves travel here before branching upward into the dermis.",
+          insight: "This layer is not “just fat.” It is the mechanical and thermal buffer between skin and the rest of the body.",
+          route: "Dermis → hypodermis → fascia",
+          hotspotId: "hypodermis",
+        },
+        {
+          id: "follicle",
+          eyebrow: "An epidermal downgrowth",
+          title: "Hair follicle",
+          body:
+            "A hair follicle is epidermis folded down into the dermis. The hair shaft is dead keratin; the bulb at the base is living matrix. A sebaceous gland typically opens into the follicle, coating the hair with sebum. Arrector pili muscle can lift the hair — the “goosebump” reflex.",
+          insight: "Follicles are skin, not a separate organ. That is why follicle disease is skin disease.",
+          route: "Epidermis → follicle in dermis → hair shaft",
+          hotspotId: "follicle",
+        },
+        {
+          id: "synthesis",
+          eyebrow: "Put the stack together",
+          title: "Barrier, supply, buffer, appendage",
+          body:
+            "Epidermis keeps water in and microbes out. Dermis supplies blood, sensation, and glands. Hypodermis insulates and pads. Follicles are epidermal invaginations that grow hair. Lose any layer and the jobs stacked on it fail — fluid loss, infection, heat loss, or denuded surface.",
+          insight: "Complete stack: epidermis · dermis · hypodermis, with follicles dropping in from the top.",
+          route: "Epidermis · dermis · hypodermis · follicle",
+        },
+      ],
+      questions: [
+        {
+          id: "avascular",
+          prompt: "Why can a superficial scrape of the epidermis not bleed?",
+          options: [
+            { id: "no-keratin", label: "The epidermis contains no keratin" },
+            { id: "no-vessels", label: "The epidermis has no blood vessels" },
+            { id: "too-deep", label: "The epidermis sits under the hypodermis" },
+            { id: "only-fat", label: "The epidermis is only adipose tissue" },
+          ],
+          answerId: "no-vessels",
+          explanation:
+            "The epidermis is avascular. Blood vessels live in the dermis. Bleeding means the cut has reached that deeper layer.",
+          hotspotId: "epidermis",
+        },
+        {
+          id: "dermis-job",
+          prompt: "Which layer houses vessels, glands, and most cutaneous sensation?",
+          options: [
+            { id: "epidermis", label: "Epidermis" },
+            { id: "dermis", label: "Dermis" },
+            { id: "hypodermis", label: "Hypodermis only" },
+            { id: "follicle", label: "Hair shaft" },
+          ],
+          answerId: "dermis",
+          explanation:
+            "The dermis is the vascular, innervated connective-tissue layer. Sweat and sebaceous glands and most sensory endings live there.",
+          hotspotId: "dermis",
+        },
+        {
+          id: "follicle-origin",
+          prompt: "What is a hair follicle, structurally?",
+          options: [
+            { id: "bone-spike", label: "A spike of bone anchored in the hypodermis" },
+            { id: "epidermal-downgrowth", label: "An invagination of epidermis into the dermis" },
+            { id: "pure-fat", label: "A pocket of hypodermal fat" },
+            { id: "artery", label: "A specialized dermal artery" },
+          ],
+          answerId: "epidermal-downgrowth",
+          explanation:
+            "The follicle is epidermis folded down into the dermis. The visible hair is dead keratin produced by living matrix in the bulb.",
+          hotspotId: "follicle",
+        },
+      ],
+      sources: [
+        { label: "OpenStax Anatomy & Physiology 2e · Layers of the skin", url: "https://openstax.org/books/anatomy-and-physiology-2e/pages/5-1-layers-of-the-skin" },
+        { label: "NIAMS · Skin health basics", url: "https://www.niams.nih.gov/health-topics/skin" },
+      ],
+      evidenceReviewedAt: "2026-09-26",
+      reviewNote: "Educational draft · source-checked; clinical review still required before use as medical guidance.",
+      labels: {
+        objectives: "In this lesson",
+        begin: "Begin the journey",
+        previous: "Previous",
+        next: "Next structure",
+        stepProgress: "Step {current} of {total}",
+        showing: "Now showing",
+        anteriorView: "Anterior view · anatomical right appears on your left",
+        flow: "Layer map",
+        checkpoint: "Check your understanding",
+        questionProgress: "Question {current} of {total}",
+        correct: "Exactly right",
+        incorrect: "Take another look",
+        continue: "Continue",
+        complete: "Journey complete",
+        score: "You answered {score} of {total} correctly.",
+        retry: "Review again",
+        exit: "Return to free explore",
+        sources: "Sources",
+        reviewed: "Evidence reviewed {date}",
+      },
+    },
     hotspots: {
       "epidermis": { label: "Epidermis", detail: "Outer protective layer" },
       "dermis": { label: "Dermis", detail: "Nerves, vessels & glands" },
