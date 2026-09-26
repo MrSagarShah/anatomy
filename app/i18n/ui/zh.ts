@@ -28,7 +28,7 @@ export const ui: UiDictionary = {
     canvas: "可交互的 3D 解剖模型。拖动旋转，滚动缩放，点击圆点可阅读该结构的说明。",
     tip: "提示", tipDrag: "拖动以旋转", tipScroll: "滚动以缩放",
     tipClick: "点击圆点了解更多",
-    loading: "正在准备{organ}", autoRotate: "自动旋转",
+    loading: "正在准备{organ}", loadError: "无法加载{organ}", autoRotate: "自动旋转",
     caption: "3D 标本 · 点击圆点探索", structures: "本标本中的结构",
   },
   info: {

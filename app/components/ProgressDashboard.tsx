@@ -117,6 +117,10 @@ export function ProgressDashboard({
         onKeepGoing?.();
         return;
       }
+      if (recommended.reason === "continue" && onContinueLesson) {
+        onContinueLesson(recommended.organId);
+        return;
+      }
       if (onSelectOrgan) onSelectOrgan(recommended.organId);
       else if (onContinueLesson) onContinueLesson(recommended.organId);
       else onKeepGoing?.();
@@ -142,8 +146,8 @@ export function ProgressDashboard({
           <Stat icon={<CircleUser size={16} />} value={String(totals.organsStudied)} label={d.stats.organs} />
           <Stat icon={<BookCheck size={16} />} value={String(totals.lessonsCompleted)} label={d.stats.lessons} />
           <Stat icon={<Target size={16} />} value={`${totals.quizAccuracy}%`} label={d.stats.accuracy} />
-          <Stat icon={<Flame size={16} />} value={String(totals.streakDays)} label={d.stats.streak} onClick={onKeepGoing} />
-          <Stat icon={<Award size={16} />} value={`${totals.averageMastery}%`} label={d.stats.mastery} onClick={onKeepGoing} />
+          <Stat icon={<Flame size={16} />} value={String(totals.streakDays)} label={d.stats.streak} />
+          <Stat icon={<Award size={16} />} value={`${totals.averageMastery}%`} label={d.stats.mastery} />
         </div>
 
         {recommended && (

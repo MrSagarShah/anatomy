@@ -28,7 +28,7 @@ export const ui: UiDictionary = {
     canvas: "نموذج تشريحي ثلاثي الأبعاد تفاعلي. اسحب للتدوير، ومرّر للتكبير، وانقر على نقطة لقراءة وصف تلك البنية.",
     tip: "تلميح", tipDrag: "اسحب للتدوير", tipScroll: "مرّر للتكبير",
     tipClick: "انقر على نقطة لمعرفة المزيد",
-    loading: "جارٍ تحضير {organ}", autoRotate: "تدوير تلقائي",
+    loading: "جارٍ تحضير {organ}", loadError: "تعذّر تحميل {organ}", autoRotate: "تدوير تلقائي",
     caption: "عيّنة ثلاثية الأبعاد · انقر على نقطة", structures: "بنى هذه العيّنة",
   },
   info: {

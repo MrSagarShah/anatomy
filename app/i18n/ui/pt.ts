@@ -28,7 +28,7 @@ export const ui: UiDictionary = {
     canvas: "Modelo anatômico 3D interativo. Arraste para girar, role para aproximar e clique em um ponto para ler sobre a estrutura.",
     tip: "Dica", tipDrag: "Arraste para girar", tipScroll: "Role para aproximar",
     tipClick: "Clique em um ponto para saber mais",
-    loading: "Preparando {organ}", autoRotate: "Rotação automática",
+    loading: "Preparando {organ}", loadError: "Não foi possível carregar {organ}", autoRotate: "Rotação automática",
     caption: "Espécime 3D · clique em um ponto", structures: "Estruturas deste espécime",
   },
   info: {

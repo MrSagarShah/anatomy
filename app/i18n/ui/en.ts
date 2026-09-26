@@ -28,7 +28,7 @@ export const ui: UiDictionary = {
     title: "{organ} interactive viewer",
     canvas: "Interactive 3D anatomy model. Drag to rotate, scroll to zoom, and click a dot to read about that structure.",
     tip: "Tip", tipDrag: "Drag to rotate", tipScroll: "Scroll to zoom", tipClick: "Click a dot to learn more",
-    loading: "Preparing the {organ}", autoRotate: "Auto rotate",
+    loading: "Preparing the {organ}", loadError: "Couldn't load the {organ}", autoRotate: "Auto rotate",
     caption: "3D specimen · click a dot to explore", structures: "Structures in this specimen",
   },
   info: {

@@ -153,7 +153,8 @@ button:focus-visible, input:focus-visible, canvas:focus-visible {
   gap: 0;
 }
 .lesson-mode .organ-library,
-.lesson-mode .info-panel { display: none; }
+.lesson-mode .info-panel,
+.lesson-mode .learning-cards { display: none; }
 .lesson-mode .viewer-shell { min-height: min(760px, calc(100vh - 128px)); }
 
 .organ-library, .viewer-shell, .info-panel {
@@ -200,6 +201,26 @@ button:focus-visible, input:focus-visible, canvas:focus-visible {
   color: var(--muted);
   font: 500 13px/1.45 var(--font-serif), serif;
 }
+.library-search {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin: 0 6px 10px;
+  padding: 0 12px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255,255,255,.4);
+  color: var(--muted);
+}
+.library-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 12px;
+}
 .organ-list { display: flex; flex-direction: column; gap: 4px; min-height: 0; overflow: auto; scrollbar-width: none; }
 .organ-item {
   width: 100%;
@@ -242,6 +263,7 @@ button:focus-visible, input:focus-visible, canvas:focus-visible {
 .organ-item b { display: block; font: 500 17px/1.1 var(--font-serif), serif; }
 .organ-item small { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; }
 .organ-item .favorite { color: #ef8d7d; }
+.organ-note-mark { color: #9a8b7e; }
 .organ-item-meta { display: flex; align-items: center; gap: 2px; }
 .organ-save {
   width: 26px;
@@ -560,6 +582,13 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
 .modal-facts { margin: 14px 0 4px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: start; }
 .modal-facts dt { color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .1em; }
 .modal-facts dd { margin: 4px 0 0; font: 500 12px/1.3 var(--font-serif), serif; }
+.modal-conditions {
+  margin: 12px 0 4px;
+  padding: 0 4px 0 18px;
+  text-align: start;
+  color: #6e655f;
+  font: 500 14px/1.45 var(--font-serif), serif;
+}
 .learning-modal.wide .lesson-button { margin-top: 16px; }
 .learning-modal .modal-secondary {
   display: block;
@@ -606,6 +635,7 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
   .app-shell { padding: 16px; }
   .topbar { grid-template-columns: 1fr auto auto auto; gap: 12px; }
   .search-box { display: none; }
+  .library-search { display: flex; }
   .workspace { grid-template-columns: 250px minmax(500px,1fr) 300px; height: min(700px, calc(100vh - 105px)); }
   .learning-cards { grid-template-columns: repeat(3, 1fr); --art-max: 300px; }
 }
@@ -625,11 +655,27 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
 
 @media (max-width: 760px) {
   .app-shell { padding: 10px; overflow: hidden; }
-  .topbar { height: 58px; grid-template-columns: 1fr auto auto auto; }
+  .topbar {
+    height: auto;
+    min-height: 58px;
+    grid-template-columns: 1fr auto auto auto;
+    grid-template-rows: auto auto;
+    row-gap: 4px;
+    padding-bottom: 4px;
+  }
   .brand strong { font-size: 29px; }
-  .main-nav { display: none; }
+  .main-nav {
+    display: flex;
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .main-nav button span { display: none; }
+  .main-nav button { padding: 8px 11px; }
   .profile span { width: 34px; height: 34px; }
   .mobile-library-trigger { display: flex; }
+  .compare-mode .viewer-tools { display: none; }
   .workspace { display: block; margin-top: 8px; }
   .viewer-shell { height: 68vh; min-height: 520px; border-radius: 22px; }
   .organ-library {

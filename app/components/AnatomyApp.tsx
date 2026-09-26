@@ -18,7 +18,7 @@ import {
   Microscope,
   Play,
   Search,
-  Share2,
+  GitCompare,
   Sparkles,
   Stethoscope,
   X,
@@ -38,7 +38,7 @@ import { recommendNext } from "../lib/progress/recommend";
 import { organMatchesQuery } from "../lib/organ-search";
 
 type NavMode = "explore" | "systems" | "library" | "lessons" | "notes" | "progress";
-type Modal = "system" | null;
+type Modal = "system" | "tissue" | "clinical" | null;
 
 const SAVED_KEY = "anatomy:saved-organs";
 const NOTES_KEY = "anatomy:notes";
@@ -346,6 +346,9 @@ export function AnatomyApp({
 
   const openCompare = () => {
     setTourActive(false);
+    setLessonActive(false);
+    setQuizActive(false);
+    setModal(null);
     setCompareId((current) => (current === organ.id ? organ.compareWith : current));
     setCompare(true);
   };
@@ -354,6 +357,7 @@ export function AnatomyApp({
   const openLesson = () => {
     setQuizActive(false);
     setTourActive(false);
+    setCompare(false);
     setModal(null);
     if (organ.lesson) {
       setNav("lessons");
@@ -479,7 +483,7 @@ export function AnatomyApp({
   };
 
   return (
-    <main className={`app-shell ${lessonActive ? "lesson-mode" : ""}`}>
+    <main className={`app-shell ${lessonActive ? "lesson-mode" : ""} ${compare ? "compare-mode" : ""}`}>
       <header className="topbar">
         <button
           className="brand"
@@ -556,6 +560,10 @@ export function AnatomyApp({
           {nav === "explore" && !query && focusSystems.length > 0 && (
             <p className="library-hint">{copy.onboarding.focusLabel}</p>
           )}
+          <label className="library-search">
+            <Search size={15} />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search.placeholder} />
+          </label>
           <div className="organ-list">
             {savedOnly && filteredOrgans.length === 0 && (
               <p className="library-empty">{t.library.emptySaved}</p>
@@ -590,6 +598,7 @@ export function AnatomyApp({
                     >
                       <Bookmark size={14} fill={isSaved ? "currentColor" : "none"} />
                     </button>
+                    {(notes[item.id] ?? "").trim() !== "" && <FileText className="organ-note-mark" size={13} />}
                     {organId === item.id && <Heart className="favorite" size={14} fill="currentColor" />}
                   </span>
                 </div>
@@ -622,10 +631,7 @@ export function AnatomyApp({
           autoRotate={autoRotate}
           onAutoRotate={setAutoRotate}
           compare={compare}
-          onCompare={() => {
-            setTourActive(false);
-            setCompare((open) => !open);
-          }}
+          onCompare={() => (compare ? setCompare(false) : openCompare())}
           quizActive={quizActive}
           onQuizExit={() => setQuizActive(false)}
           tourActive={tourActive}
@@ -662,7 +668,7 @@ export function AnatomyApp({
           <div className="action-grid" data-reveal>
             <button onClick={startTour} className={tourActive ? "active" : ""}><Play size={15} /> {t.info.animate}</button>
             <button onClick={() => { setTourActive(false); setLessonActive(false); setQuizActive(true); setModal(null); }}><CircleHelp size={15} /> {t.info.quiz}</button>
-            <button onClick={() => (compare ? setCompare(false) : openCompare())} className={compare ? "active" : ""}><Share2 size={15} /> {t.info.compare}</button>
+            <button onClick={() => (compare ? setCompare(false) : openCompare())} className={compare ? "active" : ""}><GitCompare size={15} /> {t.info.compare}</button>
           </div>
         </aside>
       </div>
@@ -715,6 +721,11 @@ export function AnatomyApp({
               <dd><Measure>{organ.weight}</Measure></dd>
               <dd className="compare-other"><Measure>{reference.weight}</Measure></dd>
             </div>
+            <div>
+              <dt>{t.compare.scale}</dt>
+              <dd><Measure>{organ.comparison}</Measure></dd>
+              <dd className="compare-other"><Measure>{reference.comparison}</Measure></dd>
+            </div>
           </dl>
           <button type="button" onClick={() => setCompare(false)} aria-label={t.compare.close}><X size={16} /></button>
         </section>
@@ -727,10 +738,10 @@ export function AnatomyApp({
         <article>
           <header><div><em>{t.cards.microscopic}</em><h3>{organ.tissue}</h3></div><Microscope size={17} /></header>
           <div className="microscope-visual organ-card-image"><OrganArt organ={organ} asset="microscopic" alt="" /></div>
-          <button onClick={openLesson}>{t.cards.exploreTissue} <ArrowRight size={14} /></button>
+          <button onClick={() => setModal("tissue")}>{t.cards.exploreTissue} <ArrowRight size={14} /></button>
         </article>
         <article>
-          <header><div><em>{t.cards.compareOrgans}</em><h3>{organ.comparison}</h3></div><Share2 size={17} /></header>
+          <header><div><em>{t.cards.compareOrgans}</em><h3>{organ.comparison}</h3></div><GitCompare size={17} /></header>
           <div className="comparison-visual organ-card-image"><OrganArt organ={organ} asset="compare" alt="" /></div>
           <button onClick={openCompare}>{t.cards.openComparison} <ArrowRight size={14} /></button>
         </article>
@@ -753,7 +764,7 @@ export function AnatomyApp({
         <article>
           <header><div><em>{t.cards.clinicalNotes}</em><h3>{t.cards.commonConditions}</h3></div><FileText size={17} /></header>
           <ul>{organ.conditions.map((condition) => <li key={condition}>{condition}</li>)}</ul>
-          <button onClick={openLesson}>{t.cards.seeAll} <ArrowRight size={14} /></button>
+          <button onClick={() => setModal("clinical")}>{t.cards.seeAll} <ArrowRight size={14} /></button>
         </article>
         <article className="system-card">
           <header><div><em>{t.cards.whereItWorks}</em><h3>{organ.system}</h3></div><BrainCircuit size={17} /></header>
@@ -775,7 +786,7 @@ export function AnatomyApp({
           organ={organ}
           t={t}
           onClose={() => setModal(null)}
-          onStudy={organ.lesson ? () => { setModal(null); setNav("lessons"); setLessonActive(true); } : undefined}
+          onStudy={organ.lesson ? () => { setModal(null); setCompare(false); setNav("lessons"); setLessonActive(true); } : undefined}
         />
       )}
       {nav === "notes" && (
@@ -875,9 +886,11 @@ export function AnatomyApp({
 }
 
 function LearningModal({
+  type,
   organ,
   t,
   onClose,
+  onStudy,
 }: {
   type: Exclude<Modal, null>;
   organ: Organ;
@@ -886,6 +899,14 @@ function LearningModal({
   onStudy?: () => void;
 }) {
   const vars = { organ: organ.name, location: organ.location };
+  const title =
+    type === "tissue" ? organ.tissue
+      : type === "clinical" ? t.cards.commonConditions
+        : format(t.modal.bodyTitle, vars);
+  const eyebrow =
+    type === "tissue" ? t.cards.microscopic
+      : type === "clinical" ? t.cards.clinicalNotes
+        : t.modal.guided;
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
@@ -897,19 +918,40 @@ function LearningModal({
         onMouseDown={(event) => event.stopPropagation()}
       >
         <button className="modal-close" onClick={onClose} aria-label={t.modal.close}><X size={18} /></button>
-        <span className="modal-icon">⌖</span>
-        <em>{t.modal.guided}</em>
-        <h2 id="modal-title">{format(t.modal.bodyTitle, vars)}</h2>
-        <p>{format(t.modal.systemIntro, vars)}</p>
-        <figure className="modal-figure">
-          <OrganArt organ={organ} asset="location" alt="" />
-        </figure>
-        <dl className="modal-facts">
-          <div><dt>{t.modal.system}</dt><dd>{organ.system}</dd></div>
-          <div><dt>{t.modal.primaryRole}</dt><dd><Measure>{organ.function}</Measure></dd></div>
-          <div><dt>{t.modal.bloodSupply}</dt><dd><Measure>{organ.bloodSupply}</Measure></dd></div>
-        </dl>
+        <span className="modal-icon">{type === "tissue" ? "✿" : type === "clinical" ? "✚" : "⌖"}</span>
+        <em>{eyebrow}</em>
+        <h2 id="modal-title">{title}</h2>
+        {type === "tissue" && (
+          <>
+            <p>{organ.description}</p>
+            <figure className="modal-figure">
+              <OrganArt organ={organ} asset="microscopic" alt="" />
+            </figure>
+          </>
+        )}
+        {type === "clinical" && (
+          <>
+            <p><b>{t.info.medical}</b> {organ.medical}</p>
+            <ul className="modal-conditions">{organ.conditions.map((condition) => <li key={condition}>{condition}</li>)}</ul>
+          </>
+        )}
+        {type === "system" && (
+          <>
+            <p>{format(t.modal.systemIntro, vars)}</p>
+            <figure className="modal-figure">
+              <OrganArt organ={organ} asset="location" alt="" />
+            </figure>
+            <dl className="modal-facts">
+              <div><dt>{t.modal.system}</dt><dd>{organ.system}</dd></div>
+              <div><dt>{t.modal.primaryRole}</dt><dd><Measure>{organ.function}</Measure></dd></div>
+              <div><dt>{t.modal.bloodSupply}</dt><dd><Measure>{organ.bloodSupply}</Measure></dd></div>
+            </dl>
+          </>
+        )}
         <button className="lesson-button" onClick={onClose}>{t.modal.continueExploring} <ArrowRight size={16} /></button>
+        {onStudy && (
+          <button className="modal-secondary" type="button" onClick={onStudy}>{t.info.viewLesson}</button>
+        )}
       </section>
     </div>
   );

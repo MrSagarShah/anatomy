@@ -28,7 +28,7 @@ export const ui: UiDictionary = {
     canvas: "Model anatomi 3D interaktif. Seret untuk memutar, gulir untuk memperbesar, dan klik titik untuk membaca tentang struktur tersebut.",
     tip: "Tips", tipDrag: "Seret untuk memutar", tipScroll: "Gulir untuk memperbesar",
     tipClick: "Klik titik untuk tahu lebih lanjut",
-    loading: "Menyiapkan {organ}", autoRotate: "Putar otomatis",
+    loading: "Menyiapkan {organ}", loadError: "Tidak bisa memuat {organ}", autoRotate: "Putar otomatis",
     caption: "Spesimen 3D · klik sebuah titik", structures: "Struktur pada spesimen ini",
   },
   info: {

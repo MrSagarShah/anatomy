@@ -694,6 +694,10 @@ export class AnatomyViewer {
 
   toggleIsolate() {
     this.isolated = !this.isolated;
+    if (this.isolated && !this.selectedId) {
+      const first = this.hotspots.list[0];
+      if (first) this.select(first.hotspot.id);
+    }
     this.applyIsolateVisuals();
     this.applyIsolateDots();
     return this.isolated;

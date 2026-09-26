@@ -28,7 +28,7 @@ export const ui: UiDictionary = {
     canvas: "操作できる 3D 解剖モデルです。ドラッグで回転、スクロールでズーム、点をクリックするとその構造の説明が読めます。",
     tip: "ヒント", tipDrag: "ドラッグで回転", tipScroll: "スクロールでズーム",
     tipClick: "点をクリックして詳しく",
-    loading: "{organ}を準備中", autoRotate: "自動回転",
+    loading: "{organ}を準備中", loadError: "{organ}を読み込めませんでした", autoRotate: "自動回転",
     caption: "3D 標本 · 点をクリック", structures: "この標本の構造",
   },
   info: {

@@ -794,7 +794,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
 
       {loadFailed && (
         <div className="model-loader" role="alert">
-          <strong>{format(t.viewer.loading, { organ: organ.name })}</strong>
+          <strong>{format(t.viewer.loadError, { organ: organ.name })}</strong>
           <button type="button" className="lesson-button" onClick={retryLoad}>{t.quiz.retry}</button>
         </div>
       )}

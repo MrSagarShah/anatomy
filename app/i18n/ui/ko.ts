@@ -28,7 +28,7 @@ export const ui: UiDictionary = {
     canvas: "조작 가능한 3D 해부 모델입니다. 끌어서 회전하고, 스크롤해 확대하며, 점을 클릭하면 해당 구조 설명을 볼 수 있습니다.",
     tip: "도움말", tipDrag: "끌어서 회전", tipScroll: "스크롤해 확대",
     tipClick: "점을 클릭해 자세히 보기",
-    loading: "{organ} 준비 중", autoRotate: "자동 회전",
+    loading: "{organ} 준비 중", loadError: "{organ}을(를) 불러오지 못했습니다", autoRotate: "자동 회전",
     caption: "3D 표본 · 점을 클릭하세요", structures: "이 표본의 구조",
   },
   info: {
