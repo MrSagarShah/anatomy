@@ -7,10 +7,12 @@ import {
   progressEvents,
   type Learner,
 } from "./schema";
+import { parseNotes, parseSavedOrgans } from "../app/lib/progress/library";
 import { currentStreak } from "../app/lib/progress/recommend";
 import {
   computeMastery,
   type LearnerProfile,
+  type LibraryInput,
   type OnboardingInput,
   type ProgressEventInput,
   type ProgressSnapshot,
@@ -85,6 +87,23 @@ export async function saveOnboarding(
       ...(input.priorKnowledge !== undefined ? { priorKnowledge: input.priorKnowledge } : {}),
       ...(input.studyGoal !== undefined ? { studyGoal: input.studyGoal } : {}),
       ...(input.focusSystems !== undefined ? { focusSystems: JSON.stringify(input.focusSystems) } : {}),
+    })
+    .where(eq(learners.id, learnerId))
+    .returning();
+  return rows[0];
+}
+
+export async function saveLibrary(
+  db: Db,
+  learnerId: number,
+  input: LibraryInput,
+): Promise<Learner> {
+  const rows = await db
+    .update(learners)
+    .set({
+      updatedAt: NOW,
+      ...(input.savedOrgans !== undefined ? { savedOrgans: JSON.stringify(input.savedOrgans) } : {}),
+      ...(input.notes !== undefined ? { notes: JSON.stringify(input.notes) } : {}),
     })
     .where(eq(learners.id, learnerId))
     .returning();
@@ -378,5 +397,9 @@ export async function getSnapshot(
       total: e.total,
       createdAt: e.createdAt,
     })),
+    library: {
+      savedOrgans: parseSavedOrgans(learner.savedOrgans),
+      notes: parseNotes(learner.notes),
+    },
   };
 }

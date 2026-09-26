@@ -9,6 +9,7 @@
 import { getChatGPTUser } from "../../chatgpt-auth";
 import type {
   LearnerResponse,
+  LibraryInput,
   OnboardingInput,
   ProgressEventInput,
   ProgressResponse,
@@ -24,6 +25,7 @@ function isSchemaMissing(error: unknown): boolean {
   const combined = `${message} ${cause}`.toLowerCase();
   return (
     combined.includes("no such table") ||
+    combined.includes("no such column") ||
     combined.includes("binding") ||
     combined.includes("d1_error") ||
     combined.includes("cloudflare:workers")
@@ -104,6 +106,15 @@ export function applyOnboarding(locale: string, input: OnboardingInput): Promise
 }
 
 type EventResult = { available: false } | { available: true; authenticated: boolean };
+
+/** PUT /api/learner — persist bookmarks and notes, return a fresh snapshot. */
+export function applyLibrary(locale: string, input: LibraryInput): Promise<ProgressResponse> {
+  return withLearner<ProgressResponse>(locale, { unavailable: UNAVAILABLE, anon: ANON }, async ({ db, learner }) => {
+    const { saveLibrary, getSnapshot } = await import("../../../db/learners");
+    const updated = await saveLibrary(db, learner.id, input);
+    return { available: true, authenticated: true, snapshot: await getSnapshot(db, updated) };
+  });
+}
 
 /** POST /api/progress — record one event. The client fires and forgets, so this
  *  only needs to report availability. */

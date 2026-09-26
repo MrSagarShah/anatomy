@@ -1,4 +1,5 @@
-import { applyOnboarding, identifyLearner } from "../../lib/progress/server";
+import { applyLibrary, applyOnboarding, identifyLearner } from "../../lib/progress/server";
+import { sanitizeLibrary } from "../../lib/progress/library";
 import type { OnboardingInput } from "../../lib/progress/types";
 
 // These routes read auth headers and the D1 binding at request time, so they
@@ -40,4 +41,10 @@ function sanitizeOnboarding(body: unknown): OnboardingInput {
 export async function PATCH(request: Request) {
   const body = await request.json().catch(() => ({}));
   return Response.json(await applyOnboarding(localeFrom(request), sanitizeOnboarding(body)));
+}
+
+/** Persist bookmarks and per-organ notes without touching onboarding. */
+export async function PUT(request: Request) {
+  const body = await request.json().catch(() => ({}));
+  return Response.json(await applyLibrary(localeFrom(request), sanitizeLibrary(body)));
 }

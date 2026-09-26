@@ -113,6 +113,16 @@ export type ProgressSnapshot = {
   organs: OrganMasterySummary[];
   lessons: LessonProgressSummary[];
   recent: RecentActivity[];
+  /** Bookmarks and per-organ notes. Guests keep these in localStorage only. */
+  library: {
+    savedOrgans: string[];
+    notes: Record<string, string>;
+  };
+};
+
+export type LibraryInput = {
+  savedOrgans?: string[];
+  notes?: Record<string, string>;
 };
 
 /** Response envelope shared by both API routes. `available: false` means the D1

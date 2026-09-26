@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   LearnerResponse,
+  LibraryInput,
   OnboardingInput,
   ProgressEventInput,
   ProgressResponse,
@@ -171,5 +172,22 @@ export function useProgress(locale: string, signedIn: boolean) {
     }
   }, [locale]);
 
-  return { state, record, refresh, submitOnboarding, dismissOnboarding };
+  const saveLibrary = useCallback(
+    (input: LibraryInput) => {
+      if (!signedIn) return;
+      try {
+        void fetch(`/api/learner?locale=${locale}`, {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(input),
+          keepalive: true,
+        }).catch(() => {});
+      } catch {
+        // Library persist is best-effort; localStorage already holds the write.
+      }
+    },
+    [locale, signedIn],
+  );
+
+  return { state, record, refresh, submitOnboarding, dismissOnboarding, saveLibrary };
 }

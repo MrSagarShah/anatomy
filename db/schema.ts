@@ -46,6 +46,10 @@ export const learners = sqliteTable(
     studyGoal: text("study_goal"),
     /** JSON array of body-system slugs the learner wants to focus on. */
     focusSystems: text("focus_systems").notNull().default("[]"),
+    /** JSON array of organ ids the learner bookmarked. */
+    savedOrgans: text("saved_organs").notNull().default("[]"),
+    /** JSON map of organ id → note body. */
+    notes: text("notes").notNull().default("{}"),
 
     /** Null until the learner finishes onboarding; gates the onboarding prompt. */
     onboardedAt: text("onboarded_at"),

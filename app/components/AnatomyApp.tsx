@@ -33,6 +33,7 @@ import { buildOrgans, indexOrgans, type Organ } from "../i18n/merge";
 import { format, type Dictionary, type UiDictionary } from "../i18n/types";
 import { useProgress } from "../lib/progress/client";
 import { progressCopy } from "../lib/progress/copy";
+import { hydrateLibrary } from "../lib/progress/library";
 import { recommendNext } from "../lib/progress/recommend";
 
 type NavMode = "explore" | "systems" | "library" | "lessons" | "notes" | "progress";
@@ -223,7 +224,24 @@ export function AnatomyApp({
   // --- Learner progress ---
   const copy = progressCopy(locale.code);
   const progress = useProgress(locale.code, Boolean(user));
-  const { record } = progress;
+  const { record, saveLibrary } = progress;
+  const hydratedLibrary = useRef(false);
+
+  useEffect(() => {
+    const library = progress.state.snapshot?.library;
+    if (!library || hydratedLibrary.current) return;
+    hydratedLibrary.current = true;
+    const next = hydrateLibrary(library, {
+      savedOrgans: readSavedOrgans(),
+      notes: readNotes(),
+    });
+    const saved = next.savedOrgans.filter((id): id is OrganId => typeof id === "string") as OrganId[];
+    setSavedIds(saved);
+    setNotes(next.notes);
+    writeSavedOrgans(saved);
+    writeNotes(next.notes);
+    if (next.uploadLocal) saveLibrary({ savedOrgans: next.savedOrgans, notes: next.notes });
+  }, [progress.state.snapshot?.library, saveLibrary]);
   const profileInitials = user ? initialsOf(user.displayName || user.email) : "MA";
   const focusOptions = useMemo(
     () => [...new Set(organs.map((item) => item.system))],
@@ -251,6 +269,7 @@ export function AnatomyApp({
       if (value.trim()) next[id] = value;
       else delete next[id];
       writeNotes(next);
+      saveLibrary({ savedOrgans: savedIds, notes: next });
       return next;
     });
   };
@@ -411,6 +430,7 @@ export function AnatomyApp({
     setSavedIds((current) => {
       const next = current.includes(id) ? current.filter((item) => item !== id) : [...current, id];
       writeSavedOrgans(next);
+      saveLibrary({ savedOrgans: next, notes });
       return next;
     });
   };
@@ -593,6 +613,7 @@ export function AnatomyApp({
           onQuizExit={() => setQuizActive(false)}
           lesson={lessonActive ? organ.lesson ?? null : null}
           resume={progress.state.snapshot?.lessons.find((item) => item.organId === organ.id)}
+          priorKnowledge={progress.state.snapshot?.profile.priorKnowledge}
           onLessonExit={() => setLessonActive(false)}
           onEvent={record}
         />

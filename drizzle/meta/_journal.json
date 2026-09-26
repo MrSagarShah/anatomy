@@ -8,6 +8,13 @@
       "when": 1790179457200,
       "tag": "0000_messy_inhumans",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1790430196652,
+      "tag": "0001_glossy_stature",
+      "breakpoints": true
     }
   ]
 }

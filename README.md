@@ -57,9 +57,10 @@ address is never stored. See `app/lib/progress/server.ts`.
 Learner progress uses Cloudflare D1 through the `DB` binding:
 
 - `.openai/hosting.json` sets `"d1": "DB"` (R2 stays unused)
-- `db/schema.ts` defines `learners`, `progress_events`, `organ_mastery`,
-  and `lesson_progress`
-- `drizzle/0000_messy_inhumans.sql` is the generated migration
+- `db/schema.ts` defines `learners` (background, saved organs, notes),
+  `progress_events`, `organ_mastery`, and `lesson_progress`
+- `drizzle/0000_messy_inhumans.sql` is the initial migration;
+  `drizzle/0001_glossy_stature.sql` adds `saved_organs` and `notes`
 - `db/index.ts` opens Drizzle against `env.DB`
 
 Without the D1 binding — or if the tables have not been applied — the
@@ -114,8 +115,9 @@ wipe `.wrangler/state`.
 ### Production D1
 
 The dedicated database is `anatomy-atelier`. Schema
-(`learners`, `lesson_progress`, `organ_mastery`, `progress_events`) is
-already applied remotely. Later schema changes:
+(`learners` including `saved_organs` and `notes`, `lesson_progress`,
+`organ_mastery`, `progress_events`) is already applied remotely. Later
+schema changes:
 
 ```bash
 npx wrangler d1 execute anatomy-atelier \

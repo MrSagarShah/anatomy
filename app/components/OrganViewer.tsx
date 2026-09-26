@@ -21,7 +21,8 @@ import {
 import type { Hotspot, Organ } from "../i18n/merge";
 import { format, type GuidedLesson, type UiDictionary } from "../i18n/types";
 import type { AnatomyViewer } from "../lib/three/viewer";
-import type { LessonResume, ProgressEventInput } from "../lib/progress/types";
+import { lessonEntryPhase } from "../lib/progress/lesson-entry";
+import type { LessonResume, PriorKnowledge, ProgressEventInput } from "../lib/progress/types";
 
 type Props = {
   organ: Organ;
@@ -36,6 +37,8 @@ type Props = {
   onLessonExit: () => void;
   /** Reopen a guided lesson at the last recorded step or checkpoint. */
   resume?: LessonResume;
+  /** Advanced learners skip the orientation card on a fresh start. */
+  priorKnowledge?: PriorKnowledge | null;
   /** Records a learning event (best-effort, may be a no-op when tracking is off). */
   onEvent?: (event: ProgressEventInput) => void;
 };
@@ -193,15 +196,6 @@ function lastIndex(count: number): number {
   return Math.max(0, count - 1);
 }
 
-function resumePhase(
-  resume: LessonResume | undefined,
-): "overview" | "steps" | "questions" {
-  if (!resume || resume.completed) return "overview";
-  if (resume.questionsAnswered > 0) return "questions";
-  if (resume.stepsCompleted > 0) return "steps";
-  return "overview";
-}
-
 function GuidedLessonPanel({
   lesson,
   onFocus,
@@ -209,6 +203,7 @@ function GuidedLessonPanel({
   onEvent,
   organId,
   resume,
+  priorKnowledge,
 }: {
   lesson: GuidedLesson;
   onFocus: (hotspotId: string | null) => void;
@@ -216,9 +211,10 @@ function GuidedLessonPanel({
   onEvent: (event: ProgressEventInput) => void;
   organId: string;
   resume?: LessonResume;
+  priorKnowledge?: PriorKnowledge | null;
 }) {
   const [phase, setPhase] = useState<"overview" | "steps" | "questions" | "complete">(
-    () => resumePhase(resume),
+    () => lessonEntryPhase(resume, priorKnowledge),
   );
   const [stepIndex, setStepIndex] = useState(() => {
     if (!resume || resume.completed || resume.questionsAnswered > 0 || resume.stepsCompleted <= 0) {
@@ -254,6 +250,15 @@ function GuidedLessonPanel({
     }
     if (phase === "overview") completeReported.current = false;
   }, [phase, onEvent, organId, lesson.id, lesson.questions.length, score]);
+
+  const skippedOverview = useRef(false);
+  useEffect(() => {
+    if (skippedOverview.current) return;
+    if (lessonEntryPhase(resume, priorKnowledge) !== "steps") return;
+    if (resume && (resume.stepsCompleted > 0 || resume.questionsAnswered > 0)) return;
+    skippedOverview.current = true;
+    onEvent({ kind: "lesson_start", organId, refId: lesson.id, meta: { lessonId: lesson.id } });
+  }, [lesson.id, onEvent, organId, priorKnowledge, resume]);
 
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true });
@@ -437,7 +442,7 @@ function GuidedLessonPanel({
   );
 }
 
-export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, quizActive, onQuizExit, lesson, onLessonExit, resume, onEvent }: Props) {
+export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCompare, quizActive, onQuizExit, lesson, onLessonExit, resume, priorKnowledge, onEvent }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<AnatomyViewer | null>(null);
   const organRef = useRef(organ);
@@ -587,6 +592,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
           lesson={lesson}
           organId={organ.id}
           resume={resume}
+          priorKnowledge={priorKnowledge}
           onEvent={onEvent ?? noEvent}
           onFocus={focusLessonHotspot}
           onExit={() => {

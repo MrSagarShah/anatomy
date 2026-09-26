@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { hydrateLibrary, parseNotes, parseSavedOrgans, sanitizeLibrary } from "../app/lib/progress/library";
+import { lessonEntryPhase, resumePhase } from "../app/lib/progress/lesson-entry";
 import { currentStreak, recommendNext } from "../app/lib/progress/recommend";
 import { computeMastery } from "../app/lib/progress/types";
 
@@ -205,4 +207,63 @@ test("currentStreak: empty is 0, today is 1, yesterday still counts", () => {
 test("currentStreak: counts consecutive days ending today and stops at a gap", () => {
   assert.equal(currentStreak([utcDay(0), utcDay(-1), utcDay(-2)]), 3);
   assert.equal(currentStreak([utcDay(0), utcDay(-1), utcDay(-3)]), 2);
+});
+
+test("parseSavedOrgans / parseNotes: ignore junk and cap size", () => {
+  assert.deepEqual(parseSavedOrgans('["heart","nope!","liver"]'), ["heart", "liver"]);
+  assert.deepEqual(parseNotes('{"heart":"  keep  ","bad":1}'), { heart: "  keep  " });
+  assert.deepEqual(parseNotes("{"), {});
+});
+
+test("sanitizeLibrary: only accepts organ-shaped keys", () => {
+  assert.deepEqual(
+    sanitizeLibrary({ savedOrgans: ["heart", "DROP TABLE", "skin"], notes: { heart: "note", x: "no" } }),
+    { savedOrgans: ["heart", "skin"], notes: { heart: "note" } },
+  );
+});
+
+test("hydrateLibrary: empty server takes local guest data and asks to upload", () => {
+  const next = hydrateLibrary(
+    { savedOrgans: [], notes: {} },
+    { savedOrgans: ["heart"], notes: { heart: "guest" } },
+  );
+  assert.equal(next.uploadLocal, true);
+  assert.deepEqual(next.savedOrgans, ["heart"]);
+  assert.equal(next.notes.heart, "guest");
+});
+
+test("hydrateLibrary: server snapshot wins once it has anything", () => {
+  const next = hydrateLibrary(
+    { savedOrgans: ["brain"], notes: {} },
+    { savedOrgans: ["heart"], notes: { heart: "guest" } },
+  );
+  assert.equal(next.uploadLocal, false);
+  assert.deepEqual(next.savedOrgans, ["brain"]);
+  assert.deepEqual(next.notes, {});
+});
+
+test("resumePhase: completed or missing opens the overview", () => {
+  assert.equal(resumePhase(undefined), "overview");
+  assert.equal(resumePhase({ stepsCompleted: 2, questionsAnswered: 0, completed: true, totalSteps: 5, totalQuestions: 3 }), "overview");
+  assert.equal(resumePhase({ stepsCompleted: 2, questionsAnswered: 0, completed: false, totalSteps: 5, totalQuestions: 3 }), "steps");
+  assert.equal(resumePhase({ stepsCompleted: 2, questionsAnswered: 1, completed: false, totalSteps: 5, totalQuestions: 3 }), "questions");
+});
+
+test("lessonEntryPhase: advanced skips overview on a fresh start only", () => {
+  assert.equal(lessonEntryPhase(undefined, "beginner"), "overview");
+  assert.equal(lessonEntryPhase(undefined, "advanced"), "steps");
+  assert.equal(
+    lessonEntryPhase(
+      { stepsCompleted: 2, questionsAnswered: 0, completed: false, totalSteps: 5, totalQuestions: 3 },
+      "advanced",
+    ),
+    "steps",
+  );
+  assert.equal(
+    lessonEntryPhase(
+      { stepsCompleted: 0, questionsAnswered: 0, completed: true, totalSteps: 5, totalQuestions: 3 },
+      "advanced",
+    ),
+    "overview",
+  );
 });
