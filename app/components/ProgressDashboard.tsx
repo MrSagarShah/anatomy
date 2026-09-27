@@ -79,14 +79,16 @@ export function ProgressDashboard({
     typeof window !== "undefined" ? window.location.pathname : "/",
   )}`;
 
+  const retryButton = onRetry ? (
+    <button type="button" className="lesson-button" onClick={onRetry}>{d.retry ?? "Try again"}</button>
+  ) : null;
+
   let body: React.ReactNode;
   if (state.loadError && !state.snapshot) {
     body = (
       <div className="pg-guest">
         <p className="pg-note">{d.unavailable}</p>
-        {onRetry && (
-          <button type="button" className="lesson-button" onClick={onRetry}>{d.retry ?? "Try again"}</button>
-        )}
+        {retryButton}
       </div>
     );
   } else if (state.available === null) {
@@ -146,12 +148,14 @@ export function ProgressDashboard({
         <div className="pg-background">
           <div>
             <span className="pg-background-name">{profile.displayName}</span>
-            <p>{backgroundBits.length ? backgroundBits.join(" · ") : d.empty}</p>
+            <p>{backgroundBits.length ? backgroundBits.join(" · ") : d.backgroundEmpty}</p>
           </div>
           <button type="button" onClick={onEditBackground} aria-label={d.editBackground}>
             <Pencil size={14} /> {d.editBackground}
           </button>
         </div>
+
+        {state.loadError && retryButton}
 
         <div className="pg-stats">
           <Stat icon={<CircleUser size={16} />} value={String(totals.organsStudied)} label={d.stats.organs} />
@@ -161,7 +165,7 @@ export function ProgressDashboard({
           <Stat icon={<Award size={16} />} value={`${totals.averageMastery}%`} label={d.stats.mastery} />
         </div>
 
-        {recommended && (
+        {recommended && !nothingYet && (
           <section className="pg-section">
             <header>
               <h3>{d.recommended}</h3>

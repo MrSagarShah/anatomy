@@ -561,6 +561,12 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
   // A spinning specimen makes "click the mitral valve" a game of chance, so the
   // quiz holds the model still and restores the user's setting on exit.
   useEffect(() => viewerRef.current?.setAutoRotate(autoRotate && !quizActive && !lesson && !tourActive), [autoRotate, lesson, quizActive, tourActive]);
+  useEffect(() => viewerRef.current?.setGuidedLock(Boolean(lesson || tourActive || quizActive)), [lesson, quizActive, tourActive]);
+  useEffect(() => {
+    if (!quizActive && !lesson && !tourActive && !compare) return;
+    viewerRef.current?.clearToolModes();
+    setToolOn({ isolate: false, section: false, layers: false });
+  }, [quizActive, lesson, tourActive, compare]);
 
   useEffect(() => {
     if (!tourActive || lesson || quizActive || loading) {
@@ -676,7 +682,6 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         <div className="lesson-target" role="status" aria-live="polite">
           <Crosshair size={17} />
           <span><small>{lesson.labels.showing}</small><strong>{selected.label}</strong></span>
-          <em>{lesson.labels.anteriorView}</em>
         </div>
       )}
 
@@ -697,7 +702,7 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
         </div>
       )}
 
-      {!lesson && !quizActive && (
+      {!lesson && !quizActive && !tourActive && !compare && !loadFailed && (
       <div className="viewer-tools" aria-label={t.tools.label}>
         {tools.map(({ id, label, icon: Icon }) => {
           const pressed =
@@ -798,18 +803,18 @@ export function OrganViewer({ organ, t, autoRotate, onAutoRotate, compare, onCom
       {loadFailed && (
         <div className="model-loader" role="alert">
           <strong>{format(t.viewer.loadError, { organ: organ.name })}</strong>
-          <button type="button" className="lesson-button" onClick={retryLoad}>{t.quiz.retry}</button>
+          <button type="button" className="lesson-button" onClick={retryLoad}>{t.viewer.retry}</button>
         </div>
       )}
 
-      {!quizActive && !lesson && !tourActive && (
+      {!quizActive && !lesson && !tourActive && !compare && !loadFailed && (
       <button className="auto-rotate" type="button" onClick={() => onAutoRotate(!autoRotate)} aria-pressed={autoRotate}>
         <RotateCcw size={14} /> {t.viewer.autoRotate}
         <span className={`switch ${autoRotate ? "on" : ""}`}><i /></span>
       </button>
       )}
 
-      {!lesson && (
+      {!lesson && !quizActive && !tourActive && !compare && !loadFailed && (
         <div className="view-caption">
           <span>{t.viewer.caption}</span>
           <strong>{organ.scientificName}</strong>

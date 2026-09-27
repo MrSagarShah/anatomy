@@ -19,6 +19,7 @@ export const ui: UiDictionary = {
     emptySaved: "No saved organs yet. Bookmark one from the library.",
     notesHint: "Notes you write will show up as chips here.",
     viewAll: "View all organs",
+    noResults: "No organs match that search.",
     quoteLine1: "Learning is", quoteLine2: "an act of curiosity.", quoteSign: "Keep exploring!",
   },
   tools: {
@@ -29,7 +30,7 @@ export const ui: UiDictionary = {
     title: "{organ} interactive viewer",
     canvas: "Interactive 3D anatomy model. Drag to rotate, scroll to zoom, and click a dot to read about that structure.",
     tip: "Tip", tipDrag: "Drag to rotate", tipScroll: "Scroll to zoom", tipClick: "Click a dot to learn more",
-    loading: "Preparing the {organ}", loadError: "Couldn't load the {organ}", autoRotate: "Auto rotate",
+    loading: "Preparing the {organ}", loadError: "Couldn't load the {organ}", retry: "Retry", autoRotate: "Auto rotate",
     caption: "3D specimen · click a dot to explore", structures: "Structures in this specimen",
   },
   info: {

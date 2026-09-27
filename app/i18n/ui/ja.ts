@@ -16,7 +16,7 @@ export const ui: UiDictionary = {
   language: { label: "言語", choose: "言語を選択" },
   library: {
     title: "臓器ライブラリ", open: "臓器ライブラリを開く", close: "ライブラリを閉じる",
-    saved: "保存した臓器", emptySaved: "保存した臓器はまだありません。ライブラリからブックマークしてください。", notesHint: "書いたメモはここにチップで表示されます。", viewAll: "すべての臓器を見る",
+    saved: "保存した臓器", emptySaved: "保存した臓器はまだありません。ライブラリからブックマークしてください。", notesHint: "書いたメモはここにチップで表示されます。", viewAll: "すべての臓器を見る", noResults: "その検索に一致する臓器はありません。",
     quoteLine1: "学びとは", quoteLine2: "好奇心のいとなみ。", quoteSign: "探索を続けよう！",
   },
   tools: {
@@ -28,7 +28,7 @@ export const ui: UiDictionary = {
     canvas: "操作できる 3D 解剖モデルです。ドラッグで回転、スクロールでズーム、点をクリックするとその構造の説明が読めます。",
     tip: "ヒント", tipDrag: "ドラッグで回転", tipScroll: "スクロールでズーム",
     tipClick: "点をクリックして詳しく",
-    loading: "{organ}を準備中", loadError: "{organ}を読み込めませんでした", autoRotate: "自動回転",
+    loading: "{organ}を準備中", loadError: "{organ}を読み込めませんでした", retry: "再試行", autoRotate: "自動回転",
     caption: "3D 標本 · 点をクリック", structures: "この標本の構造",
   },
   info: {

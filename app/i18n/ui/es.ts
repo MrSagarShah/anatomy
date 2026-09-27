@@ -16,7 +16,7 @@ export const ui: UiDictionary = {
   language: { label: "Idioma", choose: "Elige un idioma" },
   library: {
     title: "Biblioteca de órganos", open: "Abrir biblioteca de órganos", close: "Cerrar biblioteca",
-    saved: "Órganos guardados", emptySaved: "Aún no hay órganos guardados. Marca uno en la biblioteca.", notesHint: "Las notas que escribas aparecerán aquí como fichas.", viewAll: "Ver todos los órganos",
+    saved: "Órganos guardados", emptySaved: "Aún no hay órganos guardados. Marca uno en la biblioteca.", notesHint: "Las notas que escribas aparecerán aquí como fichas.", viewAll: "Ver todos los órganos", noResults: "Ningún órgano coincide con esa búsqueda.",
     quoteLine1: "Aprender es", quoteLine2: "un acto de curiosidad.", quoteSign: "¡Sigue explorando!",
   },
   tools: {
@@ -28,7 +28,7 @@ export const ui: UiDictionary = {
     canvas: "Modelo anatómico 3D interactivo. Arrastra para girar, desplaza para hacer zoom y haz clic en un punto para leer sobre esa estructura.",
     tip: "Consejo", tipDrag: "Arrastra para girar", tipScroll: "Desplaza para hacer zoom",
     tipClick: "Haz clic en un punto para saber más",
-    loading: "Preparando {organ}", loadError: "No se pudo cargar {organ}", autoRotate: "Giro automático",
+    loading: "Preparando {organ}", loadError: "No se pudo cargar {organ}", retry: "Reintentar", autoRotate: "Giro automático",
     caption: "Espécimen 3D · haz clic en un punto", structures: "Estructuras de este espécimen",
   },
   info: {

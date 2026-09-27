@@ -334,6 +334,7 @@ button:focus-visible, input:focus-visible, canvas:focus-visible {
 .tool-button { height: 60px; border: 0; border-radius: 12px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; font: 500 9px/1 var(--font-serif), serif; }
 .tool-button.active { color: var(--coral); background: rgba(238,124,106,.08); }
 .tool-button:nth-last-child(1) { border-top: 1px solid var(--line); border-radius: 0 0 12px 12px; }
+.compare-mode .viewer-tools { display: none; }
 
 .tip-note {
   position: absolute;
@@ -390,7 +391,7 @@ button:focus-visible, input:focus-visible, canvas:focus-visible {
 .hotspot-callout[data-side="right"] .callout-body:before { right: 100%; }
 .hotspot-callout[data-side="left"] .callout-body:before { left: 100%; }
 .callout-body b { display: block; padding-inline-start: 13px; font: 500 13px var(--font-serif), serif; }
-.callout-body b:before { content: ""; position: absolute; left: 12px; top: 15px; width: 7px; height: 7px; border-radius: 50%; background: var(--hotspot-color); }
+.callout-body b:before { content: ""; position: absolute; inset-inline-start: 12px; top: 15px; width: 7px; height: 7px; border-radius: 50%; background: var(--hotspot-color); }
 .callout-body small { display: block; margin-top: 3px; padding-inline-start: 13px; color: var(--muted); font-size: 10px; line-height: 1.35; }
 .callout-close { position: absolute; top: 6px; inset-inline-end: 6px; width: 20px; height: 20px; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; }
 .callout-close:hover { background: rgba(116,89,67,.09); }
@@ -634,7 +635,7 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
 @media (max-width: 1350px) {
   .app-shell { padding: 16px; }
   .topbar { grid-template-columns: 1fr auto auto auto; gap: 12px; }
-  .search-box { display: none; }
+  .topbar .search-box { display: none; }
   .library-search { display: flex; }
   .workspace { grid-template-columns: 250px minmax(500px,1fr) 300px; height: min(700px, calc(100vh - 105px)); }
   .learning-cards { grid-template-columns: repeat(3, 1fr); --art-max: 300px; }
@@ -645,6 +646,7 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
   .main-nav button span { display: none; }
   .main-nav button { padding: 10px; }
   .workspace { grid-template-columns: 210px minmax(450px,1fr); height: 690px; }
+  .lesson-mode .workspace { grid-template-columns: minmax(0, 1fr); }
   .info-panel { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px 22px; max-height: none; }
   .info-panel .description, .info-panel .rule, .info-panel h2, .key-facts, .medical-note { grid-column: 2; }
   .info-kicker, .info-title-row { grid-column: 1; }
@@ -675,7 +677,8 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
   .main-nav button { padding: 8px 11px; }
   .profile span { width: 34px; height: 34px; }
   .mobile-library-trigger { display: flex; }
-  .compare-mode .viewer-tools { display: none; }
+  .organ-library.open .library-search,
+  .organ-library.open .search-box { display: flex; }
   .workspace { display: block; margin-top: 8px; }
   .viewer-shell { height: 68vh; min-height: 520px; border-radius: 22px; }
   .organ-library {
@@ -698,12 +701,12 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
   .learning-cards { grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; --art-max: 320px; }
   .learning-cards article { border-radius: 20px; }
   .curiosity-card { display: none !important; }
-  .viewer-tools { top: auto; bottom: 12px; left: 10px; right: 10px; transform: none; width: auto; height: 61px; flex-direction: row; justify-content: space-around; padding: 4px; border-radius: 15px; }
+  .viewer-tools { top: auto; bottom: 12px; inset-inline: 10px; transform: none; width: auto; height: 61px; flex-direction: row; justify-content: space-around; padding: 4px; border-radius: 15px; }
   .tool-button { width: 51px; height: 51px; }
   .tool-button:nth-last-child(1) { border: 0; border-radius: 12px; }
   .tool-button span { display: none; }
-  .auto-rotate { bottom: 82px; right: 10px; }
-  .view-caption { left: 12px; bottom: 84px; }
+  .auto-rotate { bottom: 82px; inset-inline-end: 10px; }
+  .view-caption { inset-inline-start: 12px; bottom: 84px; }
   .tip-note { width: 130px; min-height: 113px; padding: 11px; }
   .tip-note p { font-size: 12px; }
   .callout-body { width: 148px; top: -26px; }

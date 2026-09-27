@@ -16,7 +16,7 @@ export const ui: UiDictionary = {
   language: { label: "اللغة", choose: "اختر لغة" },
   library: {
     title: "مكتبة الأعضاء", open: "فتح مكتبة الأعضاء", close: "إغلاق المكتبة",
-    saved: "الأعضاء المحفوظة", emptySaved: "لا توجد أعضاء محفوظة بعد. احفظ عضوًا من المكتبة.", notesHint: "ستظهر ملاحظاتك هنا كبطاقات.", viewAll: "عرض كل الأعضاء",
+    saved: "الأعضاء المحفوظة", emptySaved: "لا توجد أعضاء محفوظة بعد. احفظ عضوًا من المكتبة.", notesHint: "ستظهر ملاحظاتك هنا كبطاقات.", viewAll: "عرض كل الأعضاء", noResults: "لا توجد أعضاء تطابق هذا البحث.",
     quoteLine1: "التعلّم", quoteLine2: "فعلٌ من أفعال الفضول.", quoteSign: "واصل الاستكشاف!",
   },
   tools: {
@@ -28,7 +28,7 @@ export const ui: UiDictionary = {
     canvas: "نموذج تشريحي ثلاثي الأبعاد تفاعلي. اسحب للتدوير، ومرّر للتكبير، وانقر على نقطة لقراءة وصف تلك البنية.",
     tip: "تلميح", tipDrag: "اسحب للتدوير", tipScroll: "مرّر للتكبير",
     tipClick: "انقر على نقطة لمعرفة المزيد",
-    loading: "جارٍ تحضير {organ}", loadError: "تعذّر تحميل {organ}", autoRotate: "تدوير تلقائي",
+    loading: "جارٍ تحضير {organ}", loadError: "تعذّر تحميل {organ}", retry: "أعد المحاولة", autoRotate: "تدوير تلقائي",
     caption: "عيّنة ثلاثية الأبعاد · انقر على نقطة", structures: "بنى هذه العيّنة",
   },
   info: {

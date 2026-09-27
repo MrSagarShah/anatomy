@@ -33,7 +33,7 @@ import { buildOrgans, indexOrgans, type Organ } from "../i18n/merge";
 import { format, type Dictionary, type UiDictionary } from "../i18n/types";
 import { useProgress } from "../lib/progress/client";
 import { progressCopy } from "../lib/progress/copy";
-import { hydrateLibrary } from "../lib/progress/library";
+import { hydrateLibrary, parseSavedOrgans } from "../lib/progress/library";
 import { recommendNext } from "../lib/progress/recommend";
 import { organMatchesQuery } from "../lib/organ-search";
 
@@ -74,15 +74,9 @@ function isMobileLibrary(): boolean {
 
 function readSavedOrgans(): OrganId[] {
   if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(SAVED_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as unknown;
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((id): id is OrganId => typeof id === "string");
-  } catch {
-    return [];
-  }
+  return parseSavedOrgans(window.localStorage.getItem(SAVED_KEY)).filter(
+    (id): id is OrganId => (organIds as readonly string[]).includes(id),
+  );
 }
 
 function writeSavedOrgans(ids: OrganId[]) {
@@ -197,7 +191,9 @@ function LanguageSwitcher({ locale, t, organId }: { locale: LocaleConfig; t: UiD
         value={locale.code}
         onChange={(event) => {
           writeViewOrgan(organId);
-          window.location.pathname = `/${event.target.value}`;
+          const next = new URL(window.location.href);
+          next.pathname = `/${event.target.value}`;
+          window.location.assign(next.toString());
         }}
       >
         {locales.map((entry) => (
@@ -323,7 +319,7 @@ export function AnatomyApp({
       if (!organMatchesQuery(item, query, locale.code)) return false;
       if (nav === "systems" && activeSystem && item.system !== activeSystem) return false;
       if (nav === "lessons" && !item.lesson) return false;
-      if (savedOnly && !savedSet.has(item.id)) return false;
+      if (nav === "library" && savedOnly && !savedSet.has(item.id)) return false;
       return true;
     });
     if (nav === "explore" && !query.trim() && focusSystems.length > 0) {
@@ -404,32 +400,36 @@ export function AnatomyApp({
     libraryRef.current?.focus();
   };
 
-  const goExplore = () => {
-    setNav("explore");
-    setActiveSystem(null);
-    setSavedOnly(false);
-    setDashboardOpen(false);
+  const leaveModes = () => {
+    setQuizActive(false);
+    setCompare(false);
+    setTourActive(false);
+    setModal(null);
     setLessonActive(false);
+    setDashboardOpen(false);
     flushNote();
   };
 
+  const goExplore = () => {
+    leaveModes();
+    setNav("explore");
+    setActiveSystem(null);
+    setSavedOnly(false);
+  };
+
   const goSystems = () => {
+    leaveModes();
     setNav("systems");
     setActiveSystem(organ.system);
     setSavedOnly(false);
-    setDashboardOpen(false);
-    setLessonActive(false);
-    flushNote();
     if (isMobileLibrary()) setMobileLibrary(true);
   };
 
   const goLibrary = () => {
+    leaveModes();
     setNav("library");
     setActiveSystem(null);
     setSavedOnly(true);
-    setDashboardOpen(false);
-    setLessonActive(false);
-    flushNote();
     focusLibrary();
   };
 
@@ -459,13 +459,16 @@ export function AnatomyApp({
   const goNotes = () => {
     setDashboardOpen(false);
     setLessonActive(false);
+    setQuizActive(false);
+    setCompare(false);
+    setTourActive(false);
+    setModal(null);
     setNoteDraft(readNotes()[organId] ?? notes[organId] ?? "");
     setNav("notes");
   };
 
   const goProgress = () => {
-    flushNote();
-    setLessonActive(false);
+    leaveModes();
     setNav("progress");
     setDashboardOpen(true);
   };
@@ -551,7 +554,7 @@ export function AnatomyApp({
         </label>
         <LanguageSwitcher locale={locale} t={t} organId={organId} />
         <button className="profile" aria-label={t.profile.open} onClick={goProgress}><span>{profileInitials}</span><ChevronDown size={15} /></button>
-        <button className="mobile-library-trigger" onClick={() => { setNav("library"); setSavedOnly(false); setMobileLibrary(true); }} aria-label={t.library.open}><LibraryBig size={20} /></button>
+        <button className="mobile-library-trigger" onClick={() => { leaveModes(); setNav("library"); setSavedOnly(false); setMobileLibrary(true); }} aria-label={t.library.open}><LibraryBig size={20} /></button>
       </header>
 
       <div className="workspace">
@@ -593,8 +596,11 @@ export function AnatomyApp({
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search.placeholder} />
           </label>
           <div className="organ-list">
-            {savedOnly && filteredOrgans.length === 0 && (
+            {nav === "library" && savedOnly && filteredOrgans.length === 0 && !query.trim() && (
               <p className="library-empty">{t.library.emptySaved}</p>
+            )}
+            {query.trim() && filteredOrgans.length === 0 && (
+              <p className="library-empty">{t.library.noResults}</p>
             )}
             {filteredOrgans.map((item) => {
               const isSaved = savedSet.has(item.id);
@@ -667,7 +673,10 @@ export function AnatomyApp({
           lesson={lessonActive ? organ.lesson ?? null : null}
           resume={progress.state.snapshot?.lessons.find((item) => item.organId === organ.id)}
           priorKnowledge={progress.state.snapshot?.profile.priorKnowledge}
-          onLessonExit={() => setLessonActive(false)}
+          onLessonExit={() => {
+            setLessonActive(false);
+            setNav("explore");
+          }}
           onEvent={record}
         />
 
@@ -831,7 +840,7 @@ export function AnatomyApp({
       )}
       {mobileLibrary && <button className="drawer-backdrop" aria-label={t.library.close} onClick={() => setMobileLibrary(false)} />}
 
-      {progress.state.needsOnboarding && !dashboardOpen && nav !== "notes" && (
+      {progress.state.needsOnboarding && !dashboardOpen && nav !== "notes" && !modal && !quizActive && !compare && !lessonActive && !tourActive && (
         <OnboardingModal
           copy={copy}
           focusOptions={focusOptions}

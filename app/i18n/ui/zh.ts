@@ -16,7 +16,7 @@ export const ui: UiDictionary = {
   language: { label: "语言", choose: "选择语言" },
   library: {
     title: "器官库", open: "打开器官库", close: "关闭器官库",
-    saved: "已收藏的器官", emptySaved: "还没有收藏的器官。从器官库中收藏一个吧。", notesHint: "你写下的笔记会以标签出现在这里。", viewAll: "查看全部器官",
+    saved: "已收藏的器官", emptySaved: "还没有收藏的器官。从器官库中收藏一个吧。", notesHint: "你写下的笔记会以标签出现在这里。", viewAll: "查看全部器官", noResults: "没有与该搜索匹配的器官。",
     quoteLine1: "学习", quoteLine2: "是一种好奇心。", quoteSign: "继续探索吧！",
   },
   tools: {
@@ -28,7 +28,7 @@ export const ui: UiDictionary = {
     canvas: "可交互的 3D 解剖模型。拖动旋转，滚动缩放，点击圆点可阅读该结构的说明。",
     tip: "提示", tipDrag: "拖动以旋转", tipScroll: "滚动以缩放",
     tipClick: "点击圆点了解更多",
-    loading: "正在准备{organ}", loadError: "无法加载{organ}", autoRotate: "自动旋转",
+    loading: "正在准备{organ}", loadError: "无法加载{organ}", retry: "重试", autoRotate: "自动旋转",
     caption: "3D 标本 · 点击圆点探索", structures: "本标本中的结构",
   },
   info: {

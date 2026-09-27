@@ -39,6 +39,7 @@ export type ProgressCopy = {
     guest: string;
     backgroundTitle: string;
     editBackground: string;
+    backgroundEmpty: string;
     stats: {
       organs: string;
       lessons: string;
@@ -112,6 +113,7 @@ const en: ProgressCopy = {
     guest: "Sign in with ChatGPT to save your progress and pick up where you left off.",
     backgroundTitle: "Your background",
     editBackground: "Edit",
+    backgroundEmpty: "Add your background so we can tailor suggestions.",
     stats: {
       organs: "Organs studied",
       lessons: "Lessons completed",
@@ -192,6 +194,7 @@ const es: ProgressCopy = {
     guest: "Inicia sesión con ChatGPT para guardar tu progreso y retomar donde lo dejaste.",
     backgroundTitle: "Tu perfil",
     editBackground: "Editar",
+    backgroundEmpty: "Añade tu perfil para que podamos adaptar las sugerencias.",
     stats: {
       organs: "Órganos estudiados",
       lessons: "Lecciones completadas",
@@ -272,6 +275,7 @@ const hi: ProgressCopy = {
     guest: "ChatGPT से साइन इन करें ताकि प्रगति सहेजी जाए और जहाँ छोड़ा था वहीं से जारी रख सकें।",
     backgroundTitle: "आपकी पृष्ठभूमि",
     editBackground: "संपादित करें",
+    backgroundEmpty: "अपनी पृष्ठभूमि जोड़ें ताकि हम सुझाव आपके अनुकूल बना सकें।",
     stats: {
       organs: "अध्ययन किए अंग",
       lessons: "पूर्ण किए पाठ",
@@ -350,6 +354,7 @@ const zh: ProgressCopy = {
     guest: "用 ChatGPT 登录，即可保存进度并从上次停下的地方继续。",
     backgroundTitle: "你的背景",
     editBackground: "编辑",
+    backgroundEmpty: "补充你的背景，我们就能为你定制建议。",
     stats: {
       organs: "已学器官",
       lessons: "已完成课程",
@@ -430,6 +435,7 @@ const ar: ProgressCopy = {
     guest: "سجّل الدخول عبر ChatGPT لحفظ تقدّمك ومتابعة ما توقّفت عنده.",
     backgroundTitle: "خلفيّتك",
     editBackground: "تعديل",
+    backgroundEmpty: "أضف خلفيّتك كي نُوائم الاقتراحات معك.",
     stats: {
       organs: "أعضاء دُرست",
       lessons: "دروس أُكملت",
@@ -510,6 +516,7 @@ const pt: ProgressCopy = {
     guest: "Entre com o ChatGPT para salvar seu progresso e retomar de onde parou.",
     backgroundTitle: "Seu perfil",
     editBackground: "Editar",
+    backgroundEmpty: "Adicione seu perfil para adaptarmos as sugestões.",
     stats: {
       organs: "Órgãos estudados",
       lessons: "Lições concluídas",
@@ -590,6 +597,7 @@ const fr: ProgressCopy = {
     guest: "Connectez-vous avec ChatGPT pour enregistrer votre progression et reprendre là où vous vous êtes arrêté.",
     backgroundTitle: "Votre profil",
     editBackground: "Modifier",
+    backgroundEmpty: "Ajoutez votre profil pour que nous puissions adapter les suggestions.",
     stats: {
       organs: "Organes étudiés",
       lessons: "Leçons terminées",
@@ -670,6 +678,7 @@ const de: ProgressCopy = {
     guest: "Melde dich mit ChatGPT an, um deinen Fortschritt zu speichern und dort weiterzumachen, wo du aufgehört hast.",
     backgroundTitle: "Dein Hintergrund",
     editBackground: "Bearbeiten",
+    backgroundEmpty: "Ergänze deinen Hintergrund, damit wir Vorschläge anpassen können.",
     stats: {
       organs: "Studierte Organe",
       lessons: "Abgeschlossene Lektionen",
@@ -750,6 +759,7 @@ const ja: ProgressCopy = {
     guest: "ChatGPT でログインすると、進捗を保存し、中断したところから続けられます。",
     backgroundTitle: "あなたの背景",
     editBackground: "編集",
+    backgroundEmpty: "背景を追加すると、おすすめを合わせられます。",
     stats: {
       organs: "学んだ器官",
       lessons: "完了したレッスン",
@@ -830,6 +840,7 @@ const ru: ProgressCopy = {
     guest: "Войдите через ChatGPT, чтобы сохранить прогресс и продолжить с того места, где остановились.",
     backgroundTitle: "Ваш профиль",
     editBackground: "Изменить",
+    backgroundEmpty: "Добавьте свой профиль, чтобы мы подстроили рекомендации.",
     stats: {
       organs: "Изученные органы",
       lessons: "Завершённые уроки",
@@ -910,6 +921,7 @@ const id: ProgressCopy = {
     guest: "Masuk dengan ChatGPT untuk menyimpan progres dan lanjut dari tempat terakhir.",
     backgroundTitle: "Latar belakangmu",
     editBackground: "Edit",
+    backgroundEmpty: "Tambahkan latar belakangmu agar kami bisa menyesuaikan saran.",
     stats: {
       organs: "Organ dipelajari",
       lessons: "Pelajaran selesai",
@@ -990,6 +1002,7 @@ const ko: ProgressCopy = {
     guest: "ChatGPT로 로그인하면 진도를 저장하고 멈춘 곳부터 이어갈 수 있습니다.",
     backgroundTitle: "나의 배경",
     editBackground: "편집",
+    backgroundEmpty: "배경을 추가하면 추천을 맞출 수 있습니다.",
     stats: {
       organs: "학습한 기관",
       lessons: "완료한 수업",

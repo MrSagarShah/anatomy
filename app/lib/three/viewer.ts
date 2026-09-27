@@ -72,6 +72,7 @@ export class AnatomyViewer {
   private fadeTween: gsap.core.Tween | null = null;
   private disposed = false;
   private quizMode = false;
+  private guidedLock = false;
   private authoring = false;
   private authorRaycaster = new THREE.Raycaster();
 
@@ -628,7 +629,7 @@ export class AnatomyViewer {
     if (event.key === "ArrowRight" && pivot) pivot.rotation.y += 0.08;
     if (event.key === "+") this.camera.position.z = Math.max(4.8, this.camera.position.z - 0.35);
     if (event.key === "-") this.camera.position.z = Math.min(12, this.camera.position.z + 0.35);
-    if (event.key === "Escape") this.select(null);
+    if (event.key === "Escape" && !this.quizMode && !this.guidedLock) this.select(null);
     this.dirty = true;
   };
 
@@ -644,14 +645,23 @@ export class AnatomyViewer {
     this.dirty = true;
   }
 
-  reset() {
-    this.select(null);
+  /** Turns off isolate, clip, and see-through without moving the camera. */
+  clearToolModes() {
     this.setCrossSection(false);
     this.isolated = false;
     this.layered = false;
     this.applyIsolateVisuals();
     this.applyIsolateDots();
     this.applyLayers();
+  }
+
+  setGuidedLock(enabled: boolean) {
+    this.guidedLock = enabled;
+  }
+
+  reset() {
+    this.select(null);
+    this.clearToolModes();
     this.tween(this.camera.position, { ...HOME_CAMERA, duration: 0.8, ease: "power3.out" });
     this.tween(this.controls.target, { ...HOME_TARGET, duration: 0.8, ease: "power3.out" });
     if (this.organ) this.tween(this.organ.pivot.rotation, { x: 0.05, y: -0.28, z: 0, duration: 0.8, ease: "power3.out" });

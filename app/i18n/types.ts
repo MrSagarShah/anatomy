@@ -92,12 +92,13 @@ export type UiDictionary = {
   language: { label: string; choose: string };
   library: {
     title: string; open: string; close: string; saved: string; emptySaved: string; notesHint: string; viewAll: string;
+    noResults: string;
     quoteLine1: string; quoteLine2: string; quoteSign: string;
   };
   tools: { label: string; rotate: string; zoom: string; isolate: string; section: string; layers: string; compare: string; reset: string };
   viewer: {
     title: string; canvas: string; tip: string; tipDrag: string; tipScroll: string; tipClick: string;
-    loading: string; loadError: string; autoRotate: string; caption: string; structures: string;
+    loading: string; loadError: string; retry: string; autoRotate: string; caption: string; structures: string;
   };
   info: {
     kicker: string; keyFacts: string; size: string; weight: string; daily: string;
