@@ -1,11 +1,24 @@
+import { getTableColumns } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/sqlite-proxy";
 import * as schema from "./schema";
+import { learners, lessonProgress, organMastery, progressEvents } from "./schema";
 
 type D1QueryResponse = {
   success: boolean;
   errors?: { message: string }[];
-  result?: { results?: Record<string, unknown>[] }[];
+  result?: {
+    results?: Record<string, unknown>[] | unknown[][];
+    success?: boolean;
+    error?: string;
+  }[];
 };
+
+const TABLE_COLUMN_ORDERS = [
+  learners,
+  progressEvents,
+  organMastery,
+  lessonProgress,
+].map((table) => Object.values(getTableColumns(table)).map((column) => column.name));
 
 function readEnv(name: string): string | undefined {
   // Dynamic key so Next cannot replace these with empty strings at build
@@ -27,7 +40,10 @@ export function isHttpDbConfigured(): boolean {
   return httpConfig() !== null;
 }
 
-async function queryD1(sql: string, params: unknown[]): Promise<Record<string, unknown>[]> {
+async function queryD1(
+  sql: string,
+  params: unknown[],
+): Promise<Array<Record<string, unknown> | unknown[]>> {
   const config = httpConfig();
   if (!config) {
     throw new Error("Cloudflare D1 HTTP credentials are not configured.");
@@ -44,15 +60,25 @@ async function queryD1(sql: string, params: unknown[]): Promise<Record<string, u
     },
   );
   const payload = (await response.json()) as D1QueryResponse;
-  if (!response.ok || !payload.success) {
-    const detail = payload.errors?.map((error) => error.message).join("; ") || response.statusText;
-    throw new Error(`D1 HTTP query failed: ${detail}`);
+  const first = payload.result?.[0];
+  if (!response.ok || !payload.success || first?.success === false) {
+    const detail =
+      first?.error ||
+      payload.errors?.map((error) => error.message).join("; ") ||
+      response.statusText;
+    throw new Error(`D1 query failed: ${detail}`);
   }
-  return payload.result?.[0]?.results ?? [];
+  return first?.results ?? [];
 }
 
-function asValueRows(rows: Record<string, unknown>[]): unknown[][] {
-  return rows.map((row) => Object.values(row));
+function asValueRows(rows: Array<Record<string, unknown> | unknown[]>): unknown[][] {
+  return rows.map((row) => {
+    if (Array.isArray(row)) return row;
+    const names = TABLE_COLUMN_ORDERS.find((columns) =>
+      columns.every((name) => Object.prototype.hasOwnProperty.call(row, name)),
+    );
+    return names ? names.map((name) => row[name]) : Object.values(row);
+  });
 }
 
 export function getHttpDb() {

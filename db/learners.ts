@@ -44,11 +44,30 @@ export function toProfile(row: Learner): LearnerProfile {
 }
 
 /** Insert the learner on first sight, or refresh their display fields. Keyed by
- *  the verified email from the auth headers. */
+ *  the verified email from the auth headers. Select-then-write avoids D1 HTTP
+ *  rejecting `ON CONFLICT ("learners"."email_hash")`. */
 export async function upsertLearner(
   db: Db,
   input: { emailHash: string; displayName: string; fullName: string | null; locale: string },
 ): Promise<Learner> {
+  const existing = await db
+    .select()
+    .from(learners)
+    .where(eq(learners.emailHash, input.emailHash))
+    .limit(1);
+  if (existing[0]) {
+    const rows = await db
+      .update(learners)
+      .set({
+        displayName: input.displayName,
+        fullName: input.fullName,
+        locale: input.locale,
+        updatedAt: NOW,
+      })
+      .where(eq(learners.id, existing[0].id))
+      .returning();
+    return rows[0];
+  }
   const rows = await db
     .insert(learners)
     .values({
@@ -56,15 +75,6 @@ export async function upsertLearner(
       displayName: input.displayName,
       fullName: input.fullName,
       locale: input.locale,
-    })
-    .onConflictDoUpdate({
-      target: learners.emailHash,
-      set: {
-        displayName: input.displayName,
-        fullName: input.fullName,
-        locale: input.locale,
-        updatedAt: NOW,
-      },
     })
     .returning();
   return rows[0];
