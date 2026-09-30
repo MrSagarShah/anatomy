@@ -75,9 +75,9 @@ export function ProgressDashboard({
   onRetry,
 }: Props) {
   const d = copy.dashboard;
-  const signInHref = `/signin-with-chatgpt?return_to=${encodeURIComponent(
-    typeof window !== "undefined" ? window.location.pathname : "/",
-  )}`;
+  const returnTo = typeof window !== "undefined" ? window.location.pathname : "/";
+  const signInHref = `/signin-with-chatgpt?return_to=${encodeURIComponent(returnTo)}`;
+  const signOutHref = `/signout-with-chatgpt?return_to=${encodeURIComponent(returnTo)}`;
 
   const retryButton = onRetry ? (
     <button type="button" className="lesson-button" onClick={onRetry}>{d.retry ?? "Try again"}</button>
@@ -150,9 +150,12 @@ export function ProgressDashboard({
             <span className="pg-background-name">{profile.displayName}</span>
             <p>{backgroundBits.length ? backgroundBits.join(" · ") : d.backgroundEmpty}</p>
           </div>
-          <button type="button" onClick={onEditBackground} aria-label={d.editBackground}>
-            <Pencil size={14} /> {d.editBackground}
-          </button>
+          <div className="pg-background-actions">
+            <button type="button" onClick={onEditBackground} aria-label={d.editBackground}>
+              <Pencil size={14} /> {d.editBackground}
+            </button>
+            <a className="pg-signout" href={signOutHref}>{copy.signOut ?? "Sign out"}</a>
+          </div>
         </div>
 
         {state.loadError && retryButton}

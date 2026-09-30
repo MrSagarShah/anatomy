@@ -28,7 +28,8 @@ function isSchemaMissing(error: unknown): boolean {
     combined.includes("no such column") ||
     combined.includes("binding") ||
     combined.includes("d1_error") ||
-    combined.includes("cloudflare:workers")
+    combined.includes("cloudflare:workers") ||
+    combined.includes("d1 http")
   );
 }
 
@@ -66,7 +67,7 @@ async function withLearner<T>(
 
     const { getDb } = await import("../../../db");
     const { upsertLearner } = await import("../../../db/learners");
-    const db = getDb();
+    const db = await getDb();
     const learner = await upsertLearner(db, {
       emailHash: await hashEmail(user.email),
       displayName: user.displayName,
@@ -75,6 +76,7 @@ async function withLearner<T>(
     });
     return await work({ db, learner });
   } catch (error) {
+    console.error("learner db", error);
     if (isSchemaMissing(error)) return fallbacks.unavailable;
     throw error;
   }

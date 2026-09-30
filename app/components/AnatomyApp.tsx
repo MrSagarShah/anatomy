@@ -14,6 +14,7 @@ import {
   FileText,
   Globe,
   Heart,
+  LogIn,
   LibraryBig,
   Microscope,
   Play,
@@ -434,35 +435,19 @@ export function AnatomyApp({
   };
 
   const goLessons = () => {
-    setDashboardOpen(false);
-    setModal(null);
-    setTourActive(false);
-    setCompare(false);
-    flushNote();
-    if (organ.lesson) {
-      setNav("lessons");
-      setQuizActive(false);
-      setLessonActive(true);
-      return;
-    }
-    const first = organs.find((item) => item.lesson);
-    if (first) {
-      setNav("lessons");
-      selectOrgan(first.id, { lesson: true });
-      return;
-    }
+    leaveModes();
     setNav("lessons");
-    setLessonActive(false);
-    setQuizActive(true);
+    setSavedOnly(false);
+    setActiveSystem(null);
+    if (!organ.lesson) {
+      const first = organs.find((item) => item.lesson);
+      if (first) selectOrgan(first.id);
+    }
+    focusLibrary();
   };
 
   const goNotes = () => {
-    setDashboardOpen(false);
-    setLessonActive(false);
-    setQuizActive(false);
-    setCompare(false);
-    setTourActive(false);
-    setModal(null);
+    leaveModes();
     setNoteDraft(readNotes()[organId] ?? notes[organId] ?? "");
     setNav("notes");
   };
@@ -475,11 +460,13 @@ export function AnatomyApp({
 
   const closeDashboard = () => {
     setDashboardOpen(false);
+    setSavedOnly(false);
     setNav((current) => (current === "progress" ? "explore" : current));
   };
 
   const closeNotes = () => {
     flushNote();
+    setSavedOnly(false);
     setNav("explore");
   };
 
@@ -529,22 +516,22 @@ export function AnatomyApp({
           <em>{t.brand.tagline}</em>
         </button>
         <nav className="main-nav" aria-label="Primary navigation">
-          <button type="button" className={nav === "explore" ? "active" : ""} onClick={goExplore}>
+          <button type="button" className={nav === "explore" ? "active" : ""} aria-current={nav === "explore" ? "page" : undefined} onClick={goExplore}>
             <Compass size={17} /> <span>{t.nav.explore}</span>
           </button>
-          <button type="button" className={nav === "systems" ? "active" : ""} onClick={goSystems}>
+          <button type="button" className={nav === "systems" ? "active" : ""} aria-current={nav === "systems" ? "page" : undefined} onClick={goSystems}>
             <BrainCircuit size={17} /> <span>{t.nav.systems}</span>
           </button>
-          <button type="button" className={nav === "lessons" ? "active" : ""} onClick={goLessons}>
+          <button type="button" className={nav === "lessons" ? "active" : ""} aria-current={nav === "lessons" ? "page" : undefined} onClick={goLessons}>
             <BookOpen size={17} /> <span>{t.nav.lessons}</span>
           </button>
-          <button type="button" className={nav === "library" ? "active" : ""} onClick={goLibrary}>
+          <button type="button" className={nav === "library" ? "active" : ""} aria-current={nav === "library" ? "page" : undefined} onClick={goLibrary}>
             <LibraryBig size={17} /> <span>{t.nav.library}</span>
           </button>
-          <button type="button" className={nav === "notes" ? "active" : ""} onClick={goNotes}>
+          <button type="button" className={nav === "notes" ? "active" : ""} aria-current={nav === "notes" ? "page" : undefined} onClick={goNotes}>
             <FileText size={17} /> <span>{t.nav.notes}</span>
           </button>
-          <button type="button" className={nav === "progress" || dashboardOpen ? "active" : ""} onClick={goProgress}>
+          <button type="button" className={nav === "progress" || dashboardOpen ? "active" : ""} aria-current={nav === "progress" || dashboardOpen ? "page" : undefined} onClick={goProgress}>
             <Award size={17} /> <span>{copy.nav}</span>
           </button>
         </nav>
@@ -553,24 +540,53 @@ export function AnatomyApp({
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search.placeholder} />
         </label>
         <LanguageSwitcher locale={locale} t={t} organId={organId} />
-        <button className="profile" aria-label={t.profile.open} onClick={goProgress}><span>{profileInitials}</span><ChevronDown size={15} /></button>
-        <button className="mobile-library-trigger" onClick={() => { leaveModes(); setNav("library"); setSavedOnly(false); setMobileLibrary(true); }} aria-label={t.library.open}><LibraryBig size={20} /></button>
+        {user ? (
+          <button className="profile" aria-label={t.profile.open} onClick={goProgress}>
+            <span>{profileInitials}</span>
+            <ChevronDown size={15} />
+          </button>
+        ) : (
+          <a
+            className="sign-in"
+            href={`/signin-with-chatgpt?return_to=${encodeURIComponent(`/${locale.code}`)}`}
+          >
+            <LogIn size={16} />
+            {copy.signIn ?? copy.signInCta}
+          </a>
+        )}
+        <button className="mobile-library-trigger" onClick={goLibrary} aria-label={t.library.open}><LibraryBig size={20} /></button>
       </header>
+      {!user ? (
+        <a
+          className="sign-in-banner"
+          href={`/signin-with-chatgpt?return_to=${encodeURIComponent(`/${locale.code}`)}`}
+        >
+          <LogIn size={16} />
+          {copy.signInCta}
+        </a>
+      ) : null}
 
       <div className="workspace">
         <aside ref={libraryRef} className={`organ-library ${mobileLibrary ? "open" : ""}`} tabIndex={-1}>
           <div className="panel-heading">
-            <span>{savedOnly ? t.library.saved : t.library.title}</span>
+            <span>
+              {nav === "lessons" ? t.nav.lessons
+                : nav === "systems" ? t.nav.systems
+                  : nav === "library" && savedOnly ? t.library.saved
+                    : t.library.title}
+            </span>
             <button aria-label={t.library.close} className="mobile-close" onClick={() => setMobileLibrary(false)}><X size={17} /></button>
-            <button
-              type="button"
-              aria-label={t.library.saved}
-              aria-pressed={savedOnly}
-              className={savedOnly ? "on" : ""}
-              onClick={() => setSavedOnly((on) => !on)}
-            >
-              <Bookmark size={17} fill={savedOnly ? "currentColor" : "none"} />
-            </button>
+            {nav === "library" && (
+              <button
+                type="button"
+                aria-label={t.library.saved}
+                aria-pressed={savedOnly}
+                className={savedOnly ? "on" : ""}
+                onClick={() => setSavedOnly((on) => !on)}
+              >
+                <Bookmark size={17} fill={savedOnly ? "currentColor" : "none"} />
+              </button>
+            )}
           </div>
           {nav === "systems" && (
             <div className="library-systems" role="tablist" aria-label={t.nav.systems}>
@@ -581,7 +597,7 @@ export function AnatomyApp({
                   role="tab"
                   aria-selected={activeSystem === system}
                   className={`library-chip ${activeSystem === system ? "on" : ""}`}
-                  onClick={() => setActiveSystem(system)}
+                  onClick={() => setActiveSystem((current) => (current === system ? null : system))}
                 >
                   {system}
                 </button>
@@ -644,7 +660,9 @@ export function AnatomyApp({
             onClick={() => {
               setQuery("");
               setSavedOnly(false);
-              if (nav !== "systems") {
+              if (nav === "systems") {
+                setActiveSystem(null);
+              } else if (nav !== "library" && nav !== "lessons") {
                 setNav("explore");
                 setActiveSystem(null);
               }
@@ -673,10 +691,7 @@ export function AnatomyApp({
           lesson={lessonActive ? organ.lesson ?? null : null}
           resume={progress.state.snapshot?.lessons.find((item) => item.organId === organ.id)}
           priorKnowledge={progress.state.snapshot?.profile.priorKnowledge}
-          onLessonExit={() => {
-            setLessonActive(false);
-            setNav("explore");
-          }}
+          onLessonExit={() => setLessonActive(false)}
           onEvent={record}
         />
 
@@ -703,9 +718,9 @@ export function AnatomyApp({
           <div className="fun-note" data-reveal><Sparkles size={15} /><p><b>{t.info.didYouKnow}</b>{organ.funFact}</p></div>
           <button className="lesson-button" data-reveal onClick={openLesson}>{organ.lesson ? t.info.viewLesson : t.quiz.start} <ArrowRight size={16} /></button>
           <div className="action-grid" data-reveal>
-            <button onClick={startTour} className={tourActive ? "active" : ""}><Play size={15} /> {t.info.animate}</button>
-            <button onClick={() => { setTourActive(false); setLessonActive(false); setCompare(false); setQuizActive(true); setModal(null); }}><CircleHelp size={15} /> {t.info.quiz}</button>
-            <button onClick={() => (compare ? setCompare(false) : openCompare())} className={compare ? "active" : ""}><GitCompare size={15} /> {t.info.compare}</button>
+            <button onClick={startTour} className={tourActive ? "active" : ""} aria-pressed={tourActive}><Play size={15} /> {t.info.animate}</button>
+            <button onClick={() => { setTourActive(false); setLessonActive(false); setCompare(false); setQuizActive(true); setModal(null); }} className={quizActive ? "active" : ""} aria-pressed={quizActive}><CircleHelp size={15} /> {t.info.quiz}</button>
+            <button onClick={() => (compare ? setCompare(false) : openCompare())} className={compare ? "active" : ""} aria-pressed={compare}><GitCompare size={15} /> {t.info.compare}</button>
           </div>
         </aside>
       </div>

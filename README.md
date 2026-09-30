@@ -42,12 +42,30 @@ npm run build
 
 ## Auth
 
-Identity comes from OpenAI Sites / ChatGPT headers, not from an app-owned
-login. The verified address is `oai-authenticated-user-email`. Helpers live
-in `app/chatgpt-auth.ts` (`getChatGPTUser`, `requireChatGPTUser`, sign-in /
-sign-out paths). Dispatch owns `/signin-with-chatgpt`,
-`/signout-with-chatgpt`, and `/callback` — do not add app routes for those
-paths.
+On ChatGPT Sites, identity still comes from Dispatch headers
+(`oai-authenticated-user-email`). Helpers live in `app/chatgpt-auth.ts`.
+Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, and
+`/callback` — do not add app routes for those paths.
+
+Everywhere else (local `npm run dev` and Vercel) the learner signs in with
+**Google** or **any other email**. `/signin-with-chatgpt` redirects to
+`/[locale]/auth/continue`. Google uses `/api/auth/google`; other addresses
+use the name + email form. A cookie carries that identity. Progress keys
+the D1 row by the SHA-256 of the email. This stand-in never runs on
+ChatGPT Sites hosts.
+
+Google sign-in needs `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. Add
+these authorized redirect URIs in the Google Cloud OAuth client:
+
+- `http://localhost:3000/api/auth/google/callback` (match your local port)
+- `https://anatomy-omega-three.vercel.app/api/auth/google/callback`
+
+Without those env vars the continue page still accepts any email.
+
+Vercel talks to the existing `anatomy-atelier` D1 over HTTP. Set
+`CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_D1_DATABASE_ID`, and
+`CLOUDFLARE_API_TOKEN` on the Vercel project. vinext / Sites keep using
+the `DB` Worker binding.
 
 Progress keys each learner by the SHA-256 of the normalized email. The raw
 address is never stored. See `app/lib/progress/server.ts`.

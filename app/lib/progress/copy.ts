@@ -13,6 +13,19 @@ export type ProgressCopy = {
   nav: string;
   profileGuest: string;
   signInCta: string;
+  signIn?: string;
+  signOut?: string;
+  continueTitle?: string;
+  continueSubtitle?: string;
+  continueName?: string;
+  continueEmail?: string;
+  continueEmailPlaceholder?: string;
+  continueEmailDivider?: string;
+  continueEmailError?: string;
+  continueGoogle?: string;
+  continueGoogleError?: string;
+  continueSubmit?: string;
+  continueDemo?: string;
   onboarding: {
     eyebrow: string;
     title: string;
@@ -68,7 +81,21 @@ export type ProgressCopy = {
 const en: ProgressCopy = {
   nav: "Progress",
   profileGuest: "Guest",
-  signInCta: "Sign in to save progress",
+  signInCta: "Sign in with Google or email",
+  signIn: "Sign in",
+  signOut: "Sign out",
+  continueTitle: "Sign in to save progress",
+  continueSubtitle:
+    "Use Google, or any other email — Outlook, school, or work. We store a hash of the address, never the address itself.",
+  continueName: "Your name",
+  continueEmail: "Email",
+  continueEmailPlaceholder: "you@gmail.com",
+  continueEmailDivider: "or use any other email",
+  continueEmailError: "Enter a name and a valid email.",
+  continueGoogle: "Continue with Google",
+  continueGoogleError: "Google sign-in didn't complete. Try again or use your email.",
+  continueSubmit: "Continue learning",
+  continueDemo: "Continue as a demo learner",
   onboarding: {
     eyebrow: "Welcome",
     title: "Tell us where you're starting from",
@@ -110,7 +137,7 @@ const en: ProgressCopy = {
     retry: "Try again",
     unavailable:
       "Progress tracking isn't connected in this environment yet. Explore freely — nothing is lost.",
-    guest: "Sign in with ChatGPT to save your progress and pick up where you left off.",
+    guest: "Sign in with Google or your email to save progress and pick up where you left off.",
     backgroundTitle: "Your background",
     editBackground: "Edit",
     backgroundEmpty: "Add your background so we can tailor suggestions.",
@@ -151,7 +178,7 @@ const en: ProgressCopy = {
 const es: ProgressCopy = {
   nav: "Progreso",
   profileGuest: "Invitado",
-  signInCta: "Inicia sesión para guardar tu progreso",
+  signInCta: "Entra con Google o tu email",
   onboarding: {
     eyebrow: "Bienvenida",
     title: "Cuéntanos desde dónde partes",
@@ -191,7 +218,7 @@ const es: ProgressCopy = {
     empty: "Empieza una lección o un cuestionario y tu avance aparecerá aquí.",
     unavailable:
       "El seguimiento del progreso aún no está conectado en este entorno. Explora con libertad: no se pierde nada.",
-    guest: "Inicia sesión con ChatGPT para guardar tu progreso y retomar donde lo dejaste.",
+    guest: "Entra con Google o tu email para guardar tu progreso y retomar donde lo dejaste.",
     backgroundTitle: "Tu perfil",
     editBackground: "Editar",
     backgroundEmpty: "Añade tu perfil para que podamos adaptar las sugerencias.",
@@ -232,7 +259,7 @@ const es: ProgressCopy = {
 const hi: ProgressCopy = {
   nav: "प्रगति",
   profileGuest: "अतिथि",
-  signInCta: "प्रगति सहेजने के लिए साइन इन करें",
+  signInCta: "Google या ईमेल से साइन इन करें",
   onboarding: {
     eyebrow: "स्वागत है",
     title: "बताएँ, आप कहाँ से शुरू कर रहे हैं",
@@ -272,7 +299,7 @@ const hi: ProgressCopy = {
     empty: "कोई पाठ या प्रश्नोत्तरी शुरू करें — आपकी प्रगति यहाँ दिखेगी।",
     unavailable:
       "इस वातावरण में प्रगति ट्रैकिंग अभी जुड़ी नहीं है। बेझिझक अन्वेषण करें — कुछ खोता नहीं।",
-    guest: "ChatGPT से साइन इन करें ताकि प्रगति सहेजी जाए और जहाँ छोड़ा था वहीं से जारी रख सकें।",
+    guest: "Google या अपने ईमेल से साइन इन करें ताकि प्रगति सहेजी जाए और जहाँ छोड़ा था वहीं से जारी रख सकें।",
     backgroundTitle: "आपकी पृष्ठभूमि",
     editBackground: "संपादित करें",
     backgroundEmpty: "अपनी पृष्ठभूमि जोड़ें ताकि हम सुझाव आपके अनुकूल बना सकें।",
@@ -313,7 +340,7 @@ const hi: ProgressCopy = {
 const zh: ProgressCopy = {
   nav: "进度",
   profileGuest: "访客",
-  signInCta: "登录以保存进度",
+  signInCta: "用 Google 或邮箱登录",
   onboarding: {
     eyebrow: "欢迎",
     title: "先告诉我们你的起点",
@@ -351,7 +378,7 @@ const zh: ProgressCopy = {
     close: "关闭进度",
     empty: "开始一节课或一次测验，成长就会出现在这里。",
     unavailable: "此环境尚未接入进度跟踪。请自由探索 — 内容不会丢失。",
-    guest: "用 ChatGPT 登录，即可保存进度并从上次停下的地方继续。",
+    guest: "用 Google 或邮箱登录，即可保存进度并从上次停下的地方继续。",
     backgroundTitle: "你的背景",
     editBackground: "编辑",
     backgroundEmpty: "补充你的背景，我们就能为你定制建议。",
@@ -392,7 +419,7 @@ const zh: ProgressCopy = {
 const ar: ProgressCopy = {
   nav: "التقدّم",
   profileGuest: "زائر",
-  signInCta: "سجّل الدخول لحفظ تقدّمك",
+  signInCta: "سجّل الدخول عبر Google أو بريدك",
   onboarding: {
     eyebrow: "مرحبًا",
     title: "أخبرنا من أين تبدأ",
@@ -432,7 +459,7 @@ const ar: ProgressCopy = {
     empty: "ابدأ درسًا أو اختبارًا وسيظهر نموّك هنا.",
     unavailable:
       "تتبّع التقدّم غير متّصل بعد في هذه البيئة. استكشف بحرّية — لا يُفقد شيء.",
-    guest: "سجّل الدخول عبر ChatGPT لحفظ تقدّمك ومتابعة ما توقّفت عنده.",
+    guest: "سجّل الدخول عبر Google أو بريدك لحفظ تقدّمك ومتابعة ما توقّفت عنده.",
     backgroundTitle: "خلفيّتك",
     editBackground: "تعديل",
     backgroundEmpty: "أضف خلفيّتك كي نُوائم الاقتراحات معك.",
@@ -473,7 +500,7 @@ const ar: ProgressCopy = {
 const pt: ProgressCopy = {
   nav: "Progresso",
   profileGuest: "Convidado",
-  signInCta: "Entre para salvar seu progresso",
+  signInCta: "Entre com o Google ou seu e-mail",
   onboarding: {
     eyebrow: "Boas-vindas",
     title: "Conte de onde você está partindo",
@@ -513,7 +540,7 @@ const pt: ProgressCopy = {
     empty: "Comece uma lição ou um quiz e seu avanço aparece aqui.",
     unavailable:
       "O acompanhamento de progresso ainda não está ligado neste ambiente. Explore à vontade — nada se perde.",
-    guest: "Entre com o ChatGPT para salvar seu progresso e retomar de onde parou.",
+    guest: "Entre com o Google ou seu e-mail para salvar seu progresso e retomar de onde parou.",
     backgroundTitle: "Seu perfil",
     editBackground: "Editar",
     backgroundEmpty: "Adicione seu perfil para adaptarmos as sugestões.",
@@ -554,7 +581,7 @@ const pt: ProgressCopy = {
 const fr: ProgressCopy = {
   nav: "Progression",
   profileGuest: "Invité",
-  signInCta: "Connectez-vous pour enregistrer votre progression",
+  signInCta: "Connectez-vous avec Google ou votre e-mail",
   onboarding: {
     eyebrow: "Bienvenue",
     title: "Dites-nous d'où vous partez",
@@ -594,7 +621,7 @@ const fr: ProgressCopy = {
     empty: "Commencez une leçon ou un quiz : votre progression apparaîtra ici.",
     unavailable:
       "Le suivi de progression n'est pas encore branché dans cet environnement. Explorez librement — rien n'est perdu.",
-    guest: "Connectez-vous avec ChatGPT pour enregistrer votre progression et reprendre là où vous vous êtes arrêté.",
+    guest: "Connectez-vous avec Google ou votre e-mail pour enregistrer votre progression et reprendre là où vous vous êtes arrêté.",
     backgroundTitle: "Votre profil",
     editBackground: "Modifier",
     backgroundEmpty: "Ajoutez votre profil pour que nous puissions adapter les suggestions.",
@@ -635,7 +662,7 @@ const fr: ProgressCopy = {
 const de: ProgressCopy = {
   nav: "Fortschritt",
   profileGuest: "Gast",
-  signInCta: "Melde dich an, um deinen Fortschritt zu speichern",
+  signInCta: "Mit Google oder E-Mail anmelden",
   onboarding: {
     eyebrow: "Willkommen",
     title: "Sag uns, wo du startest",
@@ -675,7 +702,7 @@ const de: ProgressCopy = {
     empty: "Starte eine Lektion oder ein Quiz — dein Wachstum erscheint hier.",
     unavailable:
       "Die Fortschrittserfassung ist in dieser Umgebung noch nicht verbunden. Entdecke frei — nichts geht verloren.",
-    guest: "Melde dich mit ChatGPT an, um deinen Fortschritt zu speichern und dort weiterzumachen, wo du aufgehört hast.",
+    guest: "Melde dich mit Google oder deiner E-Mail an, um deinen Fortschritt zu speichern und dort weiterzumachen, wo du aufgehört hast.",
     backgroundTitle: "Dein Hintergrund",
     editBackground: "Bearbeiten",
     backgroundEmpty: "Ergänze deinen Hintergrund, damit wir Vorschläge anpassen können.",
@@ -716,7 +743,7 @@ const de: ProgressCopy = {
 const ja: ProgressCopy = {
   nav: "進捗",
   profileGuest: "ゲスト",
-  signInCta: "ログインして進捗を保存",
+  signInCta: "Google またはメールでログイン",
   onboarding: {
     eyebrow: "ようこそ",
     title: "いまの出発点を教えてください",
@@ -756,7 +783,7 @@ const ja: ProgressCopy = {
     empty: "レッスンかクイズを始めると、成長がここに現れます。",
     unavailable:
       "この環境では進捗の記録がまだつながっていません。自由に探索してください — 失われるものはありません。",
-    guest: "ChatGPT でログインすると、進捗を保存し、中断したところから続けられます。",
+    guest: "Google またはメールでログインすると、進捗を保存し、中断したところから続けられます。",
     backgroundTitle: "あなたの背景",
     editBackground: "編集",
     backgroundEmpty: "背景を追加すると、おすすめを合わせられます。",
@@ -797,7 +824,7 @@ const ja: ProgressCopy = {
 const ru: ProgressCopy = {
   nav: "Прогресс",
   profileGuest: "Гость",
-  signInCta: "Войдите, чтобы сохранить прогресс",
+  signInCta: "Войдите через Google или почту",
   onboarding: {
     eyebrow: "Добро пожаловать",
     title: "Расскажите, с чего вы начинаете",
@@ -837,7 +864,7 @@ const ru: ProgressCopy = {
     empty: "Начните урок или тест — рост появится здесь.",
     unavailable:
       "Отслеживание прогресса в этой среде ещё не подключено. Изучайте свободно — ничего не потеряется.",
-    guest: "Войдите через ChatGPT, чтобы сохранить прогресс и продолжить с того места, где остановились.",
+    guest: "Войдите через Google или почту, чтобы сохранить прогресс и продолжить с того места, где остановились.",
     backgroundTitle: "Ваш профиль",
     editBackground: "Изменить",
     backgroundEmpty: "Добавьте свой профиль, чтобы мы подстроили рекомендации.",
@@ -878,7 +905,7 @@ const ru: ProgressCopy = {
 const id: ProgressCopy = {
   nav: "Progres",
   profileGuest: "Tamu",
-  signInCta: "Masuk untuk menyimpan progres",
+  signInCta: "Masuk dengan Google atau email",
   onboarding: {
     eyebrow: "Selamat datang",
     title: "Ceritakan dari mana kamu memulai",
@@ -918,7 +945,7 @@ const id: ProgressCopy = {
     empty: "Mulai pelajaran atau kuis, dan kemajuanmu akan muncul di sini.",
     unavailable:
       "Pelacakan progres belum terhubung di lingkungan ini. Jelajahi bebas — tidak ada yang hilang.",
-    guest: "Masuk dengan ChatGPT untuk menyimpan progres dan lanjut dari tempat terakhir.",
+    guest: "Masuk dengan Google atau email untuk menyimpan progres dan lanjut dari tempat terakhir.",
     backgroundTitle: "Latar belakangmu",
     editBackground: "Edit",
     backgroundEmpty: "Tambahkan latar belakangmu agar kami bisa menyesuaikan saran.",
@@ -959,7 +986,7 @@ const id: ProgressCopy = {
 const ko: ProgressCopy = {
   nav: "진도",
   profileGuest: "손님",
-  signInCta: "로그인하여 진도를 저장하세요",
+  signInCta: "Google 또는 이메일로 로그인",
   onboarding: {
     eyebrow: "환영합니다",
     title: "어디에서 시작하는지 알려 주세요",
@@ -999,7 +1026,7 @@ const ko: ProgressCopy = {
     empty: "수업이나 퀴즈를 시작하면 성장이 여기에 나타납니다.",
     unavailable:
       "이 환경에는 아직 진도 추적이 연결되어 있지 않습니다. 자유롭게 탐색하세요 — 사라지는 것은 없습니다.",
-    guest: "ChatGPT로 로그인하면 진도를 저장하고 멈춘 곳부터 이어갈 수 있습니다.",
+    guest: "Google 또는 이메일로 로그인하면 진도를 저장하고 멈춘 곳부터 이어갈 수 있습니다.",
     backgroundTitle: "나의 배경",
     editBackground: "편집",
     backgroundEmpty: "배경을 추가하면 추천을 맞출 수 있습니다.",
@@ -1054,5 +1081,6 @@ const translations: Record<string, ProgressCopy> = {
 };
 
 export function progressCopy(locale: string): ProgressCopy {
-  return translations[locale] ?? en;
+  const local = translations[locale];
+  return local && local !== en ? { ...en, ...local } : en;
 }

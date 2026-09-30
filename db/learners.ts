@@ -1,5 +1,4 @@
 import { and, desc, eq, sql } from "drizzle-orm";
-import { getDb } from "./index";
 import {
   learners,
   lessonProgress,
@@ -18,7 +17,7 @@ import {
   type ProgressSnapshot,
 } from "../app/lib/progress/types";
 
-type Db = ReturnType<typeof getDb>;
+type Db = import("./index").AppDb;
 
 const NOW = sql`CURRENT_TIMESTAMP`;
 
