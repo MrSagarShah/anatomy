@@ -61,6 +61,6 @@ test("googleRedirectUri and continue error stay on-app", () => {
   );
   assert.equal(
     googleContinueErrorPath("/en", "google"),
-    "/en/auth/continue?return_to=%2Fen&error=google",
+    "/en/auth/signup?return_to=%2Fen&error=google",
   );
 });

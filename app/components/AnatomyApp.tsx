@@ -577,7 +577,7 @@ export function AnatomyApp({
             href={signInHref}
           >
             <LogIn size={16} />
-            Log in
+            {copy.signIn ?? "Sign up"}
           </a>
           <a
             className="sign-in-banner"

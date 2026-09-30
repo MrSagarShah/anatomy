@@ -48,13 +48,13 @@ test("handleLocalChatGPTAuth sends app-owned hosts to continue, not Sites", () =
   );
   assert.ok(local);
   assert.equal(local.status, 302);
-  assert.equal(new URL(local.headers.get("Location") ?? "").pathname, "/en/auth/continue");
+  assert.equal(new URL(local.headers.get("Location") ?? "").pathname, "/en/auth/signup");
 
   const vercel = handleLocalChatGPTAuth(
     new Request("https://anatomy-omega-three.vercel.app/signin-with-chatgpt?return_to=%2Fen"),
   );
   assert.ok(vercel);
-  assert.equal(new URL(vercel.headers.get("Location") ?? "").pathname, "/en/auth/continue");
+  assert.equal(new URL(vercel.headers.get("Location") ?? "").pathname, "/en/auth/signup");
 
   const sites = handleLocalChatGPTAuth(
     new Request("https://anatomy-atelier.openai.chatgpt.site/signin-with-chatgpt?return_to=%2Fen"),
@@ -69,7 +69,7 @@ test("sign-out on app-owned hosts returns to login, not the studio", () => {
   assert.ok(local);
   assert.equal(local.status, 302);
   const location = new URL(local.headers.get("Location") ?? "");
-  assert.equal(location.pathname, "/en/auth/continue");
+  assert.equal(location.pathname, "/en/auth/signup");
   assert.match(local.headers.get("Set-Cookie") ?? "", /anatomy_local_chatgpt=;/);
 
   const sites = handleLocalChatGPTAuth(

@@ -180,7 +180,7 @@ export function applyLocalChatGPTHeaders(request: Request): Request {
 export function continuePath(returnTo: string): string {
   const locale = returnTo.split("/").filter(Boolean)[0];
   const code = locale && /^[a-z]{2}$/.test(locale) ? locale : "en";
-  return `/${code}/auth/continue?return_to=${encodeURIComponent(returnTo)}`;
+  return `/${code}/auth/signup?return_to=${encodeURIComponent(returnTo)}`;
 }
 
 /** Handle Dispatch-owned auth paths on app-owned hosts only. Returns null elsewhere. */

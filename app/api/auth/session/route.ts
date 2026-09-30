@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   const user = readUser(form);
   const returnTo = safeRelativeReturnPath(String(form.get("returnTo") ?? "/en"));
   if (!user) {
-    redirect(`/en/auth/continue?return_to=${encodeURIComponent(returnTo)}&error=1`);
+    redirect(`/en/auth/signup?return_to=${encodeURIComponent(returnTo)}&error=1`);
   }
 
   const jar = await cookies();

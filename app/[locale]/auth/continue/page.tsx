@@ -24,7 +24,7 @@ export default async function ContinuePage({
   return (
     <main className="auth-continue">
       <section className="learning-modal pg-onboarding" aria-labelledby="auth-continue-title">
-        <em>{copy.dashboard.eyebrow}</em>
+        <em>{copy.onboarding.eyebrow}</em>
         <h1 id="auth-continue-title">{copy.continueTitle}</h1>
         <p className="pg-onboarding-sub">{copy.continueSubtitle}</p>
         {query.error === "google" ? (
