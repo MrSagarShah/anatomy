@@ -1,0 +1,9 @@
+name = "anatomy-d1-proxy"
+main = "worker.ts"
+compatibility_date = "2026-09-30"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "anatomy-atelier"
+database_id = "4230b44b-cf0a-4267-bf93-4a6e4fbcd145"

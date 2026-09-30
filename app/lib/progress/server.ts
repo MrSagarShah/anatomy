@@ -29,7 +29,8 @@ function isSchemaMissing(error: unknown): boolean {
     combined.includes("binding") ||
     combined.includes("d1_error") ||
     combined.includes("cloudflare:workers") ||
-    combined.includes("d1 http")
+    combined.includes("d1 http") ||
+    combined.includes("authentication error")
   );
 }
 

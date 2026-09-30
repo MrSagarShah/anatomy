@@ -28,12 +28,18 @@ function readEnv(name: string): string | undefined {
   return value;
 }
 
-function httpConfig(): { accountId: string; databaseId: string; token: string } | null {
+function httpConfig(): { url: string; token: string } | null {
+  const token = readEnv("CLOUDFLARE_API_TOKEN");
+  if (!token) return null;
+  const proxyUrl = readEnv("D1_PROXY_URL");
+  if (proxyUrl) return { url: proxyUrl, token };
   const accountId = readEnv("CLOUDFLARE_ACCOUNT_ID");
   const databaseId = readEnv("CLOUDFLARE_D1_DATABASE_ID");
-  const token = readEnv("CLOUDFLARE_API_TOKEN");
-  if (!accountId || !databaseId || !token) return null;
-  return { accountId, databaseId, token };
+  if (!accountId || !databaseId) return null;
+  return {
+    url: `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${databaseId}/query`,
+    token,
+  };
 }
 
 export function isHttpDbConfigured(): boolean {
@@ -48,17 +54,15 @@ async function queryD1(
   if (!config) {
     throw new Error("Cloudflare D1 HTTP credentials are not configured.");
   }
-  const response = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${config.accountId}/d1/database/${config.databaseId}/query`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${config.token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ sql, params }),
+  const response = await fetch(config.url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${config.token}`,
+      "Content-Type": "application/json",
+      "User-Agent": "Mozilla/5.0 AnatomyProgress/1.0",
     },
-  );
+    body: JSON.stringify({ sql, params }),
+  });
   const payload = (await response.json()) as D1QueryResponse;
   const first = payload.result?.[0];
   if (!response.ok || !payload.success || first?.success === false) {
