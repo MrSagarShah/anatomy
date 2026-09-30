@@ -42,7 +42,7 @@ test("isAppOwnedAuthHost allows Vercel but not ChatGPT Sites", () => {
   assert.equal(isAppOwnedAuthHost("anatomy-atelier.openai.chatgpt.site"), false);
 });
 
-test("handleLocalChatGPTAuth sends app-owned hosts to continue, not Sites", async () => {
+test("handleLocalChatGPTAuth sends app-owned hosts to continue, not Sites", () => {
   const local = handleLocalChatGPTAuth(
     new Request("http://localhost:3001/signin-with-chatgpt?return_to=%2Fen"),
   );
@@ -58,6 +58,22 @@ test("handleLocalChatGPTAuth sends app-owned hosts to continue, not Sites", asyn
 
   const sites = handleLocalChatGPTAuth(
     new Request("https://anatomy-atelier.openai.chatgpt.site/signin-with-chatgpt?return_to=%2Fen"),
+  );
+  assert.equal(sites, null);
+});
+
+test("sign-out on app-owned hosts returns to login, not the studio", () => {
+  const local = handleLocalChatGPTAuth(
+    new Request("http://localhost:3001/signout-with-chatgpt?return_to=%2Fen"),
+  );
+  assert.ok(local);
+  assert.equal(local.status, 302);
+  const location = new URL(local.headers.get("Location") ?? "");
+  assert.equal(location.pathname, "/en/auth/continue");
+  assert.match(local.headers.get("Set-Cookie") ?? "", /anatomy_local_chatgpt=;/);
+
+  const sites = handleLocalChatGPTAuth(
+    new Request("https://anatomy-atelier.openai.chatgpt.site/signout-with-chatgpt?return_to=%2Fen"),
   );
   assert.equal(sites, null);
 });

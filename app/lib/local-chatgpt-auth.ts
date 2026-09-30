@@ -192,7 +192,8 @@ export function handleLocalChatGPTAuth(request: Request): Response | null {
   const secure = !isLoopbackHost(host);
   const returnTo = safeRelativeReturnPath(url.searchParams.get("return_to"));
   if (url.pathname === SIGN_OUT_PATH) {
-    return redirectWithCookie(url, returnTo, localUserClearCookie(secure));
+    // Back to the login page — guests must not land on Progress or the studio.
+    return redirectWithCookie(url, continuePath(returnTo), localUserClearCookie(secure));
   }
   return new Response(null, {
     status: 302,

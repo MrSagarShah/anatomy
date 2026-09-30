@@ -452,7 +452,19 @@ export function AnatomyApp({
     setNav("notes");
   };
 
+  const signInHref = `/signin-with-chatgpt?return_to=${encodeURIComponent(`/${locale.code}`)}`;
+
+  useEffect(() => {
+    if (user) return;
+    setDashboardOpen(false);
+    setNav((current) => (current === "progress" ? "explore" : current));
+  }, [user]);
+
   const goProgress = () => {
+    if (!user) {
+      window.location.assign(signInHref);
+      return;
+    }
     leaveModes();
     setNav("progress");
     setDashboardOpen(true);
@@ -531,9 +543,11 @@ export function AnatomyApp({
           <button type="button" className={nav === "notes" ? "active" : ""} aria-current={nav === "notes" ? "page" : undefined} onClick={goNotes}>
             <FileText size={17} /> <span>{t.nav.notes}</span>
           </button>
-          <button type="button" className={nav === "progress" || dashboardOpen ? "active" : ""} aria-current={nav === "progress" || dashboardOpen ? "page" : undefined} onClick={goProgress}>
-            <Award size={17} /> <span>{copy.nav}</span>
-          </button>
+          {user ? (
+            <button type="button" className={nav === "progress" || dashboardOpen ? "active" : ""} aria-current={nav === "progress" || dashboardOpen ? "page" : undefined} onClick={goProgress}>
+              <Award size={17} /> <span>{copy.nav}</span>
+            </button>
+          ) : null}
         </nav>
         <label className="search-box">
           <Search size={17} />
@@ -548,7 +562,7 @@ export function AnatomyApp({
         ) : (
           <a
             className="sign-in"
-            href={`/signin-with-chatgpt?return_to=${encodeURIComponent(`/${locale.code}`)}`}
+            href={signInHref}
           >
             <LogIn size={16} />
             {copy.signIn ?? "Log in"}
@@ -560,14 +574,14 @@ export function AnatomyApp({
         <>
           <a
             className="sign-in sign-in-float"
-            href={`/signin-with-chatgpt?return_to=${encodeURIComponent(`/${locale.code}`)}`}
+            href={signInHref}
           >
             <LogIn size={16} />
             Log in
           </a>
           <a
             className="sign-in-banner"
-            href={`/signin-with-chatgpt?return_to=${encodeURIComponent(`/${locale.code}`)}`}
+            href={signInHref}
           >
             <LogIn size={16} />
             {copy.signInCta}
@@ -872,7 +886,7 @@ export function AnatomyApp({
           onSkip={progress.dismissOnboarding}
         />
       )}
-      {dashboardOpen && (
+      {dashboardOpen && user && (
         <ProgressDashboard
           copy={copy}
           state={progress.state}
