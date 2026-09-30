@@ -16,19 +16,19 @@ export const ui: UiDictionary = {
   language: { label: "Bahasa", choose: "Pilih bahasa" },
   library: {
     title: "Pustaka organ", open: "Buka pustaka organ", close: "Tutup pustaka",
-    saved: "Organ tersimpan", viewAll: "Lihat semua organ",
+    saved: "Organ tersimpan", emptySaved: "Belum ada organ tersimpan. Tandai satu dari pustaka.", notesHint: "Catatan yang kamu tulis muncul di sini sebagai chip.", viewAll: "Lihat semua organ", noResults: "Tidak ada organ yang cocok dengan pencarian itu.",
     quoteLine1: "Belajar adalah", quoteLine2: "sebuah tindakan rasa ingin tahu.", quoteSign: "Teruslah menjelajah!",
   },
   tools: {
     label: "Alat penampil 3D", rotate: "Putar", zoom: "Perbesar", isolate: "Isolasi",
-    section: "Potongan melintang", layers: "Lapisan", compare: "Bandingkan", reset: "Atur ulang",
+    section: "Tampilan potong", layers: "Tembus pandang", compare: "Bandingkan", reset: "Atur ulang",
   },
   viewer: {
     title: "Penampil interaktif: {organ}",
     canvas: "Model anatomi 3D interaktif. Seret untuk memutar, gulir untuk memperbesar, dan klik titik untuk membaca tentang struktur tersebut.",
     tip: "Tips", tipDrag: "Seret untuk memutar", tipScroll: "Gulir untuk memperbesar",
     tipClick: "Klik titik untuk tahu lebih lanjut",
-    loading: "Menyiapkan {organ}", autoRotate: "Putar otomatis",
+    loading: "Menyiapkan {organ}", loadError: "Tidak bisa memuat {organ}", retry: "Coba lagi", autoRotate: "Putar otomatis",
     caption: "Spesimen 3D · klik sebuah titik", structures: "Struktur pada spesimen ini",
   },
   info: {

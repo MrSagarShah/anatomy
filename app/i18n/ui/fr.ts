@@ -16,19 +16,19 @@ export const ui: UiDictionary = {
   language: { label: "Langue", choose: "Choisir une langue" },
   library: {
     title: "Bibliothèque d'organes", open: "Ouvrir la bibliothèque d'organes", close: "Fermer la bibliothèque",
-    saved: "Organes enregistrés", viewAll: "Voir tous les organes",
+    saved: "Organes enregistrés", emptySaved: "Aucun organe enregistré pour l'instant. Enregistrez-en un depuis la bibliothèque.", notesHint: "Vos notes apparaîtront ici sous forme de pastilles.", viewAll: "Voir tous les organes", noResults: "Aucun organe ne correspond à cette recherche.",
     quoteLine1: "Apprendre est", quoteLine2: "un acte de curiosité.", quoteSign: "Continuez à explorer !",
   },
   tools: {
     label: "Outils de la visionneuse 3D", rotate: "Pivoter", zoom: "Zoom", isolate: "Isoler",
-    section: "Coupe transversale", layers: "Couches", compare: "Comparer", reset: "Réinitialiser",
+    section: "Vue coupée", layers: "Transparence", compare: "Comparer", reset: "Réinitialiser",
   },
   viewer: {
     title: "Visionneuse interactive : {organ}",
     canvas: "Modèle anatomique 3D interactif. Faites glisser pour pivoter, défilez pour zoomer et cliquez sur un point pour lire la description de la structure.",
     tip: "Astuce", tipDrag: "Faites glisser pour pivoter", tipScroll: "Défilez pour zoomer",
     tipClick: "Cliquez sur un point pour en savoir plus",
-    loading: "Préparation : {organ}", autoRotate: "Rotation automatique",
+    loading: "Préparation : {organ}", loadError: "Impossible de charger {organ}", retry: "Réessayer", autoRotate: "Rotation automatique",
     caption: "Spécimen 3D · cliquez sur un point", structures: "Structures de ce spécimen",
   },
   info: {
