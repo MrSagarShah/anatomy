@@ -551,19 +551,28 @@ export function AnatomyApp({
             href={`/signin-with-chatgpt?return_to=${encodeURIComponent(`/${locale.code}`)}`}
           >
             <LogIn size={16} />
-            {copy.signIn ?? copy.signInCta}
+            {copy.signIn ?? "Log in"}
           </a>
         )}
         <button className="mobile-library-trigger" onClick={goLibrary} aria-label={t.library.open}><LibraryBig size={20} /></button>
       </header>
       {!user ? (
-        <a
-          className="sign-in-banner"
-          href={`/signin-with-chatgpt?return_to=${encodeURIComponent(`/${locale.code}`)}`}
-        >
-          <LogIn size={16} />
-          {copy.signInCta}
-        </a>
+        <>
+          <a
+            className="sign-in sign-in-float"
+            href={`/signin-with-chatgpt?return_to=${encodeURIComponent(`/${locale.code}`)}`}
+          >
+            <LogIn size={16} />
+            Log in
+          </a>
+          <a
+            className="sign-in-banner"
+            href={`/signin-with-chatgpt?return_to=${encodeURIComponent(`/${locale.code}`)}`}
+          >
+            <LogIn size={16} />
+            {copy.signInCta}
+          </a>
+        </>
       ) : null}
 
       <div className="workspace">

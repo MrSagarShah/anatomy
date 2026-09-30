@@ -81,8 +81,8 @@ export type ProgressCopy = {
 const en: ProgressCopy = {
   nav: "Progress",
   profileGuest: "Guest",
-  signInCta: "Sign in with Google or email",
-  signIn: "Sign in",
+  signInCta: "Log in with Google or email",
+  signIn: "Log in",
   signOut: "Sign out",
   continueTitle: "Sign in to save progress",
   continueSubtitle:
