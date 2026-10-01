@@ -40,6 +40,7 @@ import { organMatchesQuery } from "../lib/organ-search";
 
 type NavMode = "explore" | "systems" | "library" | "lessons" | "notes" | "progress";
 type Modal = "system" | "tissue" | "clinical" | null;
+type AuthGate = "lesson" | "quiz" | "progress";
 
 const SAVED_KEY = "anatomy:saved-organs";
 const NOTES_KEY = "anatomy:notes";
@@ -231,6 +232,7 @@ export function AnatomyApp({
   const [quizActive, setQuizActive] = useState(false);
   const [lessonActive, setLessonActive] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [authGate, setAuthGate] = useState<AuthGate | null>(null);
   const [reonboard, setReonboard] = useState(false);
   const [nav, setNav] = useState<NavMode>("explore");
   const [activeSystem, setActiveSystem] = useState<string | null>(null);
@@ -355,8 +357,16 @@ export function AnatomyApp({
       setCompare(false);
       setCompareId(organById[id].compareWith);
     }
-    setQuizActive(Boolean(next?.quiz));
-    setLessonActive(Boolean(next?.lesson));
+    const wantsLesson = Boolean(next?.lesson);
+    const wantsQuiz = Boolean(next?.quiz);
+    if (!user && (wantsLesson || wantsQuiz)) {
+      setQuizActive(false);
+      setLessonActive(false);
+      setAuthGate(wantsLesson ? "lesson" : "quiz");
+    } else {
+      setQuizActive(wantsQuiz);
+      setLessonActive(wantsLesson);
+    }
     if (nav === "notes") setNoteDraft(readNotes()[id] ?? notes[id] ?? "");
   };
 
@@ -379,6 +389,10 @@ export function AnatomyApp({
 
   /** View lesson / study cards: guided lesson when this organ has one, else the labelling quiz. */
   const openLesson = () => {
+    if (!user) {
+      setAuthGate(organ.lesson ? "lesson" : "quiz");
+      return;
+    }
     setQuizActive(false);
     setTourActive(false);
     setCompare(false);
@@ -462,7 +476,7 @@ export function AnatomyApp({
 
   const goProgress = () => {
     if (!user) {
-      window.location.assign(signInHref);
+      setAuthGate("progress");
       return;
     }
     leaveModes();
@@ -543,11 +557,9 @@ export function AnatomyApp({
           <button type="button" className={nav === "notes" ? "active" : ""} aria-current={nav === "notes" ? "page" : undefined} onClick={goNotes}>
             <FileText size={17} /> <span>{t.nav.notes}</span>
           </button>
-          {user ? (
-            <button type="button" className={nav === "progress" || dashboardOpen ? "active" : ""} aria-current={nav === "progress" || dashboardOpen ? "page" : undefined} onClick={goProgress}>
-              <Award size={17} /> <span>{copy.nav}</span>
-            </button>
-          ) : null}
+          <button type="button" className={nav === "progress" || dashboardOpen ? "active" : ""} aria-current={nav === "progress" || dashboardOpen ? "page" : undefined} onClick={goProgress}>
+            <Award size={17} /> <span>{copy.nav}</span>
+          </button>
         </nav>
         <label className="search-box">
           <Search size={17} />
@@ -570,24 +582,6 @@ export function AnatomyApp({
         )}
         <button className="mobile-library-trigger" onClick={goLibrary} aria-label={t.library.open}><LibraryBig size={20} /></button>
       </header>
-      {!user ? (
-        <>
-          <a
-            className="sign-in sign-in-float"
-            href={signInHref}
-          >
-            <LogIn size={16} />
-            {copy.signIn ?? "Sign up"}
-          </a>
-          <a
-            className="sign-in-banner"
-            href={signInHref}
-          >
-            <LogIn size={16} />
-            {copy.signInCta}
-          </a>
-        </>
-      ) : null}
 
       <div className="workspace">
         <aside ref={libraryRef} className={`organ-library ${mobileLibrary ? "open" : ""}`} tabIndex={-1}>
@@ -742,7 +736,7 @@ export function AnatomyApp({
           <button className="lesson-button" data-reveal onClick={openLesson}>{organ.lesson ? t.info.viewLesson : t.quiz.start} <ArrowRight size={16} /></button>
           <div className="action-grid" data-reveal>
             <button onClick={startTour} className={tourActive ? "active" : ""} aria-pressed={tourActive}><Play size={15} /> {t.info.animate}</button>
-            <button onClick={() => { setTourActive(false); setLessonActive(false); setCompare(false); setQuizActive(true); setModal(null); }} className={quizActive ? "active" : ""} aria-pressed={quizActive}><CircleHelp size={15} /> {t.info.quiz}</button>
+            <button onClick={() => { if (!user) { setAuthGate("quiz"); return; } setTourActive(false); setLessonActive(false); setCompare(false); setQuizActive(true); setModal(null); }} className={quizActive ? "active" : ""} aria-pressed={quizActive}><CircleHelp size={15} /> {t.info.quiz}</button>
             <button onClick={() => (compare ? setCompare(false) : openCompare())} className={compare ? "active" : ""} aria-pressed={compare}><GitCompare size={15} /> {t.info.compare}</button>
           </div>
         </aside>
@@ -861,7 +855,10 @@ export function AnatomyApp({
           organ={organ}
           t={t}
           onClose={() => setModal(null)}
-          onStudy={organ.lesson ? () => { setModal(null); setCompare(false); setNav("lessons"); setLessonActive(true); } : undefined}
+          onStudy={organ.lesson ? () => {
+            if (!user) { setModal(null); setAuthGate("lesson"); return; }
+            setModal(null); setCompare(false); setNav("lessons"); setLessonActive(true);
+          } : undefined}
         />
       )}
       {nav === "notes" && (
@@ -958,6 +955,29 @@ export function AnatomyApp({
           onSkip={() => setReonboard(false)}
         />
       )}
+      {authGate && !user ? (
+        <div className="modal-backdrop" role="presentation" onClick={() => setAuthGate(null)}>
+          <section
+            className="learning-modal pg-onboarding auth-gate"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="auth-gate-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <em>{copy.onboarding.eyebrow}</em>
+            <h2 id="auth-gate-title">{copy.continueTitle}</h2>
+            <p className="pg-onboarding-sub">
+              {authGate === "lesson" ? copy.gateLesson
+                : authGate === "quiz" ? copy.gateQuiz
+                  : copy.gateProgress}
+            </p>
+            <a className="lesson-button" href={signInHref}>{copy.signInCta}</a>
+            <button type="button" className="auth-demo" onClick={() => setAuthGate(null)}>
+              {copy.gateStay ?? "Keep exploring"}
+            </button>
+          </section>
+        </div>
+      ) : null}
     </main>
   );
 }

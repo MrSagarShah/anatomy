@@ -1445,6 +1445,8 @@ button.organ-card-image:focus-visible { outline: 2px solid #8b6fc4; outline-offs
   display: block; width: 100%; margin-top: 10px; padding: 10px; border: 0; background: transparent;
   color: var(--muted); cursor: pointer; font: 500 13px var(--font-sans), sans-serif;
 }
+.auth-gate { width: min(420px, 100%); }
+.auth-gate .lesson-button { justify-content: center; text-decoration: none; }
 
 .pg-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 10px; margin-bottom: 20px; }
 .pg-stat { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 13px; border: 1px solid var(--line); border-radius: 13px; background: #fffdf9; }

@@ -26,6 +26,10 @@ export type ProgressCopy = {
   continueGoogleError?: string;
   continueSubmit?: string;
   continueDemo?: string;
+  gateStay?: string;
+  gateLesson?: string;
+  gateQuiz?: string;
+  gateProgress?: string;
   onboarding: {
     eyebrow: string;
     title: string;
@@ -86,7 +90,11 @@ const en: ProgressCopy = {
   signOut: "Sign out",
   continueTitle: "Create your account",
   continueSubtitle:
-    "Sign up with Google or any email — Gmail, Outlook, school, or work. First visit creates your account. Come back with the same email to keep your progress. We store a hash of the address, never the address itself.",
+    "The studio is free to browse. Sign up with Google or any email when you want lessons, quizzes, and saved progress. First visit creates your account; the same email brings it back. We store a hash of the address, never the address itself.",
+  gateStay: "Keep exploring",
+  gateLesson: "Sign up to take the guided lesson and save how far you get.",
+  gateQuiz: "Sign up to take the labelling quiz and keep your score.",
+  gateProgress: "Sign up to track mastery, streaks, and pick up where you left off.",
   continueName: "Your name",
   continueEmail: "Email",
   continueEmailPlaceholder: "you@gmail.com",

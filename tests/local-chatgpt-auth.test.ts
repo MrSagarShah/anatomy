@@ -62,14 +62,14 @@ test("handleLocalChatGPTAuth sends app-owned hosts to continue, not Sites", () =
   assert.equal(sites, null);
 });
 
-test("sign-out on app-owned hosts returns to login, not the studio", () => {
+test("sign-out on app-owned hosts returns to the studio", () => {
   const local = handleLocalChatGPTAuth(
     new Request("http://localhost:3001/signout-with-chatgpt?return_to=%2Fen"),
   );
   assert.ok(local);
   assert.equal(local.status, 302);
   const location = new URL(local.headers.get("Location") ?? "");
-  assert.equal(location.pathname, "/en/auth/signup");
+  assert.equal(location.pathname, "/en");
   assert.match(local.headers.get("Set-Cookie") ?? "", /anatomy_local_chatgpt=;/);
 
   const sites = handleLocalChatGPTAuth(
