@@ -30,6 +30,7 @@ export type ProgressCopy = {
   gateLesson?: string;
   gateQuiz?: string;
   gateProgress?: string;
+  signInHint?: string;
   onboarding: {
     eyebrow: string;
     title: string;
@@ -95,6 +96,7 @@ const en: ProgressCopy = {
   gateLesson: "Sign up to take the guided lesson and save how far you get.",
   gateQuiz: "Sign up to take the labelling quiz and keep your score.",
   gateProgress: "Sign up to track mastery, streaks, and pick up where you left off.",
+  signInHint: "to save the lesson, quiz, and your progress.",
   continueName: "Your name",
   continueEmail: "Email",
   continueEmailPlaceholder: "you@gmail.com",

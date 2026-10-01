@@ -734,6 +734,11 @@ export function AnatomyApp({
           <div className="medical-note" data-reveal><Stethoscope size={16} /><p><b>{t.info.medical}</b>{organ.medical}</p></div>
           <div className="fun-note" data-reveal><Sparkles size={15} /><p><b>{t.info.didYouKnow}</b>{organ.funFact}</p></div>
           <button className="lesson-button" data-reveal onClick={openLesson}>{organ.lesson ? t.info.viewLesson : t.quiz.start} <ArrowRight size={16} /></button>
+          {!user ? (
+            <p className="auth-hint" data-reveal>
+              <a href={signInHref}>{copy.signIn ?? "Sign up"}</a> {copy.signInHint}
+            </p>
+          ) : null}
           <div className="action-grid" data-reveal>
             <button onClick={startTour} className={tourActive ? "active" : ""} aria-pressed={tourActive}><Play size={15} /> {t.info.animate}</button>
             <button onClick={() => { if (!user) { setAuthGate("quiz"); return; } setTourActive(false); setLessonActive(false); setCompare(false); setQuizActive(true); setModal(null); }} className={quizActive ? "active" : ""} aria-pressed={quizActive}><CircleHelp size={15} /> {t.info.quiz}</button>
